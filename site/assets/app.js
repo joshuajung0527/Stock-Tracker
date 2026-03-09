@@ -332,6 +332,14 @@ function renderTranscriptAnalysis(payload) {
     .map((quarter) => {
       const bullish = quarter.bullish_keywords ? escapeHtml(quarter.bullish_keywords) : "N/A";
       const bearish = quarter.bearish_keywords ? escapeHtml(quarter.bearish_keywords) : "N/A";
+      const directness = escapeHtml(quarter.management_directness || "unknown");
+      const unresolved = escapeHtml(quarter.unresolved_questions || "None");
+      const keyEvidence = escapeHtml(quarter.key_evidence || "N/A");
+      const guidanceView = escapeHtml(quarter.guidance_view || "N/A");
+      const demandView = escapeHtml(quarter.demand_view || "N/A");
+      const marginView = escapeHtml(quarter.margin_view || "N/A");
+      const credibilityView = escapeHtml(quarter.credibility_view || "N/A");
+      const concerns = escapeHtml(quarter.top_analyst_concerns || "N/A");
       return `
         <article class="transcript-card">
           <div class="transcript-card-head">
@@ -350,6 +358,10 @@ function renderTranscriptAnalysis(payload) {
             <div><span>Guidance</span><strong>${escapeHtml(quarter.guidance_delta || "N/A")}</strong></div>
             <div><span>Confidence</span><strong>${escapeHtml(quarter.analysis_confidence || "N/A")}</strong></div>
             <div><span>Q&A</span><strong>${quarter.qa_present ? "Present" : "Missing"}</strong></div>
+            <div><span>Directness</span><strong>${directness}</strong></div>
+            <div><span>Improved</span><strong>${escapeHtml(quarter.what_improved || "N/A")}</strong></div>
+            <div><span>Worsened</span><strong>${escapeHtml(quarter.what_worsened || "N/A")}</strong></div>
+            <div><span>Prev Quarter</span><strong>${escapeHtml(quarter.previous_quarter || "N/A")}</strong></div>
           </div>
 
           <div class="transcript-copy">
@@ -358,12 +370,38 @@ function renderTranscriptAnalysis(payload) {
               <p>${escapeHtml(quarter.quarter_summary || "N/A")}</p>
             </section>
             <section>
-              <h4>Top Analyst Questions</h4>
-              <p>${escapeHtml(quarter.top_analyst_questions || "N/A")}</p>
+              <h4>Top Analyst Concerns</h4>
+              <p>${concerns}</p>
             </section>
             <section>
               <h4>Management Answers</h4>
               <p>${escapeHtml(quarter.management_answers_summary || "N/A")}</p>
+            </section>
+          </div>
+
+          <div class="transcript-copy">
+            <section>
+              <h4>Guidance View</h4>
+              <p>${guidanceView}</p>
+            </section>
+            <section>
+              <h4>Demand View</h4>
+              <p>${demandView}</p>
+            </section>
+            <section>
+              <h4>Margin View</h4>
+              <p>${marginView}</p>
+            </section>
+          </div>
+
+          <div class="transcript-copy transcript-copy-compact">
+            <section>
+              <h4>Credibility View</h4>
+              <p>${credibilityView}</p>
+            </section>
+            <section>
+              <h4>Key Evidence</h4>
+              <p>${keyEvidence}</p>
             </section>
           </div>
 
@@ -380,6 +418,10 @@ function renderTranscriptAnalysis(payload) {
               <h4>Keywords</h4>
               <p><strong>Bullish:</strong> ${bullish}</p>
               <p><strong>Bearish:</strong> ${bearish}</p>
+            </section>
+            <section>
+              <h4>Unresolved Questions</h4>
+              <p>${unresolved}</p>
             </section>
             <section>
               <h4>Limitations</h4>
