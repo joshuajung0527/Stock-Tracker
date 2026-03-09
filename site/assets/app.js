@@ -215,6 +215,73 @@ function formatScoreBadge(value, digits = 2) {
   return `<span class="${cls}">${n.toFixed(digits)}</span>`;
 }
 
+function parseStructuredArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string" || !value.trim()) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_error) {
+    return [];
+  }
+}
+
+function titleCase(value) {
+  return String(value || "")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function renderIssueCards(issueCards) {
+  const cards = parseStructuredArray(issueCards);
+  if (!cards.length) {
+    return '<p class="placeholder">No concise Q&amp;A issue cards available for this quarter.</p>';
+  }
+  return `
+    <div class="issue-card-grid">
+      ${cards
+        .map((card) => {
+          const topic = escapeHtml(titleCase(card.topic || "General"));
+          const analyst = escapeHtml(card.analyst || "Unknown analyst");
+          const directness = escapeHtml(card.directness || "unknown");
+          const status = escapeHtml(card.status || "unknown");
+          return `
+            <article class="issue-card">
+              <div class="issue-card-head">
+                <div class="issue-card-badges">
+                  <span class="issue-badge topic">${topic}</span>
+                  <span class="issue-badge directness">${directness}</span>
+                  <span class="issue-badge status">${status}</span>
+                </div>
+                <p class="issue-analyst">${analyst}</p>
+              </div>
+              <div class="issue-copy">
+                <section>
+                  <h5>Question</h5>
+                  <p>${escapeHtml(card.question_summary || "N/A")}</p>
+                </section>
+                <section>
+                  <h5>Management Answer</h5>
+                  <p>${escapeHtml(card.management_summary || "N/A")}</p>
+                </section>
+                <section>
+                  <h5>Takeaway</h5>
+                  <p>${escapeHtml(card.takeaway || "N/A")}</p>
+                </section>
+              </div>
+              <details class="issue-evidence">
+                <summary>Evidence</summary>
+                <p><strong>Question:</strong> ${escapeHtml(card.question_evidence || "N/A")}</p>
+                <p><strong>Answer:</strong> ${escapeHtml(card.answer_evidence || "N/A")}</p>
+              </details>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
 function setText(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -330,6 +397,7 @@ function renderTranscriptAnalysis(payload) {
 
   quartersHost.innerHTML = quarters
     .map((quarter) => {
+      const issueCards = parseStructuredArray(quarter.qa_issue_cards);
       const bullish = quarter.bullish_keywords ? escapeHtml(quarter.bullish_keywords) : "N/A";
       const bearish = quarter.bearish_keywords ? escapeHtml(quarter.bearish_keywords) : "N/A";
       const directness = escapeHtml(quarter.management_directness || "unknown");
@@ -353,6 +421,14 @@ function renderTranscriptAnalysis(payload) {
             </div>
           </div>
 
+          <section class="transcript-priority-block">
+            <div class="transcript-section-head">
+              <h4>Top Q&amp;A Issues</h4>
+              <p>Concise issue cards built from the highest-signal analyst exchanges.</p>
+            </div>
+            ${renderIssueCards(issueCards)}
+          </section>
+
           <div class="transcript-metrics">
             <div><span>Direction</span><strong>${escapeHtml(quarter.tone_direction || "flat")}</strong></div>
             <div><span>Guidance</span><strong>${escapeHtml(quarter.guidance_delta || "N/A")}</strong></div>
@@ -366,12 +442,12 @@ function renderTranscriptAnalysis(payload) {
 
           <div class="transcript-copy">
             <section>
-              <h4>Quarter Summary</h4>
-              <p>${escapeHtml(quarter.quarter_summary || "N/A")}</p>
-            </section>
-            <section>
               <h4>Top Analyst Concerns</h4>
               <p>${concerns}</p>
+            </section>
+            <section>
+              <h4>Comparison</h4>
+              <p>${escapeHtml(quarter.comparison_summary || "N/A")}</p>
             </section>
             <section>
               <h4>Management Answers</h4>
@@ -394,40 +470,44 @@ function renderTranscriptAnalysis(payload) {
             </section>
           </div>
 
-          <div class="transcript-copy transcript-copy-compact">
-            <section>
-              <h4>Credibility View</h4>
-              <p>${credibilityView}</p>
-            </section>
-            <section>
-              <h4>Key Evidence</h4>
-              <p>${keyEvidence}</p>
-            </section>
-          </div>
-
-          <div class="transcript-copy transcript-copy-compact">
-            <section>
-              <h4>Key Risks</h4>
-              <p>${escapeHtml(quarter.key_risks || "N/A")}</p>
-            </section>
-            <section>
-              <h4>Key Improvements</h4>
-              <p>${escapeHtml(quarter.key_improvements || "N/A")}</p>
-            </section>
-            <section>
-              <h4>Keywords</h4>
-              <p><strong>Bullish:</strong> ${bullish}</p>
-              <p><strong>Bearish:</strong> ${bearish}</p>
-            </section>
-            <section>
-              <h4>Unresolved Questions</h4>
-              <p>${unresolved}</p>
-            </section>
-            <section>
-              <h4>Limitations</h4>
-              <p>${escapeHtml(quarter.limitations || "None")}</p>
-            </section>
-          </div>
+          <details class="transcript-detail-block">
+            <summary>Quarter Narrative &amp; Supporting Detail</summary>
+            <div class="transcript-copy transcript-copy-compact">
+              <section>
+                <h4>Quarter Summary</h4>
+                <p>${escapeHtml(quarter.quarter_summary || "N/A")}</p>
+              </section>
+              <section>
+                <h4>Credibility View</h4>
+                <p>${credibilityView}</p>
+              </section>
+              <section>
+                <h4>Key Evidence</h4>
+                <p>${keyEvidence}</p>
+              </section>
+              <section>
+                <h4>Key Risks</h4>
+                <p>${escapeHtml(quarter.key_risks || "N/A")}</p>
+              </section>
+              <section>
+                <h4>Key Improvements</h4>
+                <p>${escapeHtml(quarter.key_improvements || "N/A")}</p>
+              </section>
+              <section>
+                <h4>Keywords</h4>
+                <p><strong>Bullish:</strong> ${bullish}</p>
+                <p><strong>Bearish:</strong> ${bearish}</p>
+              </section>
+              <section>
+                <h4>Unresolved Questions</h4>
+                <p>${unresolved}</p>
+              </section>
+              <section>
+                <h4>Limitations</h4>
+                <p>${escapeHtml(quarter.limitations || "None")}</p>
+              </section>
+            </div>
+          </details>
         </article>
       `;
     })
