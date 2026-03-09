@@ -102,10 +102,107 @@ h1 {
   color: var(--muted);
 }
 
+.tabs-shell {
+  padding: 0.65rem 0.75rem;
+}
+
+.tablist {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tab-btn {
+  border: 1px solid rgba(18, 60, 73, 0.2);
+  background: #f5fbfd;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.48rem 0.9rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.tab-btn:hover {
+  background: #e9f5f9;
+  transform: translateY(-1px);
+}
+
+.tab-btn:focus-visible {
+  outline: 3px solid rgba(31, 122, 140, 0.36);
+  outline-offset: 2px;
+}
+
+.tab-btn.is-active {
+  border-color: rgba(31, 122, 140, 0.45);
+  background: linear-gradient(180deg, #dbf1f8, #cdeaf3);
+  box-shadow: inset 0 -1px 0 rgba(13, 33, 40, 0.15);
+}
+
+.tab-panel {
+  animation: panel-fade-in 170ms ease;
+}
+
+.tab-panel.is-hidden {
+  display: none;
+}
+
+@keyframes panel-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .grid.two-col {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.9rem;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.stat-card {
+  border: 1px solid rgba(18, 60, 73, 0.14);
+  border-radius: 12px;
+  background: #f7fcfd;
+  padding: 0.65rem 0.75rem;
+}
+
+.stat-card h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.stat-value {
+  margin: 0.35rem 0 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.mini-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.mini-list li {
+  margin: 0.22rem 0;
 }
 
 .table-wrap {
@@ -166,6 +263,106 @@ h1 {
   margin: 0 0 0.5rem;
 }
 
+.transcript-summary-grid {
+  margin-bottom: 1rem;
+}
+
+.transcript-card {
+  border: 1px solid rgba(18, 60, 73, 0.12);
+  border-radius: 14px;
+  background: #f8fbfc;
+  padding: 0.95rem;
+  margin: 0 0 1rem;
+}
+
+.transcript-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.transcript-card-head h3 {
+  margin: 0;
+}
+
+.transcript-card-head p {
+  margin: 0.25rem 0 0;
+}
+
+.transcript-scorebox {
+  text-align: right;
+}
+
+.score-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  background: #e6f4f7;
+  border: 1px solid rgba(31, 122, 140, 0.2);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 600;
+}
+
+.score-sub {
+  margin-top: 0.35rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.transcript-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.transcript-metrics div {
+  border: 1px solid rgba(18, 60, 73, 0.12);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  background: #ffffff;
+}
+
+.transcript-metrics span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.22rem;
+}
+
+.transcript-metrics strong {
+  display: block;
+}
+
+.transcript-copy {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.transcript-copy-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
+.transcript-copy section {
+  border: 1px solid rgba(18, 60, 73, 0.1);
+  border-radius: 10px;
+  padding: 0.7rem;
+  background: #ffffff;
+}
+
+.transcript-copy h4 {
+  margin: 0 0 0.45rem;
+}
+
+.transcript-copy p {
+  margin: 0;
+  line-height: 1.5;
+}
+
 .placeholder {
   margin: 0;
   color: var(--muted);
@@ -178,11 +375,29 @@ h1 {
 }
 
 @media (max-width: 960px) {
+  .overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .grid.two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .transcript-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .transcript-copy {
     grid-template-columns: 1fr;
   }
 
   .data-table {
     min-width: 560px;
+  }
+}
+
+@media (max-width: 640px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
   }
 }

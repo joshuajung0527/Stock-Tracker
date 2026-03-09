@@ -29,7 +29,127 @@
         <p id="alert-text"></p>
       </section>
 
-      <section class="panel">
+      <section class="panel tabs-shell">
+        <div class="tablist" role="tablist" aria-label="Dashboard sheets">
+          <button
+            class="tab-btn is-active"
+            type="button"
+            id="tab-overview"
+            role="tab"
+            aria-selected="true"
+            aria-controls="tab-panel-overview"
+            data-tab="overview"
+          >
+            Overview
+          </button>
+          <button
+            class="tab-btn"
+            type="button"
+            id="tab-week-high"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tab-panel-week-high"
+            data-tab="week-high"
+          >
+            Week High
+          </button>
+          <button
+            class="tab-btn"
+            type="button"
+            id="tab-watchlist"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tab-panel-watchlist"
+            data-tab="watchlist"
+          >
+            Watchlist
+          </button>
+          <button
+            class="tab-btn"
+            type="button"
+            id="tab-transcripts"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tab-panel-transcripts"
+            data-tab="transcripts"
+          >
+            Transcripts
+          </button>
+        </div>
+      </section>
+
+      <section
+        class="panel tab-panel"
+        id="tab-panel-overview"
+        role="tabpanel"
+        aria-labelledby="tab-overview"
+        aria-hidden="false"
+      >
+        <div class="panel-head">
+          <h2>Overview</h2>
+          <p>Quick summary of the latest published snapshot.</p>
+        </div>
+        <div class="overview-grid">
+          <article class="stat-card">
+            <h3>Publish Status</h3>
+            <p class="stat-value" id="overview-status">-</p>
+          </article>
+          <article class="stat-card">
+            <h3>Last Update</h3>
+            <p class="stat-value" id="overview-generated-at">-</p>
+          </article>
+          <article class="stat-card">
+            <h3>Week High Sectors</h3>
+            <p class="stat-value" id="overview-week-high-sectors">-</p>
+          </article>
+          <article class="stat-card">
+            <h3>Week High Stocks</h3>
+            <p class="stat-value" id="overview-week-high-stocks">-</p>
+          </article>
+          <article class="stat-card">
+            <h3>Watchlist Buy Rows</h3>
+            <p class="stat-value" id="overview-watchlist-buy">-</p>
+          </article>
+          <article class="stat-card">
+            <h3>Watchlist Sector Rows</h3>
+            <p class="stat-value" id="overview-watchlist-rows">-</p>
+          </article>
+          <article class="stat-card">
+            <h3>Transcript Ticker</h3>
+            <p class="stat-value" id="overview-transcript-ticker">-</p>
+          </article>
+          <article class="stat-card">
+            <h3>Transcript Quarters</h3>
+            <p class="stat-value" id="overview-transcript-quarters">-</p>
+          </article>
+          <article class="stat-card">
+            <h3>Latest Transcript Score</h3>
+            <p class="stat-value" id="overview-transcript-score">-</p>
+          </article>
+        </div>
+        <div class="grid two-col">
+          <article>
+            <h3>Top Week High Sectors</h3>
+            <div id="overview-top-week-high"></div>
+          </article>
+          <article>
+            <h3>Watchlist Sectors</h3>
+            <div id="overview-watchlist-sectors"></div>
+          </article>
+          <article>
+            <h3>Transcript Quarter Timeline</h3>
+            <div id="overview-transcript-timeline"></div>
+          </article>
+        </div>
+      </section>
+
+      <section
+        class="panel tab-panel is-hidden"
+        id="tab-panel-week-high"
+        role="tabpanel"
+        aria-labelledby="tab-week-high"
+        aria-hidden="true"
+      >
         <div class="panel-head">
           <h2>Week High Tracker</h2>
           <p>50-day / 52-week momentum by sector and stock.</p>
@@ -46,7 +166,13 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section
+        class="panel tab-panel is-hidden"
+        id="tab-panel-watchlist"
+        role="tabpanel"
+        aria-labelledby="tab-watchlist"
+        aria-hidden="true"
+      >
         <div class="panel-head">
           <h2>Watchlist Tracker</h2>
           <p>Performance, momentum, and technical positioning for tracked sectors.</p>
@@ -59,6 +185,21 @@
           <h3>Sector Details</h3>
           <div id="watchlist-sectors"></div>
         </article>
+      </section>
+
+      <section
+        class="panel tab-panel is-hidden"
+        id="tab-panel-transcripts"
+        role="tabpanel"
+        aria-labelledby="tab-transcripts"
+        aria-hidden="true"
+      >
+        <div class="panel-head">
+          <h2>Transcript Analyzer</h2>
+          <p>Quarter-by-quarter earnings call analysis from the local transcript pipeline.</p>
+        </div>
+        <div class="overview-grid transcript-summary-grid" id="transcript-summary"></div>
+        <div id="transcript-quarters"></div>
       </section>
     </main>
 
