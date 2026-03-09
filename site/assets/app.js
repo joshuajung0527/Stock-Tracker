@@ -21,6 +21,12 @@ function formatNumber(value, digits = 2) {
   return Number(value).toFixed(digits);
 }
 
+function formatTimestamp(value) {
+  if (!value) return "N/A";
+  const text = String(value).trim();
+  return text.replace("T", " ");
+}
+
 function formatPctCell(value, digits = 2) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
     return '<span class="neutral">N/A</span>';
@@ -195,9 +201,9 @@ function renderMeta(meta) {
   const alertText = document.getElementById("alert-text");
 
   statusEl.textContent = meta.status || "unknown";
-  generatedEl.textContent = meta.generated_at || "N/A";
+  generatedEl.textContent = formatTimestamp(meta.generated_at);
   if (overviewStatusEl) overviewStatusEl.textContent = meta.status || "unknown";
-  if (overviewGeneratedEl) overviewGeneratedEl.textContent = meta.generated_at || "N/A";
+  if (overviewGeneratedEl) overviewGeneratedEl.textContent = formatTimestamp(meta.generated_at);
 
   if (meta.status && meta.status !== "success") {
     alertPanel.hidden = false;
@@ -376,7 +382,7 @@ function renderTranscriptAnalysis(payload) {
     ["Quarter Count", String(quarters.length)],
     ["Latest Quarter", latest?.quarter || "N/A"],
     ["Latest Score", latest ? `${formatNumber(latest.normalized_score, 0)} / 100` : "N/A"],
-    ["Generated At", payload.generated_at || "N/A"],
+    ["Generated At", formatTimestamp(payload.generated_at)],
   ];
 
   summaryHost.innerHTML = summaryCards
