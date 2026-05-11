@@ -217,6 +217,7 @@ function buildImpactClusters(payload) {
         themes: new Set(),
         subthemes: new Set(),
         impact_stock_scores: new Map(),
+        impact_stock_moves: new Map(),
       });
     }
 
@@ -240,14 +241,25 @@ function buildImpactClusters(payload) {
         const name = contributor?.symbol_name || contributor?.symbol;
         if (!name) continue;
         const share = Number.isFinite(Number(contributor?.share_pct)) ? Number(contributor.share_pct) : 0;
+        const move = Number.isFinite(Number(contributor?.price_change_pct)) ? Number(contributor.price_change_pct) : 0;
         const existing = cluster.impact_stock_scores.get(name) || 0;
         cluster.impact_stock_scores.set(name, existing + share);
+        const existingMove = cluster.impact_stock_moves.get(name) || { weightedMove: 0, totalShare: 0 };
+        cluster.impact_stock_moves.set(name, {
+          weightedMove: existingMove.weightedMove + move * Math.max(share, 1),
+          totalShare: existingMove.totalShare + Math.max(share, 1),
+        });
       }
     } else {
       const fallbackName = getLeadContributorName(row);
       if (fallbackName && fallbackName !== "N/A") {
         const existing = cluster.impact_stock_scores.get(fallbackName) || 0;
         cluster.impact_stock_scores.set(fallbackName, existing + 100);
+        const existingMove = cluster.impact_stock_moves.get(fallbackName) || { weightedMove: 0, totalShare: 0 };
+        cluster.impact_stock_moves.set(fallbackName, {
+          weightedMove: existingMove.weightedMove,
+          totalShare: existingMove.totalShare + 1,
+        });
       }
     }
   }
@@ -259,6 +271,19 @@ function buildImpactClusters(payload) {
       const impactStocks = Array.from(cluster.impact_stock_scores.entries())
         .sort((left, right) => right[1] - left[1])
         .map(([name]) => name);
+      const impactMoves = impactStocks.map((name) => {
+        const moveState = cluster.impact_stock_moves.get(name) || { weightedMove: 0, totalShare: 1 };
+        return {
+          name,
+          move: moveState.totalShare ? moveState.weightedMove / moveState.totalShare : 0,
+        };
+      });
+      const positiveCount = impactMoves.filter((item) => Number(item.move) > 0).length;
+      const negativeCount = impactMoves.filter((item) => Number(item.move) < 0).length;
+      const avgMove =
+        impactMoves.length > 0
+          ? impactMoves.reduce((sum, item) => sum + Number(item.move || 0), 0) / impactMoves.length
+          : 0;
       const topImpactStocks = impactStocks.slice(0, 5);
       const topSubthemes = subthemeList.slice(0, 4);
       const extraThemeCount = Math.max(themeList.length - topSubthemes.length, 0);
@@ -278,6 +303,15 @@ function buildImpactClusters(payload) {
           topImpactStocks.length > 0
             ? `${topImpactStocks.join(", ")}${extraStockCount > 0 ? ` 외 ${extraStockCount}` : ""}`
             : "N/A",
+        avg_move: avgMove,
+        positive_count: positiveCount,
+        negative_count: negativeCount,
+        direction_label:
+          avgMove <= -1.0 || (negativeCount > positiveCount && negativeCount >= 2)
+            ? "Down Pressure"
+            : avgMove >= 1.0 || positiveCount >= negativeCount
+              ? "Up Interest"
+              : "Mixed",
       };
     })
     .sort((left, right) => {
@@ -822,8 +856,10 @@ function renderKoreaThemeDashboard(payload) {
   const narrow = payload.top_narrow_themes || [];
   const broad = payload.top_broad_themes || [];
   const impactClusters = buildImpactClusters(payload);
+  const upClusters = impactClusters.filter((row) => row.direction_label !== "Down Pressure");
+  const downClusters = impactClusters.filter((row) => row.direction_label === "Down Pressure");
   const positionLensRows = buildPositionLensRows(payload);
-  const topBundle = impactClusters[0] || {};
+  const topBundle = upClusters[0] || impactClusters[0] || {};
   const topNarrow = narrow[0] || {};
   const methodology = payload.methodology || {};
   const filteredBroad = broad.filter((row) => {
@@ -893,7 +929,24 @@ function renderKoreaThemeDashboard(payload) {
       { key: "theme_bundle", label: "Covered Themes" },
       { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(row.signal_score) },
     ],
-    impactClusters.slice(0, 18),
+    upClusters.slice(0, 18),
+  );
+
+  renderTable(
+    "korea-theme-down",
+    [
+      { key: "bundle_name", label: "Theme Bundle" },
+      { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "active_theme_count", label: "Themes", numeric: true },
+      { key: "impact_stocks", label: "Impact Stocks" },
+      { key: "theme_bundle", label: "Covered Themes" },
+      {
+        key: "direction_label",
+        label: "Signal",
+        render: (_v, row) => `<span class="signal-pill cold">${escapeHtml(row.direction_label || "Down Pressure")}</span>`,
+      },
+    ],
+    downClusters.slice(0, 12),
   );
 
   renderTable(
