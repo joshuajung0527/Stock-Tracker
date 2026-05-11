@@ -931,6 +931,7 @@ function renderKoreaThemeDashboard(payload) {
       <p>${escapeHtml(methodology.fallback || "같은 시각 이력이 부족하면 최근 20일 일평균 거래대금/거래량에 세션 진행률을 곱한 기대치로 보정합니다.")}</p>
       <p>${escapeHtml(methodology.minute_role || "1분봉은 상세 확인용이고, 메인 랭킹 기준은 same-time cumulative flow입니다.")}</p>
       <p>${escapeHtml(methodology.bundle_scope || "번들 해석은 현재 활성 종목만이 아니라, taxonomy에 매핑된 전체 종목군과 현재 활성 종목군을 함께 봅니다.")}</p>
+      <p>${escapeHtml(methodology.coarse_scope || "장중 broad coarse는 전 종목에 가깝게 넓게 훑고, minute 상세는 shortlist만 추적해 병목을 줄입니다.")}</p>
     </article>
   `;
 
