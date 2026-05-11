@@ -124,39 +124,6 @@ function getParticipationText(row) {
   return `${active} / ${total} (${ratio.toFixed(0)}%)`;
 }
 
-function getDominantFactor(row) {
-  const factors = row?.factor_contributions || {};
-  let bestKey = null;
-  let bestValue = -Infinity;
-  for (const [key, rawValue] of Object.entries(factors)) {
-    const value = Number(rawValue);
-    if (!Number.isFinite(value)) continue;
-    if (value > bestValue) {
-      bestKey = key;
-      bestValue = value;
-    }
-  }
-  if (!bestKey) {
-    return { label: "Mixed", value: NaN };
-  }
-  return { label: FACTOR_LABELS[bestKey] || titleCase(bestKey), value: bestValue };
-}
-
-function getTradeStance(row) {
-  const heat = Number(row?.heat_score || 0);
-  const active = Number(row?.active_member_count || 0);
-  const total = Math.max(Number(row?.theme_total_members || 0), 1);
-  const strongestZ = getStrongestThemeZScore(row);
-  const ratio = active / total;
-  if (heat >= 60 && ratio >= 0.5 && Number.isFinite(strongestZ) && strongestZ >= 1.0) {
-    return "Actionable";
-  }
-  if (heat >= 55 || active >= 2 || (Number.isFinite(strongestZ) && strongestZ >= 1.0)) {
-    return "Watch";
-  }
-  return "Thin";
-}
-
 function getPositionView(row) {
   const currentWeek = Number(row?.current_week_score || 0);
   const delta = Number(row?.delta_vs_prior_week || 0);
@@ -250,9 +217,6 @@ function buildImpactClusters(payload) {
         themes: new Set(),
         subthemes: new Set(),
         impact_stock_scores: new Map(),
-        dominant_factor_label: "Mixed",
-        dominant_factor_value: NaN,
-        representative_reason: row?.reason_text || "",
       });
     }
 
@@ -263,12 +227,6 @@ function buildImpactClusters(payload) {
     cluster.theme_total_members = Math.max(cluster.theme_total_members, Number(row?.theme_total_members) || 0);
     if (Number.isFinite(strongestZ)) {
       cluster.strongest_z = Number.isFinite(cluster.strongest_z) ? Math.max(cluster.strongest_z, strongestZ) : strongestZ;
-    }
-    const dominantFactor = getDominantFactor(row);
-    if (!Number.isFinite(cluster.dominant_factor_value) || Number(dominantFactor.value) > Number(cluster.dominant_factor_value)) {
-      cluster.dominant_factor_label = dominantFactor.label;
-      cluster.dominant_factor_value = dominantFactor.value;
-      cluster.representative_reason = row?.reason_text || cluster.representative_reason;
     }
     if (row?.theme_name_ko) {
       cluster.themes.add(row.theme_name_ko);
@@ -312,8 +270,6 @@ function buildImpactClusters(payload) {
         active_member_count: cluster.active_member_count,
         theme_total_members: cluster.theme_total_members,
         signal_score: cluster.strongest_z,
-        dominant_factor_label: cluster.dominant_factor_label,
-        representative_reason: cluster.representative_reason,
         theme_bundle:
           topSubthemes.length > 0
             ? `${topSubthemes.join(", ")}${extraThemeCount > 0 ? ` 외 ${extraThemeCount}` : ""}`
@@ -332,46 +288,37 @@ function buildImpactClusters(payload) {
     });
 }
 
-function buildTradeLensRows(payload, impactClusters) {
-  const sourceRows = payload?.now || [];
-  const bundleMeta = new Map();
+function buildCloseDriverMaps(payload) {
+  const closeReview = payload?.close_review || {};
+  const sourceRows = [
+    ...(closeReview.leaderboard || []),
+    ...(closeReview.top_narrow_themes || []),
+    ...(closeReview.top_broad_themes || []),
+  ];
+  const byThemeId = new Map();
+  const byThemeName = new Map();
+  const byBundleName = new Map();
+
   for (const row of sourceRows) {
+    const lead = getLeadContributorName(row);
     const bundleName = getThemeBundleName(row);
-    if (!bundleMeta.has(bundleName) || Number(row?.heat_score || 0) > Number(bundleMeta.get(bundleName)?.heat_score || 0)) {
-      bundleMeta.set(bundleName, row);
+    if (row?.theme_id && lead && lead !== "N/A" && !byThemeId.has(row.theme_id)) {
+      byThemeId.set(row.theme_id, lead);
+    }
+    if (row?.theme_name_ko && lead && lead !== "N/A" && !byThemeName.has(row.theme_name_ko)) {
+      byThemeName.set(row.theme_name_ko, lead);
+    }
+    if (bundleName && lead && lead !== "N/A" && !byBundleName.has(bundleName)) {
+      byBundleName.set(bundleName, lead);
     }
   }
-  return impactClusters.slice(0, 12).map((cluster) => {
-    const row = bundleMeta.get(cluster.bundle_name) || {};
-    return {
-      bundle_name: cluster.bundle_name,
-      impact_stocks: cluster.impact_stocks,
-      participation: getParticipationText({
-        active_member_count: cluster.active_member_count,
-        theme_total_members: cluster.theme_total_members,
-      }),
-      driver: cluster.dominant_factor_label,
-      heat_score: cluster.heat_score,
-      stance: getTradeStance({
-        heat_score: cluster.heat_score,
-        active_member_count: cluster.active_member_count,
-        theme_total_members: cluster.theme_total_members,
-        z_scores: row?.z_scores,
-      }),
-    };
-  });
+
+  return { byThemeId, byThemeName, byBundleName };
 }
 
 function buildPositionLensRows(payload) {
   const reviewRows = (payload?.weekly_review || {}).review_rows || [];
-  const closeRows = (payload?.close_review || {}).leaderboard || [];
-  const closeBundleMap = new Map();
-  for (const row of closeRows) {
-    const bundleName = getThemeBundleName(row);
-    if (!closeBundleMap.has(bundleName) || Number(row?.heat_score || 0) > Number(closeBundleMap.get(bundleName)?.heat_score || 0)) {
-      closeBundleMap.set(bundleName, row);
-    }
-  }
+  const closeDriverMaps = buildCloseDriverMaps(payload);
 
   const bundleRows = new Map();
   for (const row of reviewRows) {
@@ -383,13 +330,17 @@ function buildPositionLensRows(payload) {
 
   return Array.from(bundleRows.entries())
     .map(([bundleName, row]) => {
-      const closeRow = closeBundleMap.get(bundleName) || {};
+      const closeLead =
+        closeDriverMaps.byThemeId.get(row?.theme_id) ||
+        closeDriverMaps.byThemeName.get(row?.theme_name_ko) ||
+        closeDriverMaps.byBundleName.get(bundleName) ||
+        "-";
       return {
         bundle_name: bundleName,
         trend_state: row?.trend_state || "N/A",
         current_week_score: row?.current_week_score,
         delta_vs_prior_week: row?.delta_vs_prior_week,
-        close_lead: getLeadContributorName(closeRow),
+        close_lead: closeLead,
         view: getPositionView(row),
       };
     })
@@ -871,7 +822,6 @@ function renderKoreaThemeDashboard(payload) {
   const narrow = payload.top_narrow_themes || [];
   const broad = payload.top_broad_themes || [];
   const impactClusters = buildImpactClusters(payload);
-  const tradeLensRows = buildTradeLensRows(payload, impactClusters);
   const positionLensRows = buildPositionLensRows(payload);
   const topBundle = impactClusters[0] || {};
   const topNarrow = narrow[0] || {};
@@ -899,8 +849,8 @@ function renderKoreaThemeDashboard(payload) {
         <p class="stat-value">${formatNumber(topBundle.heat_score, 1)}</p>
       </article>
       <article class="stat-card">
-        <h3>Trade Driver</h3>
-        <p class="stat-value">${escapeHtml(topBundle.dominant_factor_label || "N/A")}</p>
+        <h3>Top Specific</h3>
+        <p class="stat-value">${escapeHtml(topNarrow.theme_name_ko || "N/A")}</p>
       </article>
       <article class="stat-card">
         <h3>Participation</h3>
@@ -912,19 +862,6 @@ function renderKoreaThemeDashboard(payload) {
       </article>
     </div>
   `;
-
-  renderTable(
-    "korea-theme-trade-lens",
-    [
-      { key: "bundle_name", label: "Theme Bundle" },
-      { key: "impact_stocks", label: "Impact Stocks" },
-      { key: "participation", label: "Participation" },
-      { key: "driver", label: "Driver" },
-      { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
-      { key: "stance", label: "Trade Stance" },
-    ],
-    tradeLensRows,
-  );
 
   renderTable(
     "korea-theme-position-lens",
