@@ -2,8 +2,9 @@ const META_URL = "./data/meta.json";
 const WEEK_HIGH_URL = "./data/week_high/latest.json";
 const WATCHLIST_URL = "./data/watchlist/latest.json";
 const TRANSCRIPTS_URL = "./data/transcripts/latest.json";
+const KOREA_THEME_DASHBOARD_URL = "./data/korea-theme/theme_dashboard_latest.json";
 const TAB_STORAGE_KEY = "stock_tracker_active_tab";
-const VALID_TABS = new Set(["overview", "week-high", "watchlist", "transcripts"]);
+const VALID_TABS = new Set(["overview", "week-high", "watchlist", "transcripts", "korea-theme"]);
 
 function escapeHtml(value) {
   return String(value)
@@ -520,6 +521,128 @@ function renderTranscriptAnalysis(payload) {
     .join("");
 }
 
+function renderKoreaThemeDashboard(payload) {
+  const summaryTarget = document.getElementById("korea-theme-summary");
+  const contributorTarget = document.getElementById("korea-theme-contributors");
+  if (!summaryTarget) return;
+  if (!payload || !Array.isArray(payload.now) || payload.now.length === 0) {
+    summaryTarget.innerHTML = '<p class="placeholder">No Korea theme snapshot published yet.</p>';
+    if (contributorTarget) {
+      contributorTarget.innerHTML = '<p class="placeholder">No contributor map published yet.</p>';
+    }
+    return;
+  }
+
+  const now = payload.now || [];
+  const narrow = payload.top_narrow_themes || [];
+  const broad = payload.top_broad_themes || [];
+  const contributorMap = payload.contributor_map || [];
+  const topTheme = now[0] || {};
+  const topNarrow = narrow[0] || {};
+  const topBroad = broad[0] || {};
+
+  summaryTarget.innerHTML = `
+    <div class="overview-grid">
+      <article class="stat-card">
+        <h3>Latest Snapshot</h3>
+        <p class="stat-value">${escapeHtml(formatTimestamp(payload.generated_at || payload.intraday_date || payload.latest_date || "N/A"))}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Top Theme Now</h3>
+        <p class="stat-value">${escapeHtml(topTheme.theme_name_ko || "N/A")}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Heat Score</h3>
+        <p class="stat-value">${formatNumber(topTheme.heat_score, 1)}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Top Narrow</h3>
+        <p class="stat-value">${escapeHtml(topNarrow.theme_name_ko || "N/A")}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Top Broad</h3>
+        <p class="stat-value">${escapeHtml(topBroad.theme_name_ko || "N/A")}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Explorer Rows</h3>
+        <p class="stat-value">${escapeHtml(String((payload.theme_explorer || []).length))}</p>
+      </article>
+    </div>
+  `;
+
+  renderTable(
+    "korea-theme-now",
+    [
+      { key: "theme_name_ko", label: "Theme" },
+      { key: "theme_level", label: "Level" },
+      { key: "breadcrumb", label: "Hierarchy" },
+      { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "active_member_count", label: "Active", numeric: true },
+      { key: "reason_text", label: "Reason" },
+    ],
+    now.slice(0, 12),
+  );
+
+  renderTable(
+    "korea-theme-narrow",
+    [
+      { key: "theme_name_ko", label: "Theme" },
+      { key: "breadcrumb", label: "Hierarchy" },
+      { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "reason_text", label: "Reason" },
+    ],
+    narrow.slice(0, 12),
+  );
+
+  renderTable(
+    "korea-theme-broad",
+    [
+      { key: "theme_name_ko", label: "Theme" },
+      { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "active_member_count", label: "Active", numeric: true },
+      { key: "reason_text", label: "Reason" },
+    ],
+    broad.slice(0, 10),
+  );
+
+  renderTable(
+    "korea-theme-weekly",
+    [
+      { key: "theme_name_ko", label: "Theme" },
+      { key: "trend_state", label: "Trend" },
+      { key: "current_week_score", label: "Current W", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "prior_week_score", label: "Prior W", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "delta_vs_prior_week", label: "Delta", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "four_week_mean", label: "4W Mean", numeric: true, render: (v) => formatNumber(v, 1) },
+    ],
+    ((payload.weekly_review || {}).review_rows || []).slice(0, 15),
+  );
+
+  renderTable(
+    "korea-theme-explorer",
+    [
+      { key: "theme_name_ko", label: "Theme" },
+      { key: "theme_level", label: "Level" },
+      { key: "breadcrumb", label: "Hierarchy" },
+      { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "reason_text", label: "Reason" },
+    ],
+    (payload.theme_explorer || []).slice(0, 25),
+  );
+
+  if (contributorTarget) {
+    contributorTarget.innerHTML = contributorMap.length
+      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Theme</th><th>Contributor</th><th>Share</th><th>Move</th></tr></thead><tbody>${contributorMap
+          .slice(0, 15)
+          .map((row) => {
+            const topContributor = Array.isArray(row.top_contributors) ? row.top_contributors[0] : null;
+            return `<tr><td>${escapeHtml(row.theme_name_ko || "N/A")}</td><td>${escapeHtml(topContributor?.symbol_name || "N/A")}</td><td class="numeric">${formatNumber(topContributor?.share_pct, 1)}%</td><td class="numeric">${topContributor ? formatPctCell(topContributor.price_change_pct, 2) : "N/A"}</td></tr>`;
+          })
+          .join("")}</tbody></table></div>`
+      : '<p class="placeholder">No contributor map published yet.</p>';
+  }
+}
+
 function setActiveTab(tabId, options = {}) {
   const persist = options.persist !== false;
   const normalizedTab = VALID_TABS.has(tabId) ? tabId : "overview";
@@ -590,16 +713,25 @@ async function loadJson(url) {
   return response.json();
 }
 
+async function loadJsonOrNull(url) {
+  try {
+    return await loadJson(url);
+  } catch (_error) {
+    return null;
+  }
+}
+
 async function boot() {
   bindTabEvents();
   setActiveTab(getInitialTab(), { persist: false });
 
   try {
-    const [meta, weekHigh, watchlist, transcripts] = await Promise.all([
+    const [meta, weekHigh, watchlist, transcripts, koreaTheme] = await Promise.all([
       loadJson(META_URL),
       loadJson(WEEK_HIGH_URL),
       loadJson(WATCHLIST_URL),
       loadJson(TRANSCRIPTS_URL),
+      loadJsonOrNull(KOREA_THEME_DASHBOARD_URL),
     ]);
 
     renderMeta(meta);
@@ -609,6 +741,7 @@ async function boot() {
     renderSectorBlocks(watchlist);
     renderOverview(weekHigh, watchlist, transcripts);
     renderTranscriptAnalysis(transcripts);
+    renderKoreaThemeDashboard(koreaTheme);
   } catch (error) {
     const alertPanel = document.getElementById("alert-panel");
     const alertText = document.getElementById("alert-text");
