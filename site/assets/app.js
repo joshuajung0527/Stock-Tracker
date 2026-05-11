@@ -769,7 +769,7 @@ function renderKoreaThemeDashboard(payload) {
       { key: "theme_bundle", label: "Covered Themes" },
       { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(row.signal_score) },
     ],
-    impactClusters.slice(0, 12),
+    impactClusters.slice(0, 18),
   );
 
   renderTable(
@@ -781,7 +781,7 @@ function renderKoreaThemeDashboard(payload) {
       { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
       { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(getLeadContributorName(row)) },
     ],
-    narrow.slice(0, 12),
+    narrow.slice(0, 18),
   );
 
   renderTable(
@@ -794,7 +794,7 @@ function renderKoreaThemeDashboard(payload) {
       { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
       { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(getLeadContributorName(row)) },
     ],
-    broad.slice(0, 10),
+    broad.slice(0, 14),
   );
 
   renderTable(
@@ -807,7 +807,7 @@ function renderKoreaThemeDashboard(payload) {
       { key: "delta_vs_prior_week", label: "Delta", numeric: true, render: (v) => formatNumber(v, 1) },
       { key: "four_week_mean", label: "4W Mean", numeric: true, render: (v) => formatNumber(v, 1) },
     ],
-    ((payload.weekly_review || {}).review_rows || []).slice(0, 15),
+    ((payload.weekly_review || {}).review_rows || []).slice(0, 20),
   );
 
   renderTable(
@@ -819,13 +819,13 @@ function renderKoreaThemeDashboard(payload) {
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
       { key: "reason_text", label: "Reason" },
     ],
-    (payload.theme_explorer || []).slice(0, 18),
+    (payload.theme_explorer || []).slice(0, 30),
   );
 
   if (contributorTarget) {
     contributorTarget.innerHTML = impactClusters.length
       ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Theme Bundle</th><th>Impact Stocks</th><th>Covered Themes</th><th>Theme Count</th><th>Heat</th></tr></thead><tbody>${impactClusters
-          .slice(0, 15)
+          .slice(0, 20)
           .map(
             (row) =>
               `<tr><td>${escapeHtml(row.bundle_name || "N/A")}</td><td>${escapeHtml(row.impact_stocks || "N/A")}</td><td>${escapeHtml(row.theme_bundle || "N/A")}</td><td class="numeric">${formatNumber(row.active_theme_count, 0)}</td><td class="numeric">${formatNumber(row.heat_score, 1)}</td></tr>`,
