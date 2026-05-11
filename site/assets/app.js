@@ -181,6 +181,9 @@ function normalizeContributorMapRows(rows) {
 }
 
 function buildImpactClusters(payload) {
+  const bundleSnapshotMap = new Map(
+    ((payload?.bundle_market_snapshot || payload?.intraday_review?.bundle_market_snapshot || [])).map((row) => [row.bundle_name, row]),
+  );
   const sourceRows = [
     ...(payload?.now || []),
     ...(payload?.top_narrow_themes || []),
@@ -266,28 +269,45 @@ function buildImpactClusters(payload) {
 
   return Array.from(clusters.values())
     .map((cluster) => {
+      const snapshot = bundleSnapshotMap.get(cluster.bundle_name) || {};
       const themeList = Array.from(cluster.themes);
       const subthemeList = Array.from(cluster.subthemes);
-      const impactStocks = Array.from(cluster.impact_stock_scores.entries())
+      const contributorImpactStocks = Array.from(cluster.impact_stock_scores.entries())
         .sort((left, right) => right[1] - left[1])
         .map(([name]) => name);
-      const impactMoves = impactStocks.map((name) => {
+      const impactMoves = contributorImpactStocks.map((name) => {
         const moveState = cluster.impact_stock_moves.get(name) || { weightedMove: 0, totalShare: 1 };
         return {
           name,
           move: moveState.totalShare ? moveState.weightedMove / moveState.totalShare : 0,
         };
       });
-      const positiveCount = impactMoves.filter((item) => Number(item.move) > 0).length;
-      const negativeCount = impactMoves.filter((item) => Number(item.move) < 0).length;
-      const avgMove =
-        impactMoves.length > 0
+      const positiveCount = Number.isFinite(Number(snapshot.advancing_count))
+        ? Number(snapshot.advancing_count)
+        : impactMoves.filter((item) => Number(item.move) > 0).length;
+      const negativeCount = Number.isFinite(Number(snapshot.declining_count))
+        ? Number(snapshot.declining_count)
+        : impactMoves.filter((item) => Number(item.move) < 0).length;
+      const avgMove = Number.isFinite(Number(snapshot.weighted_avg_change_pct))
+        ? Number(snapshot.weighted_avg_change_pct)
+        : impactMoves.length > 0
           ? impactMoves.reduce((sum, item) => sum + Number(item.move || 0), 0) / impactMoves.length
           : 0;
-      const topImpactStocks = impactStocks.slice(0, 5);
+      const activeSymbols = Array.isArray(snapshot.active_symbols) && snapshot.active_symbols.length
+        ? snapshot.active_symbols
+        : contributorImpactStocks;
+      const mappedSymbols = Array.isArray(snapshot.mapped_symbols) && snapshot.mapped_symbols.length
+        ? snapshot.mapped_symbols
+        : activeSymbols;
+      const topImpactStocks = activeSymbols.slice(0, 6);
+      const topMappedStocks = mappedSymbols.slice(0, 10);
       const topSubthemes = subthemeList.slice(0, 4);
       const extraThemeCount = Math.max(themeList.length - topSubthemes.length, 0);
-      const extraStockCount = Math.max(impactStocks.length - topImpactStocks.length, 0);
+      const extraStockCount = Math.max(activeSymbols.length - topImpactStocks.length, 0);
+      const extraMappedCount = Math.max(mappedSymbols.length - topMappedStocks.length, 0);
+      const mappedCount = Number(snapshot.mapped_symbol_count) || mappedSymbols.length;
+      const activeCount = Number(snapshot.active_symbol_count) || activeSymbols.length;
+      const coveragePct = mappedCount > 0 ? (activeCount / mappedCount) * 100 : 0;
       return {
         bundle_name: cluster.bundle_name,
         heat_score: cluster.heat_score,
@@ -295,6 +315,7 @@ function buildImpactClusters(payload) {
         active_member_count: cluster.active_member_count,
         theme_total_members: cluster.theme_total_members,
         signal_score: cluster.strongest_z,
+        coverage_text: `${activeCount} / ${mappedCount} (${coveragePct.toFixed(0)}%)`,
         theme_bundle:
           topSubthemes.length > 0
             ? `${topSubthemes.join(", ")}${extraThemeCount > 0 ? ` 외 ${extraThemeCount}` : ""}`
@@ -303,13 +324,19 @@ function buildImpactClusters(payload) {
           topImpactStocks.length > 0
             ? `${topImpactStocks.join(", ")}${extraStockCount > 0 ? ` 외 ${extraStockCount}` : ""}`
             : "N/A",
+        bundle_universe:
+          topMappedStocks.length > 0
+            ? `${topMappedStocks.join(", ")}${extraMappedCount > 0 ? ` 외 ${extraMappedCount}` : ""}`
+            : "N/A",
+        mapped_symbol_count: mappedCount,
+        active_symbol_count: activeCount,
         avg_move: avgMove,
         positive_count: positiveCount,
         negative_count: negativeCount,
         direction_label:
-          avgMove <= -2.5 || (avgMove <= -1.0 && negativeCount > positiveCount && negativeCount >= 2)
+          activeCount > 0 && (avgMove <= -2.5 || (avgMove <= -1.0 && negativeCount > positiveCount && negativeCount >= 2))
             ? "Down Pressure"
-            : avgMove >= 1.0 || positiveCount >= negativeCount
+            : activeCount > 0 && (avgMove >= 1.0 || positiveCount >= negativeCount)
               ? "Up Interest"
               : "Mixed",
       };
@@ -903,6 +930,7 @@ function renderKoreaThemeDashboard(payload) {
       <p>${escapeHtml(methodology.primary || "현재 시각까지의 누적 거래대금/거래량을 과거 같은 시각의 누적치와 비교해 상대강도를 봅니다.")}</p>
       <p>${escapeHtml(methodology.fallback || "같은 시각 이력이 부족하면 최근 20일 일평균 거래대금/거래량에 세션 진행률을 곱한 기대치로 보정합니다.")}</p>
       <p>${escapeHtml(methodology.minute_role || "1분봉은 상세 확인용이고, 메인 랭킹 기준은 same-time cumulative flow입니다.")}</p>
+      <p>${escapeHtml(methodology.bundle_scope || "번들 해석은 현재 활성 종목만이 아니라, taxonomy에 매핑된 전체 종목군과 현재 활성 종목군을 함께 봅니다.")}</p>
     </article>
   `;
 
@@ -924,7 +952,7 @@ function renderKoreaThemeDashboard(payload) {
     [
       { key: "bundle_name", label: "Theme Bundle" },
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
-      { key: "active_theme_count", label: "Themes", numeric: true },
+      { key: "coverage_text", label: "Coverage" },
       { key: "impact_stocks", label: "Impact Stocks" },
       { key: "theme_bundle", label: "Covered Themes" },
       { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(row.signal_score) },
@@ -937,7 +965,7 @@ function renderKoreaThemeDashboard(payload) {
     [
       { key: "bundle_name", label: "Theme Bundle" },
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
-      { key: "active_theme_count", label: "Themes", numeric: true },
+      { key: "coverage_text", label: "Coverage" },
       { key: "impact_stocks", label: "Impact Stocks" },
       { key: "theme_bundle", label: "Covered Themes" },
       {
@@ -1001,11 +1029,11 @@ function renderKoreaThemeDashboard(payload) {
 
   if (contributorTarget) {
     contributorTarget.innerHTML = impactClusters.length
-      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Theme Bundle</th><th>Impact Stocks</th><th>Covered Themes</th><th>Theme Count</th><th>Heat</th></tr></thead><tbody>${impactClusters
+      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Theme Bundle</th><th>Active Now</th><th>Bundle Universe</th><th>Coverage</th><th>Covered Themes</th><th>Heat</th></tr></thead><tbody>${impactClusters
           .slice(0, 20)
           .map(
             (row) =>
-              `<tr><td>${escapeHtml(row.bundle_name || "N/A")}</td><td>${escapeHtml(row.impact_stocks || "N/A")}</td><td>${escapeHtml(row.theme_bundle || "N/A")}</td><td class="numeric">${formatNumber(row.active_theme_count, 0)}</td><td class="numeric">${formatNumber(row.heat_score, 1)}</td></tr>`,
+              `<tr><td>${escapeHtml(row.bundle_name || "N/A")}</td><td>${escapeHtml(row.impact_stocks || "N/A")}</td><td>${escapeHtml(row.bundle_universe || "N/A")}</td><td>${escapeHtml(row.coverage_text || "N/A")}</td><td>${escapeHtml(row.theme_bundle || "N/A")}</td><td class="numeric">${formatNumber(row.heat_score, 1)}</td></tr>`,
           )
           .join("")}</tbody></table></div>`
       : '<p class="placeholder">No contributor map published yet.</p>';
