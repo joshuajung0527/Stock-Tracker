@@ -728,7 +728,14 @@ function renderKoreaThemeDashboard(payload) {
   const impactClusters = buildImpactClusters(payload);
   const topBundle = impactClusters[0] || {};
   const topNarrow = narrow[0] || {};
-  const topBroad = broad[0] || {};
+  const filteredBroad = broad.filter((row) => {
+    const activeCount = Number(row?.active_member_count || 0);
+    const heatScore = Number(row?.heat_score || 0);
+    const strongestZ = getStrongestThemeZScore(row);
+    return activeCount >= 2 || heatScore >= 55 || (Number.isFinite(strongestZ) && strongestZ >= 1.0);
+  });
+  const broadRows = filteredBroad.length ? filteredBroad : broad;
+  const topBroad = broadRows[0] || {};
 
   summaryTarget.innerHTML = `
     <div class="overview-grid">
@@ -792,9 +799,9 @@ function renderKoreaThemeDashboard(payload) {
       { key: "active_member_count", label: "Active", numeric: true },
       { key: "turnover_z", label: "Turnover Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.turnover, 2) },
       { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
-      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(getLeadContributorName(row)) },
+      { key: "lead", label: "Top Contributor", render: (_v, row) => escapeHtml(getLeadContributorName(row)) },
     ],
-    broad.slice(0, 14),
+    broadRows.slice(0, 14),
   );
 
   renderTable(
