@@ -825,6 +825,7 @@ function renderKoreaThemeDashboard(payload) {
   const positionLensRows = buildPositionLensRows(payload);
   const topBundle = impactClusters[0] || {};
   const topNarrow = narrow[0] || {};
+  const methodology = payload.methodology || {};
   const filteredBroad = broad.filter((row) => {
     const activeCount = Number(row?.active_member_count || 0);
     const heatScore = Number(row?.heat_score || 0);
@@ -845,7 +846,7 @@ function renderKoreaThemeDashboard(payload) {
         <p class="stat-value">${escapeHtml(topBundle.bundle_name || "N/A")}</p>
       </article>
       <article class="stat-card">
-        <h3>Trade Heat</h3>
+        <h3>Current Heat</h3>
         <p class="stat-value">${formatNumber(topBundle.heat_score, 1)}</p>
       </article>
       <article class="stat-card">
@@ -861,6 +862,12 @@ function renderKoreaThemeDashboard(payload) {
         <p class="stat-value">${escapeHtml((positionLensRows[0] || {}).bundle_name || topBroad.theme_name_ko || "N/A")}</p>
       </article>
     </div>
+    <article class="method-card">
+      <h3>How This Ranks Now</h3>
+      <p>${escapeHtml(methodology.primary || "현재 시각까지의 누적 거래대금/거래량을 과거 같은 시각의 누적치와 비교해 상대강도를 봅니다.")}</p>
+      <p>${escapeHtml(methodology.fallback || "같은 시각 이력이 부족하면 최근 20일 일평균 거래대금/거래량에 세션 진행률을 곱한 기대치로 보정합니다.")}</p>
+      <p>${escapeHtml(methodology.minute_role || "1분봉은 상세 확인용이고, 메인 랭킹 기준은 same-time cumulative flow입니다.")}</p>
+    </article>
   `;
 
   renderTable(
