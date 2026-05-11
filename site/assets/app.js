@@ -4,7 +4,9 @@ const WATCHLIST_URL = "./data/watchlist/latest.json";
 const TRANSCRIPTS_URL = "./data/transcripts/latest.json";
 const KOREA_THEME_DASHBOARD_URL = "./data/korea-theme/theme_dashboard_latest.json";
 const TAB_STORAGE_KEY = "stock_tracker_active_tab";
+const KOREA_SUBTAB_STORAGE_KEY = "stock_tracker_korea_subtab";
 const VALID_TABS = new Set(["overview", "week-high", "watchlist", "transcripts", "korea-theme"]);
+const VALID_KOREA_SUBTABS = new Set(["now", "contributors", "narrow", "broad", "weekly", "explorer"]);
 
 function escapeHtml(value) {
   return String(value)
@@ -61,6 +63,20 @@ function renderTable(targetId, columns, rows) {
     .join("");
 
   target.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+function formatSignalPill(score) {
+  const n = Number(score);
+  if (!Number.isFinite(n)) {
+    return '<span class="signal-pill">Stable</span>';
+  }
+  if (n >= 2.5) {
+    return '<span class="signal-pill hot">Strong Interest</span>';
+  }
+  if (n >= 1.5) {
+    return '<span class="signal-pill warm">Emerging</span>';
+  }
+  return '<span class="signal-pill">Stable</span>';
 }
 
 function renderWeekHighSummary(payload) {
@@ -574,11 +590,12 @@ function renderKoreaThemeDashboard(payload) {
     "korea-theme-now",
     [
       { key: "theme_name_ko", label: "Theme" },
-      { key: "theme_level", label: "Level" },
-      { key: "breadcrumb", label: "Hierarchy" },
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
       { key: "active_member_count", label: "Active", numeric: true },
-      { key: "reason_text", label: "Reason" },
+      { key: "turnover_z", label: "Turnover Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.turnover, 2) },
+      { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
+      { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(Math.max(Number(row.z_scores?.turnover ?? 0), Number(row.z_scores?.volume ?? 0))) },
+      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(row.top_contributors?.[0]?.symbol_name || "N/A") },
     ],
     now.slice(0, 12),
   );
@@ -587,9 +604,10 @@ function renderKoreaThemeDashboard(payload) {
     "korea-theme-narrow",
     [
       { key: "theme_name_ko", label: "Theme" },
-      { key: "breadcrumb", label: "Hierarchy" },
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
-      { key: "reason_text", label: "Reason" },
+      { key: "turnover_z", label: "Turnover Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.turnover, 2) },
+      { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
+      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(row.top_contributors?.[0]?.symbol_name || "N/A") },
     ],
     narrow.slice(0, 12),
   );
@@ -600,7 +618,9 @@ function renderKoreaThemeDashboard(payload) {
       { key: "theme_name_ko", label: "Theme" },
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
       { key: "active_member_count", label: "Active", numeric: true },
-      { key: "reason_text", label: "Reason" },
+      { key: "turnover_z", label: "Turnover Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.turnover, 2) },
+      { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
+      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(row.top_contributors?.[0]?.symbol_name || "N/A") },
     ],
     broad.slice(0, 10),
   );
@@ -627,7 +647,7 @@ function renderKoreaThemeDashboard(payload) {
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
       { key: "reason_text", label: "Reason" },
     ],
-    (payload.theme_explorer || []).slice(0, 25),
+    (payload.theme_explorer || []).slice(0, 18),
   );
 
   if (contributorTarget) {
@@ -673,6 +693,35 @@ function setActiveTab(tabId, options = {}) {
   }
 }
 
+function setActiveKoreaSubtab(tabId, options = {}) {
+  const persist = options.persist !== false;
+  const normalizedTab = VALID_KOREA_SUBTABS.has(tabId) ? tabId : "now";
+  const buttons = document.querySelectorAll(".subtab-btn[data-korea-subtab]");
+  const panels = document.querySelectorAll(".korea-subtab-panel[id^='korea-panel-']");
+
+  buttons.forEach((button) => {
+    const active = button.dataset.koreaSubtab === normalizedTab;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+    button.setAttribute("tabindex", active ? "0" : "-1");
+  });
+
+  panels.forEach((panel) => {
+    const panelTab = panel.id.replace("korea-panel-", "");
+    const active = panelTab === normalizedTab;
+    panel.classList.toggle("is-hidden", !active);
+    panel.setAttribute("aria-hidden", active ? "false" : "true");
+  });
+
+  if (persist) {
+    try {
+      localStorage.setItem(KOREA_SUBTAB_STORAGE_KEY, normalizedTab);
+    } catch (_error) {
+      // Ignore storage errors.
+    }
+  }
+}
+
 function bindTabEvents() {
   const tabButtons = document.querySelectorAll(".tab-btn[data-tab]");
   tabButtons.forEach((button) => {
@@ -693,6 +742,26 @@ function bindTabEvents() {
   });
 }
 
+function bindKoreaSubtabEvents() {
+  const buttons = document.querySelectorAll(".subtab-btn[data-korea-subtab]");
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setActiveKoreaSubtab(button.dataset.koreaSubtab || "now");
+    });
+    button.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      event.preventDefault();
+      const all = Array.from(buttons);
+      const idx = all.indexOf(button);
+      if (idx < 0) return;
+      const delta = event.key === "ArrowRight" ? 1 : -1;
+      const next = all[(idx + delta + all.length) % all.length];
+      next.focus();
+      setActiveKoreaSubtab(next.dataset.koreaSubtab || "now");
+    });
+  });
+}
+
 function getInitialTab() {
   try {
     const stored = localStorage.getItem(TAB_STORAGE_KEY);
@@ -703,6 +772,18 @@ function getInitialTab() {
     // Ignore storage errors.
   }
   return "overview";
+}
+
+function getInitialKoreaSubtab() {
+  try {
+    const stored = localStorage.getItem(KOREA_SUBTAB_STORAGE_KEY);
+    if (stored && VALID_KOREA_SUBTABS.has(stored)) {
+      return stored;
+    }
+  } catch (_error) {
+    // Ignore storage errors.
+  }
+  return "now";
 }
 
 async function loadJson(url) {
@@ -721,10 +802,7 @@ async function loadJsonOrNull(url) {
   }
 }
 
-async function boot() {
-  bindTabEvents();
-  setActiveTab(getInitialTab(), { persist: false });
-
+async function loadAndRenderDashboard() {
   try {
     const [meta, weekHigh, watchlist, transcripts, koreaTheme] = await Promise.all([
       loadJson(META_URL),
@@ -742,6 +820,11 @@ async function boot() {
     renderOverview(weekHigh, watchlist, transcripts);
     renderTranscriptAnalysis(transcripts);
     renderKoreaThemeDashboard(koreaTheme);
+    const alertPanel = document.getElementById("alert-panel");
+    if (alertPanel) {
+      alertPanel.hidden = true;
+      alertPanel.classList.remove("alert");
+    }
   } catch (error) {
     const alertPanel = document.getElementById("alert-panel");
     const alertText = document.getElementById("alert-text");
@@ -749,6 +832,28 @@ async function boot() {
     alertPanel.classList.add("alert");
     alertText.textContent = `Failed to load dashboard data: ${error.message}`;
   }
+}
+
+function bindRefreshButton() {
+  const button = document.getElementById("refresh-dashboard-btn");
+  if (!button) return;
+  button.addEventListener("click", async () => {
+    const priorLabel = button.textContent;
+    button.disabled = true;
+    button.textContent = "Refreshing...";
+    await loadAndRenderDashboard();
+    button.textContent = priorLabel;
+    button.disabled = false;
+  });
+}
+
+async function boot() {
+  bindTabEvents();
+  bindKoreaSubtabEvents();
+  bindRefreshButton();
+  setActiveTab(getInitialTab(), { persist: false });
+  setActiveKoreaSubtab(getInitialKoreaSubtab(), { persist: false });
+  await loadAndRenderDashboard();
 }
 
 boot();

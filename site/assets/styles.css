@@ -24,6 +24,35 @@ body {
     linear-gradient(180deg, #f6fbfc, #edf5f7 70%);
 }
 
+.refresh-fab {
+  position: fixed;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  border: 1px solid rgba(31, 122, 140, 0.28);
+  background: linear-gradient(180deg, #effafd, #d8eef5);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 10px 26px rgba(7, 32, 40, 0.16);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.refresh-fab:hover {
+  transform: translateY(calc(-50% - 1px));
+  box-shadow: 0 14px 30px rgba(7, 32, 40, 0.2);
+}
+
+.refresh-fab:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .bg-noise {
   position: fixed;
   inset: 0;
@@ -151,6 +180,63 @@ h1 {
   display: none;
 }
 
+.subtabs-shell {
+  margin: 0 0 1rem;
+}
+
+.subtablist {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.subtab-btn {
+  border: 1px solid rgba(18, 60, 73, 0.16);
+  background: #f7fbfc;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.42rem 0.82rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.subtab-btn.is-active {
+  border-color: rgba(31, 122, 140, 0.42);
+  background: linear-gradient(180deg, #d8f0f7, #cbe7f1);
+}
+
+.korea-subtab-panel.is-hidden {
+  display: none;
+}
+
+.signal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  padding: 0.22rem 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: 1px solid rgba(18, 60, 73, 0.14);
+  background: #f4fafb;
+}
+
+.signal-pill.hot {
+  color: #a43712;
+  background: #fff1ea;
+  border-color: rgba(192, 93, 33, 0.22);
+}
+
+.signal-pill.warm {
+  color: #795400;
+  background: #fff8e8;
+  border-color: rgba(177, 132, 19, 0.24);
+}
+
 @keyframes panel-fade-in {
   from {
     opacity: 0;
@@ -223,6 +309,8 @@ h1 {
   border-bottom: 1px solid rgba(18, 60, 73, 0.1);
   padding: 0.45rem 0.55rem;
   text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .data-table th {
@@ -527,5 +615,16 @@ h1 {
 @media (max-width: 640px) {
   .overview-grid {
     grid-template-columns: 1fr;
+  }
+
+  .refresh-fab {
+    top: auto;
+    bottom: 1rem;
+    right: 1rem;
+    transform: none;
+  }
+
+  .refresh-fab:hover {
+    transform: translateY(-1px);
   }
 }
