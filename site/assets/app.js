@@ -307,7 +307,7 @@ function buildImpactClusters(payload) {
         positive_count: positiveCount,
         negative_count: negativeCount,
         direction_label:
-          avgMove <= -1.0 || (negativeCount > positiveCount && negativeCount >= 2)
+          avgMove <= -2.5 || (avgMove <= -1.0 && negativeCount > positiveCount && negativeCount >= 2)
             ? "Down Pressure"
             : avgMove >= 1.0 || positiveCount >= negativeCount
               ? "Up Interest"
