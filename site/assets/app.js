@@ -4,9 +4,7 @@ const WATCHLIST_URL = "./data/watchlist/latest.json";
 const TRANSCRIPTS_URL = "./data/transcripts/latest.json";
 const KOREA_THEME_DASHBOARD_URL = "./data/korea-theme/theme_dashboard_latest.json";
 const TAB_STORAGE_KEY = "stock_tracker_active_tab";
-const KOREA_SUBTAB_STORAGE_KEY = "stock_tracker_korea_subtab";
 const VALID_TABS = new Set(["overview", "week-high", "watchlist", "transcripts", "korea-theme"]);
-const VALID_KOREA_SUBTABS = new Set(["now", "contributors", "narrow", "broad", "weekly", "explorer"]);
 
 function escapeHtml(value) {
   return String(value)
@@ -68,7 +66,7 @@ function renderTable(targetId, columns, rows) {
 function formatSignalPill(score) {
   const n = Number(score);
   if (!Number.isFinite(n)) {
-    return '<span class="signal-pill">Stable</span>';
+    return '<span class="signal-pill">Baseline</span>';
   }
   if (n >= 2.5) {
     return '<span class="signal-pill hot">Strong Interest</span>';
@@ -76,7 +74,65 @@ function formatSignalPill(score) {
   if (n >= 1.5) {
     return '<span class="signal-pill warm">Emerging</span>';
   }
-  return '<span class="signal-pill">Stable</span>';
+  return '<span class="signal-pill">Baseline</span>';
+}
+
+function getStrongestThemeZScore(row) {
+  const zScores = row?.z_scores || {};
+  const values = Object.values(zScores)
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value));
+  if (!values.length) {
+    return NaN;
+  }
+  return Math.max(...values);
+}
+
+function getLeadContributorName(row) {
+  if (Array.isArray(row?.top_contributors) && row.top_contributors.length > 0) {
+    return row.top_contributors[0]?.symbol_name || row.top_contributors[0]?.symbol || "N/A";
+  }
+  return row?.symbol_name || "N/A";
+}
+
+function normalizeContributorMapRows(rows) {
+  const themeMap = new Map();
+  for (const row of rows || []) {
+    if (!row || !row.theme_name_ko) continue;
+    let topContributor = null;
+    if (Array.isArray(row.top_contributors) && row.top_contributors.length > 0) {
+      topContributor = row.top_contributors[0];
+    } else if (typeof row.top_contributors_json === "string" && row.top_contributors_json.trim()) {
+      try {
+        const parsed = JSON.parse(row.top_contributors_json);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          topContributor = parsed[0];
+        }
+      } catch (_error) {
+        // Ignore malformed contributor JSON and fall back to flat fields.
+      }
+    }
+
+    const normalized = {
+      theme_name_ko: row.theme_name_ko,
+      contributor_name: topContributor?.symbol_name || row.symbol_name || row.symbol || "N/A",
+      contributor_share_pct: Number.isFinite(Number(topContributor?.share_pct))
+        ? Number(topContributor.share_pct)
+        : Number(row.contributor_share_pct),
+      price_change_pct: Number.isFinite(Number(topContributor?.price_change_pct))
+        ? Number(topContributor.price_change_pct)
+        : Number(row.price_change_pct),
+    };
+
+    const existing = themeMap.get(normalized.theme_name_ko);
+    if (!existing || Number(normalized.contributor_share_pct) > Number(existing.contributor_share_pct)) {
+      themeMap.set(normalized.theme_name_ko, normalized);
+    }
+  }
+
+  return Array.from(themeMap.values()).sort(
+    (left, right) => Number(right.contributor_share_pct || 0) - Number(left.contributor_share_pct || 0),
+  );
 }
 
 function renderWeekHighSummary(payload) {
@@ -594,8 +650,8 @@ function renderKoreaThemeDashboard(payload) {
       { key: "active_member_count", label: "Active", numeric: true },
       { key: "turnover_z", label: "Turnover Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.turnover, 2) },
       { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
-      { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(Math.max(Number(row.z_scores?.turnover ?? 0), Number(row.z_scores?.volume ?? 0))) },
-      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(row.top_contributors?.[0]?.symbol_name || "N/A") },
+      { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(getStrongestThemeZScore(row)) },
+      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(getLeadContributorName(row)) },
     ],
     now.slice(0, 12),
   );
@@ -607,7 +663,7 @@ function renderKoreaThemeDashboard(payload) {
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
       { key: "turnover_z", label: "Turnover Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.turnover, 2) },
       { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
-      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(row.top_contributors?.[0]?.symbol_name || "N/A") },
+      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(getLeadContributorName(row)) },
     ],
     narrow.slice(0, 12),
   );
@@ -620,7 +676,7 @@ function renderKoreaThemeDashboard(payload) {
       { key: "active_member_count", label: "Active", numeric: true },
       { key: "turnover_z", label: "Turnover Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.turnover, 2) },
       { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
-      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(row.top_contributors?.[0]?.symbol_name || "N/A") },
+      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(getLeadContributorName(row)) },
     ],
     broad.slice(0, 10),
   );
@@ -651,13 +707,14 @@ function renderKoreaThemeDashboard(payload) {
   );
 
   if (contributorTarget) {
-    contributorTarget.innerHTML = contributorMap.length
-      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Theme</th><th>Contributor</th><th>Share</th><th>Move</th></tr></thead><tbody>${contributorMap
+    const normalizedContributorMap = normalizeContributorMapRows(contributorMap);
+    contributorTarget.innerHTML = normalizedContributorMap.length
+      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Theme</th><th>Top Contributor</th><th>Share</th><th>Move</th></tr></thead><tbody>${normalizedContributorMap
           .slice(0, 15)
-          .map((row) => {
-            const topContributor = Array.isArray(row.top_contributors) ? row.top_contributors[0] : null;
-            return `<tr><td>${escapeHtml(row.theme_name_ko || "N/A")}</td><td>${escapeHtml(topContributor?.symbol_name || "N/A")}</td><td class="numeric">${formatNumber(topContributor?.share_pct, 1)}%</td><td class="numeric">${topContributor ? formatPctCell(topContributor.price_change_pct, 2) : "N/A"}</td></tr>`;
-          })
+          .map(
+            (row) =>
+              `<tr><td>${escapeHtml(row.theme_name_ko || "N/A")}</td><td>${escapeHtml(row.contributor_name || "N/A")}</td><td class="numeric">${formatNumber(row.contributor_share_pct, 1)}%</td><td class="numeric">${formatPctCell(row.price_change_pct, 2)}</td></tr>`,
+          )
           .join("")}</tbody></table></div>`
       : '<p class="placeholder">No contributor map published yet.</p>';
   }
@@ -693,35 +750,6 @@ function setActiveTab(tabId, options = {}) {
   }
 }
 
-function setActiveKoreaSubtab(tabId, options = {}) {
-  const persist = options.persist !== false;
-  const normalizedTab = VALID_KOREA_SUBTABS.has(tabId) ? tabId : "now";
-  const buttons = document.querySelectorAll(".subtab-btn[data-korea-subtab]");
-  const panels = document.querySelectorAll(".korea-subtab-panel[id^='korea-panel-']");
-
-  buttons.forEach((button) => {
-    const active = button.dataset.koreaSubtab === normalizedTab;
-    button.classList.toggle("is-active", active);
-    button.setAttribute("aria-selected", active ? "true" : "false");
-    button.setAttribute("tabindex", active ? "0" : "-1");
-  });
-
-  panels.forEach((panel) => {
-    const panelTab = panel.id.replace("korea-panel-", "");
-    const active = panelTab === normalizedTab;
-    panel.classList.toggle("is-hidden", !active);
-    panel.setAttribute("aria-hidden", active ? "false" : "true");
-  });
-
-  if (persist) {
-    try {
-      localStorage.setItem(KOREA_SUBTAB_STORAGE_KEY, normalizedTab);
-    } catch (_error) {
-      // Ignore storage errors.
-    }
-  }
-}
-
 function bindTabEvents() {
   const tabButtons = document.querySelectorAll(".tab-btn[data-tab]");
   tabButtons.forEach((button) => {
@@ -742,26 +770,6 @@ function bindTabEvents() {
   });
 }
 
-function bindKoreaSubtabEvents() {
-  const buttons = document.querySelectorAll(".subtab-btn[data-korea-subtab]");
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      setActiveKoreaSubtab(button.dataset.koreaSubtab || "now");
-    });
-    button.addEventListener("keydown", (event) => {
-      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-      event.preventDefault();
-      const all = Array.from(buttons);
-      const idx = all.indexOf(button);
-      if (idx < 0) return;
-      const delta = event.key === "ArrowRight" ? 1 : -1;
-      const next = all[(idx + delta + all.length) % all.length];
-      next.focus();
-      setActiveKoreaSubtab(next.dataset.koreaSubtab || "now");
-    });
-  });
-}
-
 function getInitialTab() {
   try {
     const stored = localStorage.getItem(TAB_STORAGE_KEY);
@@ -772,18 +780,6 @@ function getInitialTab() {
     // Ignore storage errors.
   }
   return "overview";
-}
-
-function getInitialKoreaSubtab() {
-  try {
-    const stored = localStorage.getItem(KOREA_SUBTAB_STORAGE_KEY);
-    if (stored && VALID_KOREA_SUBTABS.has(stored)) {
-      return stored;
-    }
-  } catch (_error) {
-    // Ignore storage errors.
-  }
-  return "now";
 }
 
 async function loadJson(url) {
@@ -849,10 +845,8 @@ function bindRefreshButton() {
 
 async function boot() {
   bindTabEvents();
-  bindKoreaSubtabEvents();
   bindRefreshButton();
   setActiveTab(getInitialTab(), { persist: false });
-  setActiveKoreaSubtab(getInitialKoreaSubtab(), { persist: false });
   await loadAndRenderDashboard();
 }
 
