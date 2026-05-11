@@ -135,6 +135,79 @@ function normalizeContributorMapRows(rows) {
   );
 }
 
+function buildImpactClusters(payload) {
+  const sourceRows = [
+    ...(payload?.now || []),
+    ...(payload?.top_narrow_themes || []),
+    ...(payload?.top_broad_themes || []),
+  ];
+  const clusters = new Map();
+
+  for (const row of sourceRows) {
+    const leadName = getLeadContributorName(row);
+    if (!leadName || leadName === "N/A") continue;
+    const key = leadName;
+    const strongestZ = getStrongestThemeZScore(row);
+    const contributors = Array.isArray(row?.top_contributors) ? row.top_contributors : [];
+
+    if (!clusters.has(key)) {
+      clusters.set(key, {
+        lead_name: leadName,
+        heat_score: Number(row?.heat_score) || 0,
+        strongest_z: Number.isFinite(strongestZ) ? strongestZ : NaN,
+        active_theme_count: 0,
+        active_member_count: 0,
+        themes: [],
+        overlap_symbols: [],
+        top_theme_name: row?.theme_name_ko || "N/A",
+      });
+    }
+
+    const cluster = clusters.get(key);
+    cluster.active_theme_count += 1;
+    cluster.heat_score = Math.max(cluster.heat_score, Number(row?.heat_score) || 0);
+    cluster.active_member_count = Math.max(cluster.active_member_count, Number(row?.active_member_count) || 0);
+    if (Number.isFinite(strongestZ)) {
+      cluster.strongest_z = Number.isFinite(cluster.strongest_z) ? Math.max(cluster.strongest_z, strongestZ) : strongestZ;
+    }
+    if (row?.theme_name_ko && !cluster.themes.includes(row.theme_name_ko)) {
+      cluster.themes.push(row.theme_name_ko);
+    }
+    for (const contributor of contributors) {
+      const name = contributor?.symbol_name || contributor?.symbol;
+      if (!name || name === leadName) continue;
+      if (!cluster.overlap_symbols.includes(name)) {
+        cluster.overlap_symbols.push(name);
+      }
+    }
+  }
+
+  return Array.from(clusters.values())
+    .map((cluster) => {
+      const themePreview = cluster.themes.slice(0, 4).join(", ");
+      const extraThemeCount = Math.max(cluster.themes.length - 4, 0);
+      const overlapPreview = cluster.overlap_symbols.slice(0, 5).join(", ");
+      const extraOverlapCount = Math.max(cluster.overlap_symbols.length - 5, 0);
+      return {
+        lead_name: cluster.lead_name,
+        heat_score: cluster.heat_score,
+        active_theme_count: cluster.active_theme_count,
+        active_member_count: cluster.active_member_count,
+        signal_score: cluster.strongest_z,
+        top_theme_name: cluster.top_theme_name,
+        theme_bundle: extraThemeCount > 0 ? `${themePreview} 외 ${extraThemeCount}` : themePreview || "N/A",
+        overlap_bundle:
+          extraOverlapCount > 0 ? `${overlapPreview} 외 ${extraOverlapCount}` : overlapPreview || cluster.lead_name,
+      };
+    })
+    .sort((left, right) => {
+      if (Number(right.heat_score || 0) !== Number(left.heat_score || 0)) {
+        return Number(right.heat_score || 0) - Number(left.heat_score || 0);
+      }
+      return Number(right.active_theme_count || 0) - Number(left.active_theme_count || 0);
+    });
+}
+
 function renderWeekHighSummary(payload) {
   const rows = payload.summary_by_sector || [];
   renderTable(
@@ -609,6 +682,7 @@ function renderKoreaThemeDashboard(payload) {
   const narrow = payload.top_narrow_themes || [];
   const broad = payload.top_broad_themes || [];
   const contributorMap = payload.contributor_map || [];
+  const impactClusters = buildImpactClusters(payload);
   const topTheme = now[0] || {};
   const topNarrow = narrow[0] || {};
   const topBroad = broad[0] || {};
@@ -645,15 +719,15 @@ function renderKoreaThemeDashboard(payload) {
   renderTable(
     "korea-theme-now",
     [
-      { key: "theme_name_ko", label: "Theme" },
+      { key: "lead_name", label: "Impact Stock" },
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
-      { key: "active_member_count", label: "Active", numeric: true },
-      { key: "turnover_z", label: "Turnover Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.turnover, 2) },
-      { key: "volume_z", label: "Volume Z", numeric: true, render: (_v, row) => formatNumber(row.z_scores?.volume, 2) },
-      { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(getStrongestThemeZScore(row)) },
-      { key: "lead", label: "Lead", render: (_v, row) => escapeHtml(getLeadContributorName(row)) },
+      { key: "active_theme_count", label: "Themes", numeric: true },
+      { key: "theme_bundle", label: "Theme Bundle" },
+      { key: "overlap_bundle", label: "Overlap Names" },
+      { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(row.signal_score) },
+      { key: "top_theme_name", label: "Top Theme" },
     ],
-    now.slice(0, 12),
+    impactClusters.slice(0, 12),
   );
 
   renderTable(
