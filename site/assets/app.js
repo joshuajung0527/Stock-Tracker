@@ -95,6 +95,18 @@ function getLeadContributorName(row) {
   return row?.symbol_name || "N/A";
 }
 
+function getThemeBundleName(row) {
+  const breadcrumb = String(row?.breadcrumb || "").trim();
+  if (breadcrumb) {
+    const root = breadcrumb
+      .split(">")
+      .map((part) => part.trim())
+      .filter(Boolean)[0];
+    if (root) return root;
+  }
+  return row?.parent_theme_name_ko || row?.theme_name_ko || "기타";
+}
+
 function normalizeContributorMapRows(rows) {
   const themeMap = new Map();
   for (const row of rows || []) {
@@ -141,25 +153,36 @@ function buildImpactClusters(payload) {
     ...(payload?.top_narrow_themes || []),
     ...(payload?.top_broad_themes || []),
   ];
+  const uniqueRows = new Map();
+  for (const row of sourceRows) {
+    const rowKey = [
+      row?.theme_name_ko || "",
+      row?.theme_level || "",
+      row?.breadcrumb || "",
+    ].join("::");
+    if (!uniqueRows.has(rowKey)) {
+      uniqueRows.set(rowKey, row);
+    }
+  }
   const clusters = new Map();
 
-  for (const row of sourceRows) {
-    const leadName = getLeadContributorName(row);
-    if (!leadName || leadName === "N/A") continue;
-    const key = leadName;
+  for (const row of uniqueRows.values()) {
+    const bundleName = getThemeBundleName(row);
+    if (!bundleName || bundleName === "N/A") continue;
+    const key = bundleName;
     const strongestZ = getStrongestThemeZScore(row);
     const contributors = Array.isArray(row?.top_contributors) ? row.top_contributors : [];
 
     if (!clusters.has(key)) {
       clusters.set(key, {
-        lead_name: leadName,
+        bundle_name: bundleName,
         heat_score: Number(row?.heat_score) || 0,
         strongest_z: Number.isFinite(strongestZ) ? strongestZ : NaN,
         active_theme_count: 0,
         active_member_count: 0,
-        themes: [],
-        overlap_symbols: [],
-        top_theme_name: row?.theme_name_ko || "N/A",
+        themes: new Set(),
+        subthemes: new Set(),
+        impact_stock_scores: new Map(),
       });
     }
 
@@ -170,34 +193,55 @@ function buildImpactClusters(payload) {
     if (Number.isFinite(strongestZ)) {
       cluster.strongest_z = Number.isFinite(cluster.strongest_z) ? Math.max(cluster.strongest_z, strongestZ) : strongestZ;
     }
-    if (row?.theme_name_ko && !cluster.themes.includes(row.theme_name_ko)) {
-      cluster.themes.push(row.theme_name_ko);
+    if (row?.theme_name_ko) {
+      cluster.themes.add(row.theme_name_ko);
+      if (row.theme_name_ko !== bundleName) {
+        cluster.subthemes.add(row.theme_name_ko);
+      }
     }
-    for (const contributor of contributors) {
-      const name = contributor?.symbol_name || contributor?.symbol;
-      if (!name || name === leadName) continue;
-      if (!cluster.overlap_symbols.includes(name)) {
-        cluster.overlap_symbols.push(name);
+
+    if (contributors.length) {
+      for (const contributor of contributors) {
+        const name = contributor?.symbol_name || contributor?.symbol;
+        if (!name) continue;
+        const share = Number.isFinite(Number(contributor?.share_pct)) ? Number(contributor.share_pct) : 0;
+        const existing = cluster.impact_stock_scores.get(name) || 0;
+        cluster.impact_stock_scores.set(name, existing + share);
+      }
+    } else {
+      const fallbackName = getLeadContributorName(row);
+      if (fallbackName && fallbackName !== "N/A") {
+        const existing = cluster.impact_stock_scores.get(fallbackName) || 0;
+        cluster.impact_stock_scores.set(fallbackName, existing + 100);
       }
     }
   }
 
   return Array.from(clusters.values())
     .map((cluster) => {
-      const themePreview = cluster.themes.slice(0, 4).join(", ");
-      const extraThemeCount = Math.max(cluster.themes.length - 4, 0);
-      const overlapPreview = cluster.overlap_symbols.slice(0, 5).join(", ");
-      const extraOverlapCount = Math.max(cluster.overlap_symbols.length - 5, 0);
+      const themeList = Array.from(cluster.themes);
+      const subthemeList = Array.from(cluster.subthemes);
+      const impactStocks = Array.from(cluster.impact_stock_scores.entries())
+        .sort((left, right) => right[1] - left[1])
+        .map(([name]) => name);
+      const topImpactStocks = impactStocks.slice(0, 5);
+      const topSubthemes = subthemeList.slice(0, 4);
+      const extraThemeCount = Math.max(themeList.length - topSubthemes.length, 0);
+      const extraStockCount = Math.max(impactStocks.length - topImpactStocks.length, 0);
       return {
-        lead_name: cluster.lead_name,
+        bundle_name: cluster.bundle_name,
         heat_score: cluster.heat_score,
         active_theme_count: cluster.active_theme_count,
         active_member_count: cluster.active_member_count,
         signal_score: cluster.strongest_z,
-        top_theme_name: cluster.top_theme_name,
-        theme_bundle: extraThemeCount > 0 ? `${themePreview} 외 ${extraThemeCount}` : themePreview || "N/A",
-        overlap_bundle:
-          extraOverlapCount > 0 ? `${overlapPreview} 외 ${extraOverlapCount}` : overlapPreview || cluster.lead_name,
+        theme_bundle:
+          topSubthemes.length > 0
+            ? `${topSubthemes.join(", ")}${extraThemeCount > 0 ? ` 외 ${extraThemeCount}` : ""}`
+            : cluster.bundle_name,
+        impact_stocks:
+          topImpactStocks.length > 0
+            ? `${topImpactStocks.join(", ")}${extraStockCount > 0 ? ` 외 ${extraStockCount}` : ""}`
+            : "N/A",
       };
     })
     .sort((left, right) => {
@@ -681,9 +725,8 @@ function renderKoreaThemeDashboard(payload) {
   const now = payload.now || [];
   const narrow = payload.top_narrow_themes || [];
   const broad = payload.top_broad_themes || [];
-  const contributorMap = payload.contributor_map || [];
   const impactClusters = buildImpactClusters(payload);
-  const topTheme = now[0] || {};
+  const topBundle = impactClusters[0] || {};
   const topNarrow = narrow[0] || {};
   const topBroad = broad[0] || {};
 
@@ -694,12 +737,12 @@ function renderKoreaThemeDashboard(payload) {
         <p class="stat-value">${escapeHtml(formatTimestamp(payload.generated_at || payload.intraday_date || payload.latest_date || "N/A"))}</p>
       </article>
       <article class="stat-card">
-        <h3>Top Theme Now</h3>
-        <p class="stat-value">${escapeHtml(topTheme.theme_name_ko || "N/A")}</p>
+        <h3>Top Bundle Now</h3>
+        <p class="stat-value">${escapeHtml(topBundle.bundle_name || "N/A")}</p>
       </article>
       <article class="stat-card">
         <h3>Heat Score</h3>
-        <p class="stat-value">${formatNumber(topTheme.heat_score, 1)}</p>
+        <p class="stat-value">${formatNumber(topBundle.heat_score, 1)}</p>
       </article>
       <article class="stat-card">
         <h3>Top Narrow</h3>
@@ -719,13 +762,12 @@ function renderKoreaThemeDashboard(payload) {
   renderTable(
     "korea-theme-now",
     [
-      { key: "lead_name", label: "Impact Stock" },
+      { key: "bundle_name", label: "Theme Bundle" },
       { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
       { key: "active_theme_count", label: "Themes", numeric: true },
-      { key: "theme_bundle", label: "Theme Bundle" },
-      { key: "overlap_bundle", label: "Overlap Names" },
+      { key: "impact_stocks", label: "Impact Stocks" },
+      { key: "theme_bundle", label: "Covered Themes" },
       { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(row.signal_score) },
-      { key: "top_theme_name", label: "Top Theme" },
     ],
     impactClusters.slice(0, 12),
   );
@@ -782,11 +824,11 @@ function renderKoreaThemeDashboard(payload) {
 
   if (contributorTarget) {
     contributorTarget.innerHTML = impactClusters.length
-      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Lead Stock</th><th>Theme Count</th><th>Theme Bundle</th><th>Overlap Names</th><th>Heat</th></tr></thead><tbody>${impactClusters
+      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Theme Bundle</th><th>Impact Stocks</th><th>Covered Themes</th><th>Theme Count</th><th>Heat</th></tr></thead><tbody>${impactClusters
           .slice(0, 15)
           .map(
             (row) =>
-              `<tr><td>${escapeHtml(row.lead_name || "N/A")}</td><td class="numeric">${formatNumber(row.active_theme_count, 0)}</td><td>${escapeHtml(row.theme_bundle || "N/A")}</td><td>${escapeHtml(row.overlap_bundle || "N/A")}</td><td class="numeric">${formatNumber(row.heat_score, 1)}</td></tr>`,
+              `<tr><td>${escapeHtml(row.bundle_name || "N/A")}</td><td>${escapeHtml(row.impact_stocks || "N/A")}</td><td>${escapeHtml(row.theme_bundle || "N/A")}</td><td class="numeric">${formatNumber(row.active_theme_count, 0)}</td><td class="numeric">${formatNumber(row.heat_score, 1)}</td></tr>`,
           )
           .join("")}</tbody></table></div>`
       : '<p class="placeholder">No contributor map published yet.</p>';
