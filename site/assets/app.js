@@ -781,13 +781,12 @@ function renderKoreaThemeDashboard(payload) {
   );
 
   if (contributorTarget) {
-    const normalizedContributorMap = normalizeContributorMapRows(contributorMap);
-    contributorTarget.innerHTML = normalizedContributorMap.length
-      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Theme</th><th>Top Contributor</th><th>Share</th><th>Move</th></tr></thead><tbody>${normalizedContributorMap
+    contributorTarget.innerHTML = impactClusters.length
+      ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Lead Stock</th><th>Theme Count</th><th>Theme Bundle</th><th>Overlap Names</th><th>Heat</th></tr></thead><tbody>${impactClusters
           .slice(0, 15)
           .map(
             (row) =>
-              `<tr><td>${escapeHtml(row.theme_name_ko || "N/A")}</td><td>${escapeHtml(row.contributor_name || "N/A")}</td><td class="numeric">${formatNumber(row.contributor_share_pct, 1)}%</td><td class="numeric">${formatPctCell(row.price_change_pct, 2)}</td></tr>`,
+              `<tr><td>${escapeHtml(row.lead_name || "N/A")}</td><td class="numeric">${formatNumber(row.active_theme_count, 0)}</td><td>${escapeHtml(row.theme_bundle || "N/A")}</td><td>${escapeHtml(row.overlap_bundle || "N/A")}</td><td class="numeric">${formatNumber(row.heat_score, 1)}</td></tr>`,
           )
           .join("")}</tbody></table></div>`
       : '<p class="placeholder">No contributor map published yet.</p>';
