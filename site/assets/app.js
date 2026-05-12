@@ -77,6 +77,20 @@ function formatSignalPill(score) {
   return '<span class="signal-pill">Baseline</span>';
 }
 
+function formatActionPill(label) {
+  const text = String(label || "").trim();
+  if (text === "Long Confirmed") {
+    return '<span class="signal-pill hot">Long Confirmed</span>';
+  }
+  if (text === "Flow Only") {
+    return '<span class="signal-pill warm">Flow Only</span>';
+  }
+  if (text === "Down Pressure") {
+    return '<span class="signal-pill cold">Down Pressure</span>';
+  }
+  return `<span class="signal-pill">${escapeHtml(text || "Baseline")}</span>`;
+}
+
 const FACTOR_LABELS = {
   turnover: "Turnover",
   volume: "Volume",
@@ -314,6 +328,12 @@ function buildImpactClusters(payload) {
           : activeCount > 0 && (avgMove >= 1.0 || positiveCount >= negativeCount)
             ? "Up Interest"
             : "Mixed";
+      const actionBucket =
+        preliminaryDirection === "Down Pressure"
+          ? "Down Pressure"
+          : activeCount > 0 && avgMove >= 1.5 && positiveCount >= Math.max(2, negativeCount)
+            ? "Long Confirmed"
+            : "Flow Only";
       const positiveImpactStocks = impactMoves
         .filter((item) => Number(item.move) > 0)
         .map((item) => item.name);
@@ -353,6 +373,8 @@ function buildImpactClusters(payload) {
         positive_count: positiveCount,
         negative_count: negativeCount,
         direction_label: preliminaryDirection,
+        action_bucket: actionBucket,
+        signal_label: actionBucket,
       };
     })
     .sort((left, right) => {
@@ -897,10 +919,11 @@ function renderKoreaThemeDashboard(payload) {
   const narrow = payload.top_narrow_themes || [];
   const broad = payload.top_broad_themes || [];
   const impactClusters = buildImpactClusters(payload);
-  const upClusters = impactClusters.filter((row) => row.direction_label !== "Down Pressure");
-  const downClusters = impactClusters.filter((row) => row.direction_label === "Down Pressure");
+  const longConfirmedClusters = impactClusters.filter((row) => row.action_bucket === "Long Confirmed");
+  const flowOnlyClusters = impactClusters.filter((row) => row.action_bucket === "Flow Only");
+  const downClusters = impactClusters.filter((row) => row.action_bucket === "Down Pressure");
   const positionLensRows = buildPositionLensRows(payload);
-  const topBundle = upClusters[0] || impactClusters[0] || {};
+  const topBundle = longConfirmedClusters[0] || flowOnlyClusters[0] || downClusters[0] || impactClusters[0] || {};
   const topNarrow = narrow[0] || {};
   const methodology = payload.methodology || {};
   const filteredBroad = broad.filter((row) => {
@@ -970,9 +993,22 @@ function renderKoreaThemeDashboard(payload) {
       { key: "coverage_text", label: "Coverage" },
       { key: "impact_stocks", label: "Impact Stocks" },
       { key: "theme_bundle", label: "Covered Themes" },
-      { key: "interest", label: "Signal", render: (_v, row) => formatSignalPill(row.signal_score) },
+      { key: "signal_label", label: "Signal", render: (_v, row) => formatActionPill(row.signal_label) },
     ],
-    upClusters.slice(0, 18),
+    longConfirmedClusters.slice(0, 18),
+  );
+
+  renderTable(
+    "korea-theme-flow",
+    [
+      { key: "bundle_name", label: "Theme Bundle" },
+      { key: "heat_score", label: "Heat", numeric: true, render: (v) => formatNumber(v, 1) },
+      { key: "coverage_text", label: "Coverage" },
+      { key: "impact_stocks", label: "Impact Stocks" },
+      { key: "theme_bundle", label: "Covered Themes" },
+      { key: "signal_label", label: "Signal", render: (_v, row) => formatActionPill(row.signal_label) },
+    ],
+    flowOnlyClusters.slice(0, 14),
   );
 
   renderTable(
@@ -984,9 +1020,9 @@ function renderKoreaThemeDashboard(payload) {
       { key: "impact_stocks", label: "Impact Stocks" },
       { key: "theme_bundle", label: "Covered Themes" },
       {
-        key: "direction_label",
+        key: "signal_label",
         label: "Signal",
-        render: (_v, row) => `<span class="signal-pill cold">${escapeHtml(row.direction_label || "Down Pressure")}</span>`,
+        render: (_v, row) => formatActionPill(row.signal_label || "Down Pressure"),
       },
     ],
     downClusters.slice(0, 12),
