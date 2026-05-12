@@ -308,6 +308,25 @@ function buildImpactClusters(payload) {
       const mappedCount = Number(snapshot.mapped_symbol_count) || mappedSymbols.length;
       const activeCount = Number(snapshot.active_symbol_count) || activeSymbols.length;
       const coveragePct = mappedCount > 0 ? (activeCount / mappedCount) * 100 : 0;
+      const preliminaryDirection =
+        activeCount > 0 && (avgMove <= -2.5 || (avgMove <= -1.0 && negativeCount > positiveCount && negativeCount >= 2))
+          ? "Down Pressure"
+          : activeCount > 0 && (avgMove >= 1.0 || positiveCount >= negativeCount)
+            ? "Up Interest"
+            : "Mixed";
+      const positiveImpactStocks = impactMoves
+        .filter((item) => Number(item.move) > 0)
+        .map((item) => item.name);
+      const negativeImpactStocks = impactMoves
+        .filter((item) => Number(item.move) < 0)
+        .map((item) => item.name);
+      const directionalImpactStocks =
+        preliminaryDirection === "Down Pressure"
+          ? (negativeImpactStocks.length > 0 ? negativeImpactStocks : contributorImpactStocks)
+          : preliminaryDirection === "Up Interest"
+            ? (positiveImpactStocks.length > 0 ? positiveImpactStocks : contributorImpactStocks)
+            : contributorImpactStocks;
+      const directionalExtraStockCount = Math.max(directionalImpactStocks.length - 6, 0);
       return {
         bundle_name: cluster.bundle_name,
         heat_score: cluster.heat_score,
@@ -321,8 +340,8 @@ function buildImpactClusters(payload) {
             ? `${topSubthemes.join(", ")}${extraThemeCount > 0 ? ` 외 ${extraThemeCount}` : ""}`
             : cluster.bundle_name,
         impact_stocks:
-          topImpactStocks.length > 0
-            ? `${topImpactStocks.join(", ")}${extraStockCount > 0 ? ` 외 ${extraStockCount}` : ""}`
+          directionalImpactStocks.length > 0
+            ? `${directionalImpactStocks.slice(0, 6).join(", ")}${directionalExtraStockCount > 0 ? ` 외 ${directionalExtraStockCount}` : ""}`
             : "N/A",
         bundle_universe:
           topMappedStocks.length > 0
@@ -333,12 +352,7 @@ function buildImpactClusters(payload) {
         avg_move: avgMove,
         positive_count: positiveCount,
         negative_count: negativeCount,
-        direction_label:
-          activeCount > 0 && (avgMove <= -2.5 || (avgMove <= -1.0 && negativeCount > positiveCount && negativeCount >= 2))
-            ? "Down Pressure"
-            : activeCount > 0 && (avgMove >= 1.0 || positiveCount >= negativeCount)
-              ? "Up Interest"
-              : "Mixed",
+        direction_label: preliminaryDirection,
       };
     })
     .sort((left, right) => {
