@@ -3,6 +3,7 @@ const WEEK_HIGH_URL = "./data/week_high/latest.json";
 const WATCHLIST_URL = "./data/watchlist/latest.json";
 const TRANSCRIPTS_URL = "./data/transcripts/latest.json";
 const KOREA_THEME_DASHBOARD_URL = "./data/korea-theme/theme_dashboard_latest.json";
+const KOREA_REALTIME_FLOW_URL = "./data/korea-theme/realtime_flow_latest.json";
 const TAB_STORAGE_KEY = "stock_tracker_active_tab";
 const VALID_TABS = new Set(["overview", "week-high", "watchlist", "transcripts", "korea-theme"]);
 
@@ -1091,6 +1092,74 @@ function renderKoreaThemeDashboard(payload) {
   }
 }
 
+function renderKoreaRealtimeFlow(payload) {
+  const summaryTarget = document.getElementById("korea-realtime-summary");
+  const buyTarget = document.getElementById("korea-realtime-buy");
+  const flowTarget = document.getElementById("korea-realtime-flow");
+  const sellTarget = document.getElementById("korea-realtime-sell");
+  if (!summaryTarget || !buyTarget || !flowTarget || !sellTarget) return;
+
+  if (!payload || !payload.feed_status) {
+    const placeholder = '<p class="placeholder">No live realtime flow snapshot published yet.</p>';
+    summaryTarget.innerHTML = placeholder;
+    buyTarget.innerHTML = placeholder;
+    flowTarget.innerHTML = placeholder;
+    sellTarget.innerHTML = placeholder;
+    return;
+  }
+
+  const status = payload.feed_status || {};
+  summaryTarget.innerHTML = `
+    <div class="overview-grid realtime-grid">
+      <article class="stat-card">
+        <h3>Live Feed Mode</h3>
+        <p class="stat-value">${escapeHtml(status.monitoring_mode || "N/A")}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Realtime Snapshot</h3>
+        <p class="stat-value">${escapeHtml(formatTimestamp(payload.generated_at || status.generated_at || "N/A"))}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Workers</h3>
+        <p class="stat-value">${escapeHtml(String(status.worker_count ?? "N/A"))}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Active Tier</h3>
+        <p class="stat-value">${escapeHtml(String(status.active_subscription_count ?? "N/A"))}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Lower Tier</h3>
+        <p class="stat-value">${escapeHtml(String(status.lower_tier_count ?? "N/A"))}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Buy Pops</h3>
+        <p class="stat-value">${escapeHtml(String(status.buy_pressure_count ?? 0))}</p>
+      </article>
+    </div>
+    <article class="method-card">
+      <h3>How Live Flow Works</h3>
+      <p>${escapeHtml(payload.methodology?.primary || "SC 체결 누적 거래대금/거래량을 20일 일평균과 세션 진행률 기대치에 비교합니다.")}</p>
+      <p>${escapeHtml(payload.methodology?.confirmation || "SH 호가를 같이 받아 buy-pressure proxy와 가격 방향을 확인합니다.")}</p>
+      <p>${escapeHtml(payload.methodology?.tiering || "전 종목 universe를 shard로 나누고 active tier와 lower tier를 30초 cadence로 재평가합니다.")}</p>
+    </article>
+  `;
+
+  const columns = [
+    { key: "symbol", label: "Symbol" },
+    { key: "symbol_name", label: "Name" },
+    { key: "bundles_text", label: "Bundle Context" },
+    { key: "price_change_pct", label: "Chg %", numeric: true, render: (v) => formatPctCell(v, 2) },
+    { key: "turnover_z", label: "Turnover Z", numeric: true, render: (v) => formatNumber(v, 2) },
+    { key: "volume_z", label: "Volume Z", numeric: true, render: (v) => formatNumber(v, 2) },
+    { key: "buy_pressure_proxy", label: "Pressure", numeric: true, render: (v) => formatNumber(v, 2) },
+    { key: "themes_text", label: "Themes" },
+  ];
+
+  renderTable("korea-realtime-buy", columns, payload.buy_pressure_pops || []);
+  renderTable("korea-realtime-flow", columns, payload.flow_only || []);
+  renderTable("korea-realtime-sell", columns, payload.sell_pressure || []);
+}
+
 function setActiveTab(tabId, options = {}) {
   const persist = options.persist !== false;
   const normalizedTab = VALID_TABS.has(tabId) ? tabId : "overview";
@@ -1171,12 +1240,13 @@ async function loadJsonOrNull(url) {
 
 async function loadAndRenderDashboard() {
   try {
-    const [meta, weekHigh, watchlist, transcripts, koreaTheme] = await Promise.all([
+    const [meta, weekHigh, watchlist, transcripts, koreaTheme, realtimeFlow] = await Promise.all([
       loadJson(META_URL),
       loadJson(WEEK_HIGH_URL),
       loadJson(WATCHLIST_URL),
       loadJson(TRANSCRIPTS_URL),
       loadJsonOrNull(KOREA_THEME_DASHBOARD_URL),
+      loadJsonOrNull(KOREA_REALTIME_FLOW_URL),
     ]);
 
     renderMeta(meta);
@@ -1186,6 +1256,7 @@ async function loadAndRenderDashboard() {
     renderSectorBlocks(watchlist);
     renderOverview(weekHigh, watchlist, transcripts);
     renderTranscriptAnalysis(transcripts);
+    renderKoreaRealtimeFlow(realtimeFlow);
     renderKoreaThemeDashboard(koreaTheme);
     const alertPanel = document.getElementById("alert-panel");
     if (alertPanel) {
