@@ -4,6 +4,7 @@ const WATCHLIST_URL = "./data/watchlist/latest.json";
 const TRANSCRIPTS_URL = "./data/transcripts/latest.json";
 const KOREA_THEME_DASHBOARD_URL = "./data/korea-theme/theme_dashboard_latest.json";
 const KOREA_REALTIME_FLOW_URL = "./data/korea-theme/realtime_flow_latest.json";
+const KOREA_THEME_FIRST_SCREENER_URL = "./data/korea-theme/theme_first_screener_latest.json";
 const TAB_STORAGE_KEY = "stock_tracker_active_tab";
 const VALID_TABS = new Set(["overview", "week-high", "watchlist", "transcripts", "korea-theme"]);
 
@@ -1160,6 +1161,71 @@ function renderKoreaRealtimeFlow(payload) {
   renderTable("korea-realtime-sell", columns, payload.sell_pressure || []);
 }
 
+function renderKoreaThemeFirstScreener(payload) {
+  const target = document.getElementById("korea-theme-first-screener");
+  if (!target) return;
+  if (!payload || payload.status !== "success") {
+    target.innerHTML = '<p class="placeholder">No theme-first EOD screener report published yet.</p>';
+    return;
+  }
+
+  const markdownText = String(payload.markdown_text || "").trim();
+  const payloadData = payload.payload || {};
+  const representativeRows = Array.isArray(payloadData.representatives)
+    ? payloadData.representatives
+    : Array.isArray(payloadData.final_candidates)
+      ? payloadData.final_candidates
+      : [];
+  const compactRows = representativeRows.slice(0, 12).map((row) => ({
+    name: row.symbol_name || row.name || row["종목명"] || row.symbol || "N/A",
+    symbol: row.symbol || row.ticker || row["티커"] || "",
+    theme: row.theme || row["테마"] || row.theme_name_ko || "N/A",
+    classification: row.classification || row.bucket || row["classification"] || row["판단"] || "N/A",
+    action: row.action || row["액션"] || row.current_action || "N/A",
+  }));
+  const directMarkdownUrl = payload.markdown_artifact
+    ? `./data/korea-theme/${encodeURIComponent(payload.markdown_artifact)}`
+    : "";
+
+  target.innerHTML = `
+    <div class="overview-grid">
+      <article class="stat-card">
+        <h3>Screen Date</h3>
+        <p class="stat-value">${escapeHtml(payload.screen_date || "N/A")}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Discovery Period</h3>
+        <p class="stat-value">${escapeHtml([payload.start_date, payload.end_date].filter(Boolean).join(" - ") || "N/A")}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Published</h3>
+        <p class="stat-value">${escapeHtml(formatTimestamp(payload.generated_at || "N/A"))}</p>
+      </article>
+      <article class="stat-card">
+        <h3>Full Report</h3>
+        <p class="stat-value">${directMarkdownUrl ? `<a href="${directMarkdownUrl}" target="_blank" rel="noreferrer">Open MD</a>` : "Inline"}</p>
+      </article>
+    </div>
+    <div id="korea-theme-first-screener-table"></div>
+    <details class="markdown-report-shell" open>
+      <summary>Full Theme-First Screener Report</summary>
+      <pre class="markdown-report">${escapeHtml(markdownText || "No markdown report body found.")}</pre>
+    </details>
+  `;
+
+  renderTable(
+    "korea-theme-first-screener-table",
+    [
+      { key: "name", label: "Name" },
+      { key: "symbol", label: "Ticker" },
+      { key: "theme", label: "Theme" },
+      { key: "classification", label: "Classification" },
+      { key: "action", label: "Action" },
+    ],
+    compactRows,
+  );
+}
+
 function setActiveTab(tabId, options = {}) {
   const persist = options.persist !== false;
   const normalizedTab = VALID_TABS.has(tabId) ? tabId : "overview";
@@ -1240,13 +1306,14 @@ async function loadJsonOrNull(url) {
 
 async function loadAndRenderDashboard() {
   try {
-    const [meta, weekHigh, watchlist, transcripts, koreaTheme, realtimeFlow] = await Promise.all([
+    const [meta, weekHigh, watchlist, transcripts, koreaTheme, realtimeFlow, themeFirstScreener] = await Promise.all([
       loadJson(META_URL),
       loadJson(WEEK_HIGH_URL),
       loadJson(WATCHLIST_URL),
       loadJson(TRANSCRIPTS_URL),
       loadJsonOrNull(KOREA_THEME_DASHBOARD_URL),
       loadJsonOrNull(KOREA_REALTIME_FLOW_URL),
+      loadJsonOrNull(KOREA_THEME_FIRST_SCREENER_URL),
     ]);
 
     renderMeta(meta);
@@ -1258,6 +1325,7 @@ async function loadAndRenderDashboard() {
     renderTranscriptAnalysis(transcripts);
     renderKoreaRealtimeFlow(realtimeFlow);
     renderKoreaThemeDashboard(koreaTheme);
+    renderKoreaThemeFirstScreener(themeFirstScreener);
     const alertPanel = document.getElementById("alert-panel");
     if (alertPanel) {
       alertPanel.hidden = true;
