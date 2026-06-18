@@ -1306,13 +1306,11 @@ async function loadJsonOrNull(url) {
 
 async function loadAndRenderDashboard() {
   try {
-    const [meta, weekHigh, watchlist, transcripts, koreaTheme, realtimeFlow, themeFirstScreener] = await Promise.all([
+    const [meta, weekHigh, watchlist, transcripts, themeFirstScreener] = await Promise.all([
       loadJson(META_URL),
       loadJson(WEEK_HIGH_URL),
       loadJson(WATCHLIST_URL),
       loadJson(TRANSCRIPTS_URL),
-      loadJsonOrNull(KOREA_THEME_DASHBOARD_URL),
-      loadJsonOrNull(KOREA_REALTIME_FLOW_URL),
       loadJsonOrNull(KOREA_THEME_FIRST_SCREENER_URL),
     ]);
 
@@ -1323,8 +1321,6 @@ async function loadAndRenderDashboard() {
     renderSectorBlocks(watchlist);
     renderOverview(weekHigh, watchlist, transcripts);
     renderTranscriptAnalysis(transcripts);
-    renderKoreaRealtimeFlow(realtimeFlow);
-    renderKoreaThemeDashboard(koreaTheme);
     renderKoreaThemeFirstScreener(themeFirstScreener);
     const alertPanel = document.getElementById("alert-panel");
     if (alertPanel) {
