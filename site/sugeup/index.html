@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="한국 주식 EOD 테마 로테이션, 초기 매도압력 둔화, 수급 연속성 대시보드"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="수급 레이더 · 테마 로테이션" />
+    <meta
+      property="og:description"
+      content="테마의 흐름, 누적 수급, 초기 흡수, 대표주의 현재 자리를 한눈에 봅니다."
+    />
+    <meta property="og:url" content="https://intraday-korean-stock-dashboard.pages.dev/sugeup/" />
+    <meta property="og:image" content="https://intraday-korean-stock-dashboard.pages.dev/sugeup/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>수급 레이더 · 테마 로테이션</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">본문으로 이동</a>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="../">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>
+          <strong>수급 레이더</strong>
+          <small>Korea EOD</small>
+        </span>
+      </a>
+      <nav aria-label="주요 메뉴">
+        <a href="#themes">테마</a>
+        <a href="#leaders">대표 종목</a>
+        <a href="#watchlist">관찰 목록</a>
+        <a href="#data">데이터</a>
+        <a class="nav-home" href="../">전체 대시보드</a>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="hero shell" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Theme rotation · Flow continuity · Early absorption</p>
+          <h1 id="page-title">테마의 흐름과<br />종목의 자리를 한눈에.</h1>
+          <p class="hero-intro" id="market-conclusion">
+            확정 EOD 데이터를 불러오고 있습니다.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#leaders">대표 종목 보기</a>
+            <button class="secondary-action" id="refresh-button" type="button">새로고침</button>
+          </div>
+        </div>
+
+        <aside class="market-card" aria-label="현재 시장 요약">
+          <div class="market-card-head">
+            <span>화면 기준일</span>
+            <strong id="screen-date">—</strong>
+          </div>
+          <div class="market-signal">
+            <p>현재 주도 흐름</p>
+            <h2 id="top-regime">데이터 확인 중</h2>
+            <span class="signal-pill" id="market-style">—</span>
+          </div>
+          <dl class="market-metrics">
+            <div>
+              <dt>발견 기간</dt>
+              <dd id="period-label">—</dd>
+            </div>
+            <div>
+              <dt>사용 거래일</dt>
+              <dd id="session-count">—</dd>
+            </div>
+            <div>
+              <dt>데이터 상태</dt>
+              <dd id="data-health">—</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="summary-strip shell" id="summary-cards" aria-label="핵심 지표"></section>
+
+      <section class="section shell" id="themes" aria-labelledby="themes-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">01 · Market regime</p>
+            <h2 id="themes-title">어떤 테마에 돈이 머무는가</h2>
+          </div>
+          <p>당일 충격보다 기간 수급, 폭, 열기, 진짜 대표주의 연속성을 먼저 봅니다.</p>
+        </div>
+
+        <div class="regime-grid" id="regime-grid"></div>
+
+        <div class="table-card">
+          <div class="table-card-head">
+            <div>
+              <p class="table-label">Traded sub-themes</p>
+              <h3>실제로 거래된 하위 테마</h3>
+            </div>
+            <span class="table-note">상위 거시 테마 밖의 강한 하위 테마도 포함</span>
+          </div>
+          <div class="table-scroll" id="subtheme-table"></div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-head">
+            <div>
+              <p class="table-label">Rotation continuity</p>
+              <h3>1D만 보면 놓치는 로테이션</h3>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="missed-only" />
+              <span>놓친 테마만</span>
+            </label>
+          </div>
+          <div class="table-scroll" id="rotation-table"></div>
+        </div>
+      </section>
+
+      <section class="section shell" id="leaders" aria-labelledby="leaders-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">02 · Leaders &amp; flow</p>
+            <h2 id="leaders-title">진짜 대표주와 지금의 자리</h2>
+          </div>
+          <p>리더십과 진입 타이밍을 분리해, 좋은 종목을 무리하게 추격하지 않도록 구성했습니다.</p>
+        </div>
+
+        <div class="filter-bar" aria-label="대표 종목 필터">
+          <label>
+            <span>검색</span>
+            <input id="stock-search" type="search" placeholder="종목명·티커·테마" />
+          </label>
+          <label>
+            <span>액션</span>
+            <select id="action-filter"><option value="">전체 액션</option></select>
+          </label>
+          <label>
+            <span>테마</span>
+            <select id="theme-filter"><option value="">전체 테마</option></select>
+          </label>
+          <label class="toggle filter-toggle">
+            <input type="checkbox" id="absorption-only" />
+            <span>초기 흡수만</span>
+          </label>
+        </div>
+
+        <div class="leader-list" id="leader-list"></div>
+        <p class="empty-state" id="leader-empty" hidden>선택한 조건에 맞는 종목이 없습니다.</p>
+      </section>
+
+      <section class="section shell" id="watchlist" aria-labelledby="watchlist-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">03 · Next-session plan</p>
+            <h2 id="watchlist-title">다음 날, 무엇을 기다릴 것인가</h2>
+          </div>
+          <p>미래 수익률 예측이 아니라 화면 기준일 시점의 트리거와 무효화 조건입니다.</p>
+        </div>
+        <div class="watch-grid" id="watch-grid"></div>
+      </section>
+
+      <section class="section shell" id="data" aria-labelledby="data-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">04 · Data &amp; method</p>
+            <h2 id="data-title">어떤 데이터를 썼는가</h2>
+          </div>
+          <p>없던 데이터는 0으로 만들지 않고 ‘데이터 없음’으로 표시합니다.</p>
+        </div>
+        <div class="data-grid" id="data-grid"></div>
+        <details class="method-details">
+          <summary>계산 기준과 점수 해석 보기</summary>
+          <div id="method-copy"></div>
+        </details>
+      </section>
+    </main>
+
+    <footer class="shell">
+      <p>확정 EOD 데이터 기반 · 미래 수익률 및 화면 기준일 이후 데이터 미사용</p>
+      <a href="#main-content">맨 위로 ↑</a>
+    </footer>
+
+    <div class="loading-screen" id="loading-screen" role="status" aria-live="polite">
+      <span class="loading-mark" aria-hidden="true"></span>
+      <p>수급과 테마를 정리하고 있습니다.</p>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
