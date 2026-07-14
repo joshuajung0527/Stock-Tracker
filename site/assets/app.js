@@ -1173,15 +1173,17 @@ function renderKoreaThemeFirstScreener(payload) {
   const payloadData = payload.payload || {};
   const representativeRows = Array.isArray(payloadData.representatives)
     ? payloadData.representatives
+    : Array.isArray(payloadData.representative_stocks)
+      ? payloadData.representative_stocks
     : Array.isArray(payloadData.final_candidates)
       ? payloadData.final_candidates
       : [];
   const compactRows = representativeRows.slice(0, 12).map((row) => ({
     name: row.symbol_name || row.name || row["종목명"] || row.symbol || "N/A",
     symbol: row.symbol || row.ticker || row["티커"] || "",
-    theme: row.theme || row["테마"] || row.theme_name_ko || "N/A",
-    classification: row.classification || row.bucket || row["classification"] || row["판단"] || "N/A",
-    action: row.action || row["액션"] || row.current_action || "N/A",
+    theme: row.traded_subtheme || row.theme?.traded_subtheme || row.theme || row["테마"] || row.theme_name_ko || "N/A",
+    classification: row.leader_role || row.condition16_bucket || row.classification || row.bucket || row["classification"] || row["판단"] || "N/A",
+    action: row.action_bucket || row.action || row["액션"] || row.current_action || "N/A",
   }));
   const directMarkdownUrl = payload.markdown_artifact
     ? `./data/korea-theme/${encodeURIComponent(payload.markdown_artifact)}`
