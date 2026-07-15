@@ -1,6 +1,9 @@
 const REPORT_URL = "../data/korea-theme/sugeup_latest.json";
+const REPORT_POLL_INTERVAL_MS = 5 * 60 * 1000;
+const SCHEDULED_SLOTS_KST = new Set(["16:00", "18:00", "21:00"]);
 
 let report = null;
+let reportRequestInFlight = false;
 
 const byId = (id) => document.getElementById(id);
 
@@ -24,8 +27,33 @@ function text(value, fallback = "데이터 없음") {
 
 function formatDate(value) {
   if (!value) return "데이터 없음";
+  const compact = String(value).match(/^(\d{4})(\d{2})(\d{2})$/);
+  if (compact) return `${compact[1]}.${compact[2]}.${compact[3]}`;
   const [year, month, day] = String(value).split("-");
   return year && month && day ? `${year}.${month}.${day}` : String(value);
+}
+
+function formatUpdateTime(payload) {
+  const slot = payload?.scheduled_run_slot_kst;
+  if (SCHEDULED_SLOTS_KST.has(slot)) return `${slot} KST`;
+
+  const generatedAt = new Date(payload?.generated_at_utc || "");
+  if (Number.isNaN(generatedAt.getTime())) return "데이터 없음";
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(generatedAt)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+  return `${parts.year}.${parts.month}.${parts.day} ${parts.hour}:${parts.minute} KST`;
 }
 
 function formatPct(value, digits = 1) {
@@ -89,7 +117,8 @@ function renderHero() {
   const leading = conclusion.truly_leading_themes || [];
   const traded = conclusion.actually_traded_subthemes || [];
 
-  byId("screen-date").textContent = formatDate(coverage.screen_date);
+  byId("screen-date").textContent = formatDate(coverage.screen_date || report.screen_date);
+  byId("update-time").textContent = formatUpdateTime(report);
   byId("period-label").textContent = `${formatDate(coverage.requested_start_date)} – ${formatDate(coverage.requested_end_date)}`;
   byId("session-count").textContent = `${(coverage.available_trading_dates || []).length}일`;
   byId("data-health").textContent = coverage.market_cap?.available && coverage.market_alert?.available ? "완전" : "일부 보조자료 없음";
@@ -98,7 +127,7 @@ function renderHero() {
 
   const leadingText = leading.length ? `기간 주도는 ${leading.slice(0, 3).join(" · ")}` : "기간 주도 테마는 제한적";
   const tradedText = traded.length ? `실제 거래는 ${traded.slice(0, 3).join(" · ")}에 집중됐습니다.` : "강한 하위 테마가 제한적입니다.";
-  byId("market-conclusion").textContent = `${leadingText}이며, ${tradedText} 현재 환경은 ${conclusion.market_favors || "선별 관찰"} 쪽에 가깝습니다.`;
+  byId("market-conclusion").textContent = `${leadingText}이며, ${tradedText} 화면 기준일 환경은 ${conclusion.market_favors || "선별 관찰"} 쪽에 가깝습니다.`;
 }
 
 function renderSummaryCards() {
@@ -383,7 +412,7 @@ function renderData() {
 }
 
 function bindControls() {
-  byId("refresh-button").addEventListener("click", () => loadReport(true));
+  byId("refresh-button").addEventListener("click", () => loadReport({ showLoading: true }));
   byId("missed-only").addEventListener("change", renderRotation);
   byId("stock-search").addEventListener("input", renderLeaders);
   byId("action-filter").addEventListener("change", renderLeaders);
@@ -403,27 +432,50 @@ function renderAll() {
   renderData();
 }
 
-async function loadReport(force = false) {
+function reportVersion(payload) {
+  return [payload?.generated_at_utc, payload?.scheduled_run_slot_kst, payload?.screen_date].join("|");
+}
+
+async function loadReport({ showLoading = true } = {}) {
+  if (reportRequestInFlight) return;
+  reportRequestInFlight = true;
   const loading = byId("loading-screen");
-  loading.classList.remove("is-done", "is-error");
-  loading.querySelector("p").textContent = "수급과 테마를 정리하고 있습니다.";
+  if (showLoading) {
+    loading.classList.remove("is-done", "is-error");
+    loading.querySelector("p").textContent = "수급과 테마를 정리하고 있습니다.";
+  }
   try {
-    const url = force ? `${REPORT_URL}?t=${Date.now()}` : REPORT_URL;
-    const response = await fetch(url, { cache: force ? "no-store" : "default" });
+    const url = `${REPORT_URL}?v=${Date.now()}`;
+    const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    report = await response.json();
-    if (!report || !report.data_coverage || !Array.isArray(report.representative_stocks)) {
+    const nextReport = await response.json();
+    if (!nextReport || !nextReport.data_coverage || !Array.isArray(nextReport.representative_stocks)) {
       throw new Error("대시보드 데이터 형식이 올바르지 않습니다.");
     }
-    renderAll();
+    const changed = reportVersion(nextReport) !== reportVersion(report);
+    report = nextReport;
+    if (changed || showLoading) renderAll();
     loading.classList.add("is-done");
   } catch (error) {
-    loading.classList.add("is-error");
-    loading.querySelector("p").textContent = `데이터를 불러오지 못했습니다: ${error.message}`;
+    if (!report) {
+      loading.classList.add("is-error");
+      loading.querySelector("p").textContent = `데이터를 불러오지 못했습니다: ${error.message}`;
+    } else {
+      loading.classList.add("is-done");
+      console.warn("대시보드 자동 업데이트 확인 실패", error);
+    }
+  } finally {
+    reportRequestInFlight = false;
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   bindControls();
   loadReport();
+  window.setInterval(() => {
+    if (document.visibilityState === "visible") loadReport({ showLoading: false });
+  }, REPORT_POLL_INTERVAL_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") loadReport({ showLoading: false });
+  });
 });
