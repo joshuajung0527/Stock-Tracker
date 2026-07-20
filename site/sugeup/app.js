@@ -4,6 +4,7 @@ const SCHEDULED_SLOTS_KST = new Set(["16:00", "18:00", "21:00"]);
 
 let report = null;
 let reportRequestInFlight = false;
+let rsHorizon = "short_term";
 
 const byId = (id) => document.getElementById(id);
 
@@ -17,6 +18,7 @@ function escapeHtml(value) {
 }
 
 function number(value) {
+  if (value === null || value === undefined || value === "") return null;
   const result = Number(value);
   return Number.isFinite(result) ? result : null;
 }
@@ -133,12 +135,14 @@ function renderHero() {
 function renderSummaryCards() {
   const coverage = report.data_coverage || {};
   const conclusion = report.conclusion || {};
+  const shortCandidates = report.viability_candidates?.short_term || {};
+  const viableShortCount = ["지금 리더", "초기 흡수", "재돌파 대기"].reduce((sum, label) => sum + (shortCandidates[label] || []).length, 0);
   const cards = [
     ["주도 테마", (report.top_regimes || []).length, "상위 3개 제한"],
     ["거래 하위 테마", (report.traded_subthemes || []).length, "상위 5개 제한"],
     ["대표 종목", (report.representative_stocks || []).length, "유동성·리더십 반영"],
     ["다음 날 관찰", (report.watchlist || []).length, "최대 15개"],
-    ["1D만 보면 놓침", (conclusion.themes_missed_by_1d_only || []).length, "기간 수급으로 복원"],
+    ["단기 유효 후보", viableShortCount, viableShortCount ? "수급·리스크 게이트 통과" : "조건 충족 종목 0개"],
   ];
   byId("summary-cards").innerHTML = cards
     .map(
@@ -377,6 +381,115 @@ function renderWatchlist() {
     : '<p class="empty-state">조건 충족 종목 0개뿐</p>';
 }
 
+function statusClass(status) {
+  if (status === "정상") return "normal";
+  if (status === "기준선 형성 중") return "baseline";
+  return "delayed";
+}
+
+function metricValue(row = {}) {
+  const value = number(row.value);
+  if (value === null) return "데이터 없음";
+  const unit = row.unit || "";
+  if (unit === "%" || unit === "%p") return `${value.toFixed(2)}${unit}`;
+  if (unit === "ratio") return value.toFixed(2);
+  return `${new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 2 }).format(value)}${unit ? ` ${unit}` : ""}`;
+}
+
+function contextCard(title, source, asOf, status, body) {
+  return `<article class="context-card">
+    <div class="context-card-head"><h3>${escapeHtml(title)}</h3><span class="freshness-badge ${statusClass(status)}">${escapeHtml(status || "미연결")}</span></div>
+    <p class="context-source">${escapeHtml(source || "원천 미연결")} · ${escapeHtml(formatDate(asOf))}</p>
+    <div class="context-body">${body}</div>
+  </article>`;
+}
+
+function renderMarketContext() {
+  const market = report.market_regime || {};
+  const breadth = market.markets || [];
+  const breadthBodyCore = breadth.length
+    ? breadth.map((row) => `<div class="context-line"><strong>${escapeHtml(row.market)}</strong><span>상승 ${row.advance_count ?? "—"} · 하락 ${row.decline_count ?? "—"} · A/D ${number(row.advance_decline_ratio)?.toFixed(2) ?? "—"}</span><small>MA20 ${formatPct(row.above_ma20_pct)} · MA60 ${formatPct(row.above_ma60_pct)} · 상승/하락 거래대금 ${number(row.up_down_turnover_ratio)?.toFixed(2) ?? "—"}</small></div>`).join("")
+    : '<p class="context-empty">시장 내부강도 데이터 없음</p>';
+  const indexLines = (market.indices || []).slice(0, 4).map((row) => `<div class="context-line compact"><strong>${escapeHtml(row.series_name)}</strong><span>${number(row.close)?.toLocaleString("ko-KR", { maximumFractionDigits: 2 }) ?? "—"}</span><small>${formatPct(row.change_rate)} · ${escapeHtml(formatDate(row.source_as_of))}</small></div>`).join("");
+  const themeLines = (market.theme_participation || []).slice(0, 2).map((row) => `<div class="context-line compact"><strong>${escapeHtml(row.theme)}</strong><span>참여 ${formatPct(row.advance_participation_pct)}</span><small>리더 집중 ${formatPct(row.leader_turnover_concentration_pct)} · ${row.stock_count}종목</small></div>`).join("");
+  const breadthBody = breadthBodyCore + indexLines + themeLines;
+  const derivative = report.derivatives_regime || {};
+  const foreign = derivative.foreign_futures || {};
+  const derivativeBody = `<div class="context-line"><strong>외국인 선물 ${escapeHtml(foreign.direction || "미연결")}</strong><span>5일 ${escapeHtml(foreign.five_day_direction || "기준선 형성 중")} · 신뢰도 ${escapeHtml(foreign.confidence || "미연결")}</span><small>관측 ${foreign.observation_count ?? 0}개 · 20D 백분위 ${formatScore(foreign.percentile_20d)} · 60D ${formatScore(foreign.percentile_60d)}</small></div>${(derivative.market_metrics || []).slice(0, 4).map((row) => `<div class="context-line compact"><strong>${escapeHtml(row.metric_name)}</strong><span>${escapeHtml(metricValue(row))}</span><small>${escapeHtml(formatDate(row.source_as_of))}</small></div>`).join("")}`;
+  const liquidity = report.liquidity_leverage || {};
+  const liquidityBody = (liquidity.metrics || []).length
+    ? (liquidity.metrics || []).slice(0, 6).map((row) => `<div class="context-line compact"><strong>${escapeHtml(row.metric_name)}</strong><span>${escapeHtml(metricValue(row))}</span><small>1D ${formatPct(row.change_1d)} · 20D z ${number(row.zscore_20d)?.toFixed(2) ?? "—"}</small></div>`).join("")
+    : '<p class="context-empty">키 설정 후 투자자예탁금·신용·CMA가 표시됩니다.</p>';
+  const macro = report.macro_context || {};
+  const macroBody = (macro.series || []).length
+    ? (macro.series || []).slice(0, 8).map((row) => `<div class="context-line compact"><strong>${escapeHtml(row.series_name)}</strong><span>${escapeHtml(metricValue(row))}</span><small>${escapeHtml(row.provider)} · ${escapeHtml(formatDate(row.source_as_of))}</small></div>`).join("")
+    : '<p class="context-empty">ECOS·FRED 키 설정 후 매크로 레짐이 표시됩니다.</p>';
+  byId("market-context-grid").innerHTML = [
+    contextCard("시장 폭 · 현물 수급", market.source, market.as_of, market.status, breadthBody),
+    contextCard("파생 레짐", derivative.source, derivative.as_of, derivative.status, derivativeBody),
+    contextCard("유동성 · 레버리지", liquidity.source, liquidity.as_of, liquidity.status, liquidityBody),
+    contextCard("한국 · 글로벌 매크로", macro.source, macro.as_of, macro.status, macroBody),
+  ].join("");
+  const freshness = report.source_freshness || [];
+  byId("freshness-strip").innerHTML = freshness.length
+    ? freshness.map((item) => `<span class="freshness-item"><i class="freshness-badge ${statusClass(item.status)}">${escapeHtml(item.status)}</i><strong>${escapeHtml(item.name || item.source)}</strong><small>${escapeHtml(formatDate(item.as_of))}</small></span>`).join("")
+    : '<span class="context-empty">원천 상태 정보 없음</span>';
+}
+
+function rsRows() {
+  const leaderRows = report.relative_strength_leaders?.[rsHorizon] || [];
+  const groups = report.viability_candidates?.[rsHorizon] || {};
+  const merged = [...leaderRows, ...Object.values(groups).flat()];
+  const unique = new Map();
+  merged.forEach((row) => {
+    const prior = unique.get(row.symbol);
+    if (!prior || (!prior.is_viable && row.is_viable)) unique.set(row.symbol, row);
+  });
+  return [...unique.values()].sort((a, b) => (number(b.rs_score) ?? -Infinity) - (number(a.rs_score) ?? -Infinity));
+}
+
+function populateRsClassFilter() {
+  const current = byId("rs-class-filter").value;
+  const values = [...new Set(rsRows().map((row) => row.classification).filter(Boolean))].sort();
+  byId("rs-class-filter").innerHTML = '<option value="">전체 분류</option>' + values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+  if (values.includes(current)) byId("rs-class-filter").value = current;
+}
+
+function rsCard(row, index) {
+  const ranks = [5, 20, 60, 120, 252].map((horizon) => `<span><small>${horizon}D</small><strong>${formatScore(row.rs?.[String(horizon)]?.market_percentile)}</strong></span>`).join("");
+  const why = (row.why_viable || []).join(" · ") || "순수 가격 RS 리더 — 수급·진입 게이트 추가 확인 필요";
+  const wait = (row.wait_reason || []).join(" · ") || "별도 대기 사유 없음";
+  return `<details class="rs-card">
+    <summary>
+      <div class="rs-rank">${String(index + 1).padStart(2, "0")}</div>
+      <div class="stock-name"><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.symbol)} · ${escapeHtml(row.market)} · ${escapeHtml(row.theme || "미분류")}</small></div>
+      <div class="rs-score"><small>${rsHorizon === "short_term" ? "단기 RS" : "스윙 RS"}</small><strong>${formatScore(row.rs_score)}</strong></div>
+      <span class="action-pill ${row.is_viable ? "" : "risk"}">${escapeHtml(row.classification || "관찰")}</span>
+      <div class="rs-ranks">${ranks}</div>
+      <span class="expand-mark" aria-hidden="true"></span>
+    </summary>
+    <div class="rs-detail">
+      <div><span>왜 유효한가</span><strong>${escapeHtml(why)}</strong></div>
+      <div><span>기다려야 하는 이유</span><strong>${escapeHtml(wait)}</strong></div>
+      <div><span>트리거 / 무효화</span><strong>${escapeHtml(row.trigger || "재돌파 확인")} ${number(row.trigger_price) !== null ? `· ${escapeHtml(formatPrice(row.trigger_price))}` : ""}<br>${escapeHtml(formatPrice(row.invalidation_price))}</strong></div>
+      <div><span>확인 근거</span><strong>테마 ${formatScore(row.theme_leadership_score)} · 수급 ${formatScore(row.flow_continuity_score)} · 진입 ${formatScore(row.entry_timing_score)}<br>${escapeHtml(row.short_borrow_classification || "공매도·대차 미확인")}</strong></div>
+    </div>
+  </details>`;
+}
+
+function renderRs() {
+  populateRsClassFilter();
+  const query = byId("rs-search").value.trim().toLowerCase();
+  const classification = byId("rs-class-filter").value;
+  const viableOnly = byId("rs-viable-only").checked;
+  const rows = rsRows().filter((row) => {
+    const haystack = [row.name, row.symbol, row.market, row.theme].join(" ").toLowerCase();
+    return (!query || haystack.includes(query)) && (!classification || row.classification === classification) && (!viableOnly || row.is_viable);
+  }).slice(0, 50);
+  byId("rs-list").innerHTML = rows.map(rsCard).join("");
+  byId("rs-empty").hidden = rows.length > 0;
+}
+
 function dataCard(title, block, countText) {
   const available = Boolean(block?.available);
   const dates = block?.dates_used || [];
@@ -402,12 +515,22 @@ function renderData() {
   ];
   byId("data-grid").innerHTML = cards.join("");
 
+  const freshnessCards = (report.source_freshness || []).map((item) => `
+    <article class="data-card"><h3>${escapeHtml(item.name || item.source)}</h3>
+    <span class="data-status ${item.status === "정상" ? "" : "missing"}">${escapeHtml(item.status || "미연결")}</span>
+    <p>기준일 ${escapeHtml(formatDate(item.as_of))}${item.detail ? ` · ${escapeHtml(item.detail)}` : ""}</p></article>`);
+  byId("data-grid").innerHTML += freshnessCards.join("");
+
   const method = report.methodology || {};
+  const walkForward = report.walk_forward_validation || {};
+  const walkForwardRows = (walkForward.cohorts || []).map((row) => `${escapeHtml(row.name)}: ${row.signal_count}건 · 5D 중앙 ${formatPct(row.median_return_5d_pct)} · 승률 ${formatPct(row.win_rate_5d_pct)} · MFE/MAE ${formatPct(row.median_mfe_20d_pct)} / ${formatPct(row.median_mae_20d_pct)}`).join("<br>");
   byId("method-copy").innerHTML = `
     <p><strong>발견과 표시 분리:</strong> ${escapeHtml(method.discovery_vs_display || "전체 기간으로 테마를 발견하고 화면일 이하 데이터만 표시")}</p>
     <p><strong>스폰서:</strong> ${escapeHtml(method.sponsor_formula || "외국인 + 사모 + 연기금 + 투신")}</p>
     <p><strong>점수:</strong> ${escapeHtml(method.scoring_note || "각 점수는 판단 근거를 분리하기 위한 보조 지표")}</p>
     <p><strong>Condition 16:</strong> ${escapeHtml(method.condition16_note || "테마 우선 시기 구분")}</p>
+    <p><strong>워크포워드 (${escapeHtml(walkForward.status || "기준선 형성 중")}):</strong> ${walkForwardRows || "결과 축적 중"}</p>
+    <p>${escapeHtml(walkForward.method || "과거 시점 데이터만 사용하며 구현 이후 viability 후보는 전진 축적")}</p>
     <p><a href="${REPORT_URL}" target="_blank" rel="noopener">원본 구조화 JSON 열기 →</a></p>`;
 }
 
@@ -418,11 +541,23 @@ function bindControls() {
   byId("action-filter").addEventListener("change", renderLeaders);
   byId("theme-filter").addEventListener("change", renderLeaders);
   byId("absorption-only").addEventListener("change", renderLeaders);
+  document.querySelectorAll(".rs-tab").forEach((button) => button.addEventListener("click", () => {
+    rsHorizon = button.dataset.horizon;
+    document.querySelectorAll(".rs-tab").forEach((item) => {
+      const active = item === button; item.classList.toggle("is-active", active); item.setAttribute("aria-selected", String(active));
+    });
+    renderRs();
+  }));
+  byId("rs-search").addEventListener("input", renderRs);
+  byId("rs-class-filter").addEventListener("change", renderRs);
+  byId("rs-viable-only").addEventListener("change", renderRs);
 }
 
 function renderAll() {
   renderHero();
   renderSummaryCards();
+  renderMarketContext();
+  renderRs();
   renderRegimes();
   renderSubthemes();
   renderRotation();
