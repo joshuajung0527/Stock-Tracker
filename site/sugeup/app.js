@@ -160,6 +160,155 @@ function renderSummaryCards() {
   }
 }
 
+function metricCard(label, value, note, tone = "") {
+  return `<article class="fund-metric ${escapeHtml(tone)}">
+    <span>${escapeHtml(label)}</span>
+    <strong>${escapeHtml(value)}</strong>
+    <small>${escapeHtml(note)}</small>
+  </article>`;
+}
+
+function equityPath(points, key, minimum, maximum, width, height, padding) {
+  const usable = points
+    .map((point, index) => ({ index, value: number(point[key]) }))
+    .filter((point) => point.value !== null && point.value > 0);
+  if (usable.length < 2) return "";
+  const logMin = Math.log(minimum);
+  const logMax = Math.log(maximum);
+  return usable
+    .map((point, pathIndex) => {
+      const x = padding + (point.index / Math.max(1, points.length - 1)) * (width - padding * 2);
+      const y = height - padding - ((Math.log(point.value) - logMin) / Math.max(0.0001, logMax - logMin)) * (height - padding * 2);
+      return `${pathIndex ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+}
+
+function renderEquityChart() {
+  const curve = report.backtest?.equity_curve || [];
+  const container = byId("equity-chart");
+  if (!curve.length) {
+    container.innerHTML = '<p class="context-empty">검증 가능한 백테스트 구간이 없습니다.</p>';
+    return;
+  }
+  const keys = ["net", "market_proxy", "hedged_net"];
+  const values = curve.flatMap((point) => keys.map((key) => number(point[key])).filter((value) => value !== null && value > 0));
+  const minimum = Math.max(1, Math.min(...values) * 0.88);
+  const maximum = Math.max(minimum * 1.05, Math.max(...values) * 1.12);
+  const width = 820;
+  const height = 300;
+  const padding = 44;
+  const grid = [0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+    const y = padding + ratio * (height - padding * 2);
+    const logValue = Math.log(maximum) - ratio * (Math.log(maximum) - Math.log(minimum));
+    return `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" />
+      <text x="${padding - 8}" y="${y + 4}" text-anchor="end">${Math.exp(logValue).toFixed(0)}</text>`;
+  }).join("");
+  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="정규화 지수, 로그 축">
+    <g class="chart-grid">${grid}</g>
+    <path class="curve-net" d="${equityPath(curve, "net", minimum, maximum, width, height, padding)}" />
+    <path class="curve-market" d="${equityPath(curve, "market_proxy", minimum, maximum, width, height, padding)}" />
+    <path class="curve-hedged" d="${equityPath(curve, "hedged_net", minimum, maximum, width, height, padding)}" />
+    <text class="chart-date" x="${padding}" y="${height - 10}">${escapeHtml(formatDate(curve[0]?.date))}</text>
+    <text class="chart-date" text-anchor="end" x="${width - padding}" y="${height - 10}">${escapeHtml(formatDate(curve.at(-1)?.date))}</text>
+  </svg>`;
+}
+
+function renderSizing() {
+  if (!report) return;
+  const input = byId("fund-nav-eok");
+  const navEok = Math.max(0, number(input?.value) ?? 10);
+  const navKrw = navEok * 100_000_000;
+  const decision = report.portfolio_decision || {};
+  const holdings = decision.holdings || [];
+  const hedgePct = number(report.hedge_plan?.hedge_notional_pct_of_nav) ?? 0;
+  const hedgeNotional = navKrw * hedgePct / 100;
+  const capacity = number(report.execution_capacity?.minimum_capacity_nav_krw);
+  const breaches = holdings.filter((row) => {
+    const weight = number(row.target_weight_pct) ?? 0;
+    const advMillion = number(row.average_turnover_20d_million_krw);
+    return advMillion && (navKrw * weight / 100) / (advMillion * 1_000_000) > 0.05;
+  });
+  const capacityUsage = capacity && capacity > 0 ? 100 * navKrw / capacity : null;
+  byId("sizing-output").innerHTML = `
+    <div><span>모의 주식 익스포저</span><strong>${escapeHtml(formatKrw(navKrw * (1 - (number(decision.cash_weight_pct) ?? 0) / 100)))}</strong></div>
+    <div><span>시장 beta 프록시</span><strong>${number(decision.portfolio_beta_market_proxy)?.toFixed(2) ?? "—"}</strong></div>
+    <div><span>진단상 헤지 명목</span><strong>${escapeHtml(formatKrw(hedgeNotional))}</strong></div>
+    <div><span>최소 용량 대비 NAV</span><strong>${capacityUsage === null ? "데이터 없음" : `${capacityUsage.toFixed(1)}%`}</strong></div>
+    <div class="${breaches.length ? "sizing-warning" : "sizing-ok"}"><span>5% ADV 초과</span><strong>${breaches.length}종목</strong></div>
+    <div><span>선물 계약 수</span><strong>${escapeHtml(report.hedge_plan?.contract_count_status || "미연결")}</strong></div>`;
+
+  document.querySelectorAll("[data-book-symbol]").forEach((row) => {
+    const weight = number(row.dataset.weight) ?? 0;
+    const advMillion = number(row.dataset.adv);
+    const amount = navKrw * weight / 100;
+    const participation = advMillion ? 100 * amount / (advMillion * 1_000_000) : null;
+    const amountNode = row.querySelector("[data-book-amount]");
+    const participationNode = row.querySelector("[data-book-participation]");
+    if (amountNode) amountNode.textContent = formatKrw(amount);
+    if (participationNode) {
+      participationNode.textContent = participation === null ? "ADV 데이터 없음" : `ADV ${participation.toFixed(2)}%`;
+      participationNode.classList.toggle("is-breach", participation !== null && participation > 5);
+    }
+  });
+}
+
+function renderDecisionBook() {
+  const decision = report.portfolio_decision || {};
+  const rows = decision.holdings || [];
+  if (!rows.length) {
+    byId("decision-book").innerHTML = '<p class="empty-state">기관형 모멘텀 이력 조건을 충족한 모의 종목이 없습니다.</p>';
+    return;
+  }
+  byId("decision-book").innerHTML = `<div class="table-scroll"><table class="fund-table">
+    <thead><tr><th>종목 / 조치</th><th>점수</th><th>비중 / 주문</th><th>6-1M / 12-1M</th><th>수급 / 위험</th><th>트리거 / 무효화</th></tr></thead>
+    <tbody>${rows.map((row) => {
+      const risks = (row.risk_flags || []).slice(0, 2).join(" · ") || "추가 하드 위험 없음";
+      return `<tr data-book-symbol="${escapeHtml(row.symbol)}" data-weight="${number(row.target_weight_pct) ?? 0}" data-adv="${number(row.average_turnover_20d_million_krw) ?? ""}">
+        <td><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.symbol)} · ${escapeHtml(row.market)}<br><span class="book-action">${escapeHtml(row.action)}</span></small></td>
+        <td><strong>${formatScore(row.score)}</strong><small>Fast RS ${formatScore(row.fast_rs_score)} · 진입 ${formatScore(row.entry_timing_score)}</small></td>
+        <td><strong>${formatPct(row.target_weight_pct)}</strong><small data-book-amount>—</small><small data-book-participation>—</small></td>
+        <td><strong>${formatPct(row.momentum_6_1_pct)} / ${formatPct(row.momentum_12_1_pct)}</strong><small>6-1 순위 ${formatScore(row.percentile_6_1)} · 12-1 ${formatScore(row.percentile_12_1)}</small></td>
+        <td><strong>수급 ${formatScore(row.flow_percentile_20d)} · β ${number(row.beta_60d_market_proxy)?.toFixed(2) ?? "—"}</strong><small>${escapeHtml(risks)}</small></td>
+        <td><strong>${escapeHtml(row.trigger || "종가 확인")}${number(row.trigger_price) !== null ? ` · ${escapeHtml(formatPrice(row.trigger_price))}` : ""}</strong><small>무효화 ${escapeHtml(formatPrice(row.invalidation_price))}</small></td>
+      </tr>`;
+    }).join("")}</tbody>
+  </table></div>`;
+}
+
+function renderFundCockpit() {
+  const readiness = report.investment_readiness || {};
+  const backtest = report.backtest || {};
+  const net = backtest.net_metrics || {};
+  const gross = backtest.gross_metrics || {};
+  const ic = backtest.information_coefficient || {};
+  const failures = readiness.failed_gates || [];
+  const ready = readiness.capital_deployment_allowed === true;
+  byId("readiness-banner").className = `readiness-banner ${ready ? "is-ready" : "is-research"}`;
+  byId("readiness-banner").innerHTML = `<div class="readiness-main">
+    <span class="readiness-label">${escapeHtml(readiness.label || "판정 대기")}</span>
+    <div><strong>${ready ? "자본투입 게이트 통과" : "실자본 투입 금지 · 모의운용만"}</strong><p>${escapeHtml(readiness.next_gate || "검증 데이터가 더 필요합니다.")}</p></div>
+  </div><ul>${failures.map((failure) => `<li>${escapeHtml(failure)}</li>`).join("")}</ul>`;
+  byId("fund-metrics").innerHTML = [
+    metricCard("비용 차감 연환산", formatPct(net.annualized_return_pct), `총 ${formatPct(net.total_return_pct)} · 짧은 표본`, "positive"),
+    metricCard("비용 차감 Sharpe", number(net.sharpe_zero_rf)?.toFixed(2) ?? "—", "무위험 0% 가정", ""),
+    metricCard("최대 낙폭", formatPct(net.max_drawdown_pct), "게이트: -20% 이내", (number(net.max_drawdown_pct) ?? 0) < -20 ? "negative" : ""),
+    metricCard("평균 Rank IC", number(ic.mean_rank_ic)?.toFixed(3) ?? "—", `${ic.observation_dates ?? 0}개 평가일`, ""),
+    metricCard("리밸런싱 회전율", formatPct(backtest.average_one_way_turnover_pct), `회당 비용 ${formatPct(backtest.average_estimated_cost_pct_per_rebalance, 2)}`, ""),
+    metricCard("비용 드래그", `${(number(gross.total_return_pct) ?? 0) - (number(net.total_return_pct) ?? 0) >= 0 ? "-" : "+"}${Math.abs((number(gross.total_return_pct) ?? 0) - (number(net.total_return_pct) ?? 0)).toFixed(1)}%p`, `${backtest.rebalance_periods ?? 0}회 리밸런싱`, ""),
+  ].join("");
+  byId("backtest-period").textContent = `${formatDate(backtest.evaluation_start)} – ${formatDate(backtest.evaluation_end)} · ${backtest.rebalance_periods ?? 0}회`;
+  renderEquityChart();
+  const statistical = backtest.statistical_validation || {};
+  const limitations = backtest.known_limitations || [];
+  byId("backtest-notes").innerHTML = `<p><strong>체결:</strong> ${escapeHtml(backtest.method?.signal_time || "종가 확정")} → ${escapeHtml(backtest.method?.first_tradable_time || "다음 시가")}</p>
+    <p><strong>헤지선:</strong> ${backtest.hedge_result_status === "executable" ? "실행 가능" : "공식 지수·선물 이력 미연결로 비실행 진단치"} · 차트는 로그 축</p>
+    <p><strong>통계 판정:</strong> ${escapeHtml(statistical.reason || "추가 표본 필요")}</p>
+    <ul>${limitations.slice(0, 4).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+  renderDecisionBook();
+  renderSizing();
+}
+
 function renderRegimes() {
   const rows = report.top_regimes || [];
   byId("regime-grid").innerHTML = rows.length
@@ -551,11 +700,13 @@ function bindControls() {
   byId("rs-search").addEventListener("input", renderRs);
   byId("rs-class-filter").addEventListener("change", renderRs);
   byId("rs-viable-only").addEventListener("change", renderRs);
+  byId("fund-nav-eok").addEventListener("input", renderSizing);
 }
 
 function renderAll() {
   renderHero();
   renderSummaryCards();
+  renderFundCockpit();
   renderMarketContext();
   renderRs();
   renderRegimes();
