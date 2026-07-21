@@ -27,6 +27,15 @@ function text(value, fallback = "데이터 없음") {
   return value === null || value === undefined || value === "" ? fallback : String(value);
 }
 
+function safeHref(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 function formatDate(value) {
   if (!value) return "데이터 없음";
   const compact = String(value).match(/^(\d{4})(\d{2})(\d{2})$/);
@@ -135,9 +144,11 @@ function renderHero() {
 function renderSummaryCards() {
   const coverage = report.data_coverage || {};
   const conclusion = report.conclusion || {};
+  const allMarket = report.all_market_screen || {};
   const shortCandidates = report.viability_candidates?.short_term || {};
   const viableShortCount = ["지금 리더", "초기 흡수", "재돌파 대기"].reduce((sum, label) => sum + (shortCandidates[label] || []).length, 0);
   const cards = [
+    ["전 종목 스크린", allMarket.universe_count || 0, `구조 신호 ${allMarket.matched_count || 0}개`],
     ["주도 테마", (report.top_regimes || []).length, "상위 3개 제한"],
     ["거래 하위 테마", (report.traded_subthemes || []).length, "상위 5개 제한"],
     ["대표 종목", (report.representative_stocks || []).length, "유동성·리더십 반영"],
@@ -158,6 +169,129 @@ function renderSummaryCards() {
   if ((coverage.missing_weekday_dates || []).length) {
     byId("data-health").textContent = "거래일 확인 필요";
   }
+}
+
+function allMarketCard(row) {
+  const shortBorrow = row.short_borrow || {};
+  const shortSale = shortBorrow.short_sale || {};
+  const borrow = shortBorrow.borrow || {};
+  const catalyst = row.latest_catalyst || {};
+  const catalystUrl = safeHref(catalyst.source_url);
+  const catalystText = catalyst.headline
+    ? `${formatDate(catalyst.event_date)} · ${catalyst.headline}`
+    : "공식 Catalyst 없이 구조 신호만 판정";
+  const riskStage = ["과열·추격 금지", "공급 압력·회피"].includes(row.stage);
+  const flow1d = row.flow?.["1d"] || {};
+  const reasons = (row.reasons || []).join(" · ") || "구조 근거 부족";
+  const risks = (row.risks || []).join(" · ") || "명시된 추가 위험 없음";
+  return `<details class="predictive-card all-market-card ${row.research_candidate ? "is-research" : ""}">
+    <summary>
+      <div class="predictive-stage ${riskStage ? "is-risk" : ""}">${escapeHtml(row.stage)}</div>
+      <div class="stock-name"><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.symbol)} · ${escapeHtml(row.market)} · ${escapeHtml(row.theme || "미분류")}</small></div>
+      <div class="predictive-score"><small>구조 점수</small><strong>${formatScore(row.structural_score)}</strong></div>
+      <div class="predictive-thesis"><strong>${escapeHtml((row.reasons || [])[0] || "조건 미충족")}</strong><small>${escapeHtml(row.action || "관찰")} · ${escapeHtml(row.catalyst_layer || "구조 신호만")}</small></div>
+      <span class="expand-mark" aria-hidden="true"></span>
+    </summary>
+    <div class="predictive-detail">
+      <div class="predictive-detail-block"><span>1D 3자 수급</span><div class="predictive-flow">${predictiveFlow(flow1d)}</div><small>5D 3자 수급/거래대금 ${number(row.triad_intensity_5d) === null ? "—" : `${(number(row.triad_intensity_5d) * 100).toFixed(1)}%`}</small></div>
+      <div class="predictive-detail-block"><span>가격 위치</span><strong>1D ${escapeHtml(formatPct(row.return_1d_pct))} · 5D ${escapeHtml(formatPct(row.return_5d_pct))}</strong><small>20일 고점 대비 ${escapeHtml(formatPct(row.drawdown_20d_pct))} · 거래대금 z ${number(row.turnover_zscore_20d)?.toFixed(2) ?? "—"}</small></div>
+      <div class="predictive-detail-block"><span>체결·테마</span><strong>체결강도 ${number(row.execution_strength)?.toFixed(1) ?? "—"}</strong><small>테마 상승 참여 ${number(row.theme_breadth?.advance_pct)?.toFixed(1) ?? "—"}% · ${row.theme_breadth?.member_count ?? 0}종목</small></div>
+      <div class="predictive-detail-block"><span>공매도·대차</span><strong>${escapeHtml(shortBorrow.classification || "데이터 부족")}</strong><small>공매도 금액비중 ${number(shortSale.short_sale_amount_ratio_1d) === null ? "—" : `${(number(shortSale.short_sale_amount_ratio_1d) * 100).toFixed(1)}%`} · 대차 3D ${number(borrow.borrow_balance_change_3d)?.toLocaleString("ko-KR") ?? "—"}</small></div>
+      <div class="predictive-detail-block catalyst-block"><span>Catalyst 층</span><strong>${catalystUrl ? `<a href="${escapeHtml(catalystUrl)}" target="_blank" rel="noopener">${escapeHtml(catalystText)}</a>` : escapeHtml(catalystText)}</strong><small>${escapeHtml(row.catalyst_layer || "구조 신호만")}</small></div>
+      <div class="predictive-detail-block"><span>트리거·무효화</span><strong>${escapeHtml(formatPrice(row.trigger_price))} / ${escapeHtml(formatPrice(row.invalidation_price))}</strong><small>${escapeHtml(reasons)}</small></div>
+      <div class="predictive-detail-block risk-copy"><span>실행 게이트</span><strong>${row.execution_eligible ? "실행 게이트 통과" : row.research_candidate ? "연구 후보 · 실행자료 확인 필요" : "관찰·회피"}</strong><small>${escapeHtml(risks)}</small></div>
+    </div>
+  </details>`;
+}
+
+function renderAllMarketScreen() {
+  const screen = report.all_market_screen || {};
+  const candidates = screen.candidates || [];
+  const counts = screen.stage_counts || {};
+  const stageFilter = byId("all-market-stage-filter");
+  const currentStage = stageFilter.value;
+  const stages = Object.keys(counts).filter((stage) => counts[stage] > 0 && stage !== "관찰");
+  stageFilter.innerHTML = '<option value="">전체 단계</option>' + stages.map((stage) => `<option value="${escapeHtml(stage)}">${escapeHtml(stage)} (${counts[stage]})</option>`).join("");
+  if (stages.includes(currentStage)) stageFilter.value = currentStage;
+  const query = byId("all-market-search").value.trim().toLowerCase();
+  const catalyst = byId("all-market-catalyst-filter").value;
+  const researchOnly = byId("all-market-research-only").checked;
+  const rows = candidates.filter((row) => {
+    const haystack = `${row.name || ""} ${row.symbol || ""} ${row.theme || ""}`.toLowerCase();
+    return (!query || haystack.includes(query))
+      && (!stageFilter.value || row.stage === stageFilter.value)
+      && (!catalyst || row.catalyst_layer === catalyst)
+      && (!researchOnly || row.research_candidate);
+  });
+  byId("all-market-list").innerHTML = rows.map(allMarketCard).join("");
+  byId("all-market-empty").hidden = rows.length > 0;
+  byId("all-market-status").innerHTML = `
+    <div><span class="freshness-badge ${statusClass(screen.status)}">${escapeHtml(screen.status || "미연결")}</span><strong>${screen.universe_count ?? 0}종목 전수 판정 · 구조 신호 ${screen.matched_count ?? 0}개</strong><small>연구 후보 ${screen.research_candidate_count ?? 0} · 실행 게이트 ${screen.execution_eligible_count ?? 0} · 화면 상위 ${screen.displayed_count ?? 0}</small></div>
+    <p>${escapeHtml(screen.score_warning || "점수는 수익확률이 아닙니다.")}</p>`;
+}
+
+function predictiveFlow(values = {}) {
+  return [
+    ["외국인", values.foreigner],
+    ["사모", values.private_equity],
+    ["연기금", values.pension],
+  ].map(([label, value]) => `<span><small>${label}</small><strong class="${flowClass(value)}">${escapeHtml(flowText(value))}</strong></span>`).join("");
+}
+
+function predictiveCard(row) {
+  const catalyst = row.latest_catalyst || {};
+  const catalystUrl = safeHref(catalyst.source_url);
+  const catalystCopy = catalyst.headline
+    ? `${escapeHtml(formatDate(catalyst.event_date))} · ${escapeHtml(catalyst.headline)}`
+    : "연결된 공개 Catalyst 없음";
+  const catalystLink = catalystUrl
+    ? `<a href="${escapeHtml(catalystUrl)}" target="_blank" rel="noopener">${catalystCopy}</a>`
+    : catalystCopy;
+  const risks = (row.risks || []).join(" · ") || "명시된 추가 위험 없음";
+  const shortBorrow = row.short_borrow || {};
+  const shortSale = shortBorrow.short_sale || {};
+  const borrow = shortBorrow.borrow || {};
+  const stageRisk = ["사후 수급/추격 금지", "관찰"].includes(row.stage);
+  return `<details class="predictive-card ${row.eligible ? "is-eligible" : ""}">
+    <summary>
+      <div class="predictive-stage ${stageRisk ? "is-risk" : ""}">${escapeHtml(row.stage)}</div>
+      <div class="stock-name"><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.symbol)} · ${escapeHtml(row.market)} · ${escapeHtml(row.theme || "미분류")}</small></div>
+      <div class="predictive-score"><small>근거 충족도</small><strong>${formatScore(row.setup_score)}</strong></div>
+      <div class="predictive-thesis"><strong>${escapeHtml((row.why_now || [])[0] || "근거 부족")}</strong><small>${escapeHtml(row.action || "관찰")}</small></div>
+      <span class="expand-mark" aria-hidden="true"></span>
+    </summary>
+    <div class="predictive-detail">
+      <div class="predictive-detail-block catalyst-block"><span>최근 Catalyst</span><strong>${catalystLink}</strong><small>${escapeHtml(catalyst.source || "미연결")} · ${escapeHtml(catalyst.source_reliability || "신뢰도 미확인")} · ${escapeHtml(row.catalyst_point_in_time_status || "unavailable")}</small></div>
+      <div class="predictive-detail-block"><span>1D 3자 수급</span><div class="predictive-flow">${predictiveFlow(row.flow?.["1d"])}</div><small>5D 3자 수급/거래대금 ${(number(row.triad_intensity_5d) === null ? "—" : `${(number(row.triad_intensity_5d) * 100).toFixed(1)}%`)}</small></div>
+      <div class="predictive-detail-block"><span>가격·리셋</span><strong>5D ${escapeHtml(formatPct(row.return_5d_pct))} · 이벤트 고점 대비 ${escapeHtml(formatPct(row.drawdown_from_event_peak_pct))}</strong><small>거래대금 z ${number(row.turnover_zscore_20d)?.toFixed(2) ?? "—"} · 체결강도 ${number(row.execution_strength)?.toFixed(1) ?? "—"}</small></div>
+      <div class="predictive-detail-block"><span>공매도·대차</span><strong>${escapeHtml(shortBorrow.classification || "데이터 부족")}</strong><small>공매도 금액비중 ${number(shortSale.short_sale_amount_ratio_1d) === null ? "—" : `${(number(shortSale.short_sale_amount_ratio_1d) * 100).toFixed(1)}%`} · 대차 3D 변화 ${number(borrow.borrow_balance_change_3d)?.toLocaleString("ko-KR") ?? "—"}</small></div>
+      <div class="predictive-detail-block"><span>다음 확인 / 무효화</span><strong>${escapeHtml(row.next_confirmation || "추가 확인 필요")}</strong><small>트리거 ${escapeHtml(formatPrice(row.trigger_price))} · 무효화 ${escapeHtml(formatPrice(row.invalidation_price))}</small></div>
+      <div class="predictive-detail-block risk-copy"><span>보류·위험</span><strong>${escapeHtml(risks)}</strong><small>${escapeHtml((row.why_now || []).slice(1).join(" · ") || "추가 근거 없음")}</small></div>
+    </div>
+  </details>`;
+}
+
+function renderPredictive() {
+  const radar = report.predictive_radar || {};
+  const backtest = report.predictive_backtest || {};
+  const coverage = radar.data_coverage || {};
+  const counts = radar.stage_counts || {};
+  const stageFilter = byId("predictive-stage-filter");
+  const current = stageFilter.value;
+  const candidates = radar.candidates || [];
+  const stages = [...new Set(candidates.map((row) => row.stage).filter(Boolean))];
+  stageFilter.innerHTML = '<option value="">전체 단계</option>' + stages.map((stage) => `<option value="${escapeHtml(stage)}">${escapeHtml(stage)} (${counts[stage] || 0})</option>`).join("");
+  if (stages.includes(current)) stageFilter.value = current;
+  const eligibleOnly = byId("predictive-eligible-only").checked;
+  const rows = candidates.filter((row) => (!stageFilter.value || row.stage === stageFilter.value) && (!eligibleOnly || row.eligible));
+  byId("predictive-list").innerHTML = rows.map(predictiveCard).join("");
+  byId("predictive-empty").hidden = rows.length > 0;
+  byId("predictive-status").innerHTML = `
+    <div><span class="freshness-badge ${statusClass(radar.status)}">${escapeHtml(radar.status || "미연결")}</span><strong>공식·수동 Anchor ${coverage.anchor_event_count ?? 0}건 · 뉴스 보조 ${coverage.stream_evidence_count ?? 0}건</strong><small>검증 Anchor ${coverage.verified_anchor_event_count ?? 0} · 전체 매핑 ${coverage.symbol_count ?? 0}종목</small></div>
+    <p>${escapeHtml(radar.score_warning || "점수는 확률이 아닙니다.")}</p>`;
+  const normalBacktest = backtest.status === "정상";
+  const cohortRows = (backtest.cohorts || []).map((row) => `<div><strong>${escapeHtml(row.stage)}</strong><span>${row.fillable_count ?? 0}건 체결 · 미체결 ${row.no_fill_count ?? 0}</span><small>5D 중앙 ${escapeHtml(formatPct(row.median_return_5d_pct))} · MFE/MAE ${escapeHtml(formatPct(row.median_mfe_10d_pct))} / ${escapeHtml(formatPct(row.median_mae_10d_pct))}${normalBacktest ? ` · 승률 ${escapeHtml(formatPct(row.win_rate_5d_pct))}` : " · 승률 비공개(표본 부족)"}</small></div>`).join("");
+  byId("predictive-backtest").innerHTML = `<div class="predictive-backtest-head"><strong>다음 시가 기준 단계별 검증</strong><span class="freshness-badge ${statusClass(backtest.status)}">${escapeHtml(backtest.status || "기준선 형성 중")}</span></div><p>${escapeHtml(backtest.fill_guard || "갭 미체결 처리")} · ${escapeHtml(backtest.theme_history || "테마 이력 제한")}</p><div class="predictive-cohorts">${cohortRows || '<span class="context-empty">검증 가능한 전환 신호 축적 중</span>'}</div>`;
 }
 
 function metricCard(label, value, note, tone = "") {
@@ -660,6 +794,7 @@ function renderData() {
     dataCard("당일 NXT", coverage.nxt_same_date, coverage.nxt_same_date?.available ? `${coverage.nxt_same_date.symbol_count}개 종목에서 당일 종가 확인` : "당일 NXT 종가 없음"),
     dataCard("시가총액", coverage.market_cap, coverage.market_cap?.available ? `${coverage.market_cap.symbol_count}개 종목` : coverage.market_cap?.reason),
     dataCard("시장경보", coverage.market_alert, coverage.market_alert?.reason),
+    dataCard("예측 이벤트", coverage.predictive_events, coverage.predictive_events?.available ? `${coverage.predictive_events.event_count}건 · ${coverage.predictive_events.symbol_count}종목 · ${coverage.predictive_events.status}` : coverage.predictive_events?.reason),
     dataCard("거래일 세트", { available: true }, `1D ${names(coverage.dates_1d)} · 3D ${names(coverage.dates_3d)} · 5D ${names(coverage.dates_5d)}`),
   ];
   byId("data-grid").innerHTML = cards.join("");
@@ -678,6 +813,10 @@ function renderData() {
     <p><strong>스폰서:</strong> ${escapeHtml(method.sponsor_formula || "외국인 + 사모 + 연기금 + 투신")}</p>
     <p><strong>점수:</strong> ${escapeHtml(method.scoring_note || "각 점수는 판단 근거를 분리하기 위한 보조 지표")}</p>
     <p><strong>Condition 16:</strong> ${escapeHtml(method.condition16_note || "테마 우선 시기 구분")}</p>
+    <p><strong>예측 단계:</strong> ${escapeHtml(method.predictive_stage_note || "가격·수급 1차 필터 뒤 공개 이벤트를 결합")}</p>
+    <p><strong>예측 점수:</strong> ${escapeHtml(method.predictive_score_note || "근거 충족도이며 수익확률이 아님")}</p>
+    <p><strong>예측 백테스트:</strong> ${escapeHtml(method.predictive_backtest_note || "다음 거래일 시가 체결과 갭 미체결을 반영")}</p>
+    <p><strong>전 종목 구조 스크린:</strong> ${escapeHtml(method.all_market_screen_note || "뉴스 없이 전 종목을 먼저 판정하고 공식 이벤트는 강화 근거로만 사용")}</p>
     <p><strong>워크포워드 (${escapeHtml(walkForward.status || "기준선 형성 중")}):</strong> ${walkForwardRows || "결과 축적 중"}</p>
     <p>${escapeHtml(walkForward.method || "과거 시점 데이터만 사용하며 구현 이후 viability 후보는 전진 축적")}</p>
     <p><a href="${REPORT_URL}" target="_blank" rel="noopener">원본 구조화 JSON 열기 →</a></p>`;
@@ -700,12 +839,20 @@ function bindControls() {
   byId("rs-search").addEventListener("input", renderRs);
   byId("rs-class-filter").addEventListener("change", renderRs);
   byId("rs-viable-only").addEventListener("change", renderRs);
+  byId("predictive-stage-filter").addEventListener("change", renderPredictive);
+  byId("predictive-eligible-only").addEventListener("change", renderPredictive);
+  byId("all-market-search").addEventListener("input", renderAllMarketScreen);
+  byId("all-market-stage-filter").addEventListener("change", renderAllMarketScreen);
+  byId("all-market-catalyst-filter").addEventListener("change", renderAllMarketScreen);
+  byId("all-market-research-only").addEventListener("change", renderAllMarketScreen);
   byId("fund-nav-eok").addEventListener("input", renderSizing);
 }
 
 function renderAll() {
   renderHero();
   renderSummaryCards();
+  renderAllMarketScreen();
+  renderPredictive();
   renderFundCockpit();
   renderMarketContext();
   renderRs();

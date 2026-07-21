@@ -17,7 +17,7 @@
     <meta property="og:image" content="https://intraday-korean-stock-dashboard.pages.dev/sugeup/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <title>수급 레이더 · 테마 로테이션</title>
-    <link rel="stylesheet" href="./styles.css?v=3.0.0" />
+    <link rel="stylesheet" href="./styles.css?v=4.1.1" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">본문으로 이동</a>
@@ -33,6 +33,8 @@
         </span>
       </a>
       <nav aria-label="주요 메뉴">
+        <a href="#all-market-screen">전 종목</a>
+        <a href="#predictive-radar">예측 레이더</a>
         <a href="#fund-cockpit">펀드 의사결정</a>
         <a href="#market-context">시장 레짐</a>
         <a href="#rs-candidates">RS 후보</a>
@@ -53,7 +55,7 @@
             확정 EOD 데이터를 불러오고 있습니다.
           </p>
           <div class="hero-actions">
-            <a class="primary-action" href="#rs-candidates">단기 유효 후보 보기</a>
+            <a class="primary-action" href="#all-market-screen">전 종목 선행 신호 보기</a>
             <button class="secondary-action" id="refresh-button" type="button">새로고침</button>
           </div>
         </div>
@@ -92,6 +94,43 @@
       </section>
 
       <section class="summary-strip shell" id="summary-cards" aria-label="핵심 지표"></section>
+
+      <section class="section shell all-market-section" id="all-market-screen" aria-labelledby="all-market-title">
+        <div class="section-heading all-market-heading">
+          <div>
+            <p class="section-kicker">00 · All-market structural flow screen</p>
+            <h2 id="all-market-title">뉴스 없이도, 모든 종목을 같은 기준으로</h2>
+          </div>
+          <p>KOSPI·KOSDAQ 전 종목을 가격 위치, 외국인·사모·연기금, 개인 반대매매 흐름, 체결, 테마 확산, 공매도·대차로 먼저 판정합니다. 공시·공식 이벤트는 후보를 만드는 필수조건이 아니라 강화 근거입니다.</p>
+        </div>
+        <div class="all-market-status" id="all-market-status"></div>
+        <div class="all-market-toolbar">
+          <label><span>검색</span><input id="all-market-search" type="search" placeholder="종목명 · 코드 · 테마" /></label>
+          <label><span>구조 단계</span><select id="all-market-stage-filter"><option value="">전체 단계</option></select></label>
+          <label><span>Catalyst</span><select id="all-market-catalyst-filter"><option value="">전체</option><option value="공식 Catalyst 강화">공식 Catalyst 강화</option><option value="구조 신호만">구조 신호만</option></select></label>
+          <label class="toggle"><input id="all-market-research-only" type="checkbox" /><span>연구 후보만</span></label>
+        </div>
+        <div class="all-market-list" id="all-market-list"></div>
+        <p class="empty-state" id="all-market-empty" hidden>조건 충족 종목 0개</p>
+      </section>
+
+      <section class="section shell predictive-section" id="predictive-radar" aria-labelledby="predictive-title">
+        <div class="section-heading predictive-heading">
+          <div>
+            <p class="section-kicker">00 · Point-in-time predictive funnel</p>
+            <h2 id="predictive-title">오른 뒤 수급이 아니라, 오르기 전 상태를 추적</h2>
+          </div>
+          <p>전 종목은 가격·수급으로 먼저 압축하고, 새 공시·뉴스 스트림을 후보에 역매핑합니다. Catalyst 축적→초기 흡수→Event reset→재유입→확인 순서이며, 급등 뒤 수급은 추격 금지로 분리합니다.</p>
+        </div>
+        <div class="predictive-status" id="predictive-status"></div>
+        <div class="predictive-toolbar">
+          <label><span>단계</span><select id="predictive-stage-filter"><option value="">전체 단계</option></select></label>
+          <label class="toggle"><input id="predictive-eligible-only" type="checkbox" /><span>실행 가능만</span></label>
+        </div>
+        <div class="predictive-list" id="predictive-list"></div>
+        <p class="empty-state" id="predictive-empty" hidden>조건 충족 종목 0개</p>
+        <div class="predictive-backtest" id="predictive-backtest"></div>
+      </section>
 
       <section class="section shell fund-cockpit" id="fund-cockpit" aria-labelledby="fund-title">
         <div class="section-heading fund-heading">
@@ -296,6 +335,6 @@
       <p>수급과 테마를 정리하고 있습니다.</p>
     </div>
 
-    <script src="./app.js?v=3.0.0" defer></script>
+    <script src="./app.js?v=4.1.1" defer></script>
   </body>
 </html>
