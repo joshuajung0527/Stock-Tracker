@@ -200,6 +200,7 @@ function allMarketCard(row) {
       <div class="predictive-detail-block catalyst-block"><span>Catalyst 층</span><strong>${catalystUrl ? `<a href="${escapeHtml(catalystUrl)}" target="_blank" rel="noopener">${escapeHtml(catalystText)}</a>` : escapeHtml(catalystText)}</strong><small>${escapeHtml(row.catalyst_layer || "구조 신호만")}</small></div>
       <div class="predictive-detail-block"><span>트리거·무효화</span><strong>${escapeHtml(formatPrice(row.trigger_price))} / ${escapeHtml(formatPrice(row.invalidation_price))}</strong><small>${escapeHtml(reasons)}</small></div>
       <div class="predictive-detail-block risk-copy"><span>실행 게이트</span><strong>${row.execution_eligible ? "실행 게이트 통과" : row.research_candidate ? "연구 후보 · 실행자료 확인 필요" : "관찰·회피"}</strong><small>${escapeHtml(risks)}</small></div>
+      ${companyResearchDetail(row.symbol)}
     </div>
   </details>`;
 }
@@ -267,6 +268,7 @@ function predictiveCard(row) {
       <div class="predictive-detail-block"><span>공매도·대차</span><strong>${escapeHtml(shortBorrow.classification || "데이터 부족")}</strong><small>공매도 금액비중 ${number(shortSale.short_sale_amount_ratio_1d) === null ? "—" : `${(number(shortSale.short_sale_amount_ratio_1d) * 100).toFixed(1)}%`} · 대차 3D 변화 ${number(borrow.borrow_balance_change_3d)?.toLocaleString("ko-KR") ?? "—"}</small></div>
       <div class="predictive-detail-block"><span>다음 확인 / 무효화</span><strong>${escapeHtml(row.next_confirmation || "추가 확인 필요")}</strong><small>트리거 ${escapeHtml(formatPrice(row.trigger_price))} · 무효화 ${escapeHtml(formatPrice(row.invalidation_price))}</small></div>
       <div class="predictive-detail-block risk-copy"><span>보류·위험</span><strong>${escapeHtml(risks)}</strong><small>${escapeHtml((row.why_now || []).slice(1).join(" · ") || "추가 근거 없음")}</small></div>
+      ${companyResearchDetail(row.symbol)}
     </div>
   </details>`;
 }
@@ -687,6 +689,72 @@ function contextCard(title, source, asOf, status, body) {
   </article>`;
 }
 
+function multiple(value) {
+  const parsed = number(value);
+  return parsed === null ? "—" : `${parsed.toFixed(1)}배`;
+}
+
+function stockLabel(symbol) {
+  const pools = [
+    ...(report.all_market_screen?.candidates || []),
+    ...(report.representative_stocks || []),
+    ...(report.relative_strength_leaders?.short_term || []),
+    ...(report.relative_strength_leaders?.swing || []),
+  ];
+  const row = pools.find((item) => item.symbol === symbol);
+  return row?.name ? `${row.name} · ${symbol}` : symbol;
+}
+
+function companyResearchDetail(symbol) {
+  const filings = report.official_disclosures?.by_symbol?.[symbol] || [];
+  const valuation = report.valuation_context?.by_symbol?.[symbol];
+  const peer = report.global_peer_context?.by_symbol?.[symbol];
+  if (!filings.length && !valuation && !peer) {
+    return `<div class="predictive-detail-block official-evidence-block"><span>공시·밸류·피어</span><strong>연결된 선택 데이터 없음</strong><small>필수 수급 판정에는 영향 없음</small></div>`;
+  }
+  const latest = filings[0];
+  const latestLink = latest ? safeHref(latest.link) : "";
+  const filingCopy = latest ? `${formatDate(latest.date)} · ${latest.title}` : "최근 공식 공시 없음";
+  const peerNames = (peer?.peers || []).slice(0, 3).map((item) => `${item.symbol}(${item.role === "direct_peer" ? "직접" : item.role === "benchmark" ? "벤치마크" : "가치사슬"})`).join(" · ") || "피어 미연결";
+  return `<div class="predictive-detail-block official-evidence-block"><span>공시·actual·피어</span>
+    <strong>${latestLink ? `<a href="${escapeHtml(latestLink)}" target="_blank" rel="noopener">${escapeHtml(filingCopy)}</a>` : escapeHtml(filingCopy)}</strong>
+    <small>TTM P/E ${multiple(valuation?.ttm_pe)} · 정상화 ${multiple(valuation?.normalized_pe)} · 최근분기 연율화 ${multiple(valuation?.recent_quarter_annualized_pe)}<br>${escapeHtml(peerNames)} · 20D 피어 초과 ${formatPct(peer?.excess_return_20d_pct)} · 피어 밸류 백분위 ${formatScore(peer?.trailing_valuation_percentile)}</small></div>`;
+}
+
+function officialItem(row) {
+  const href = safeHref(row.link);
+  const title = href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(row.title || "공시")}</a>` : escapeHtml(row.title || "공시");
+  const importance = Math.min(5, Math.max(1, Number(row.importance) || 1));
+  return `<div class="official-item"><div><strong>${escapeHtml(row.company || stockLabel(row.symbol))}</strong><span class="importance-pill level-${importance}">중요도 ${row.importance ?? "—"}</span></div><p>${title}</p><small>${escapeHtml(formatDate(row.date))} · ${escapeHtml(row.event_stage || row.event_type || "기타")}${number(row.materiality_pct) !== null ? ` · 기준액 대비 ${formatPct(row.materiality_pct)}` : ""}</small></div>`;
+}
+
+function renderOfficialContext() {
+  const disclosures = report.official_disclosures || {};
+  const valuation = report.valuation_context || {};
+  const peers = report.global_peer_context || {};
+  const digest = report.weekly_issue_digest || {};
+  byId("official-status-grid").innerHTML = [
+    contextCard("OpenDART 공식 공시", disclosures.source, disclosures.as_of, disclosures.status, `<div class="context-line"><strong>${(disclosures.items || []).length}건 표시</strong><small>정정·철회는 상태 변경 이력으로 보존</small></div>`),
+    contextCard("한국 재무 actual", valuation.source, valuation.as_of, valuation.status, `<div class="context-line"><strong>${Object.keys(valuation.by_symbol || {}).length}종목</strong><small>연결 우선 · 별도 대체 · 미래 공시 차단</small></div>`),
+    contextCard("글로벌 가치사슬", peers.source, peers.as_of, peers.status, `<div class="context-line"><strong>${Object.keys(peers.by_symbol || {}).length}종목</strong><small>직접 피어와 ETF 프록시를 분리</small></div>`),
+    contextCard("Forward 컨센서스", "허가된 원천 필요", null, valuation.forward_consensus?.status || "미연결", `<div class="context-line"><strong>값을 만들지 않음</strong><small>${escapeHtml(valuation.forward_consensus?.reason || "무료·허가된 컨센서스 원천 없음")}</small></div>`),
+  ].join("");
+  byId("weekly-issue-period").textContent = digest.window_start ? `${formatDate(digest.window_start)}–${formatDate(digest.window_end)}` : "수집 전";
+  byId("weekly-issue-list").innerHTML = (digest.items || []).length ? digest.items.slice(0, 15).map(officialItem).join("") : '<p class="context-empty">이번 주 연결된 공식 이슈가 없습니다.</p>';
+  byId("official-filing-list").innerHTML = (disclosures.items || []).length ? disclosures.items.slice(0, 15).map(officialItem).join("") : '<p class="context-empty">OPENDART_API_KEY 설정 후 표시됩니다.</p>';
+  const symbols = [...new Set([
+    ...(report.all_market_screen?.candidates || []).slice(0, 30).map((row) => row.symbol),
+    ...Object.keys(valuation.by_symbol || {}),
+    ...Object.keys(peers.by_symbol || {}),
+  ])].slice(0, 40);
+  byId("research-context-list").innerHTML = symbols.length ? symbols.map((symbol) => {
+    const value = valuation.by_symbol?.[symbol];
+    const peer = peers.by_symbol?.[symbol];
+    const filing = disclosures.by_symbol?.[symbol]?.[0];
+    return `<details class="research-context-row"><summary><strong>${escapeHtml(stockLabel(symbol))}</strong><span>TTM ${multiple(value?.ttm_pe)} · 피어 20D ${formatPct(peer?.excess_return_20d_pct)}</span><i class="expand-mark" aria-hidden="true"></i></summary><div>${companyResearchDetail(symbol)}<p class="research-warning">Forward P/E ${value?.consensus_forward_pe == null ? "미연결" : multiple(value.consensus_forward_pe)} · 최근 공시 ${escapeHtml(filing?.event_stage || "없음")}</p></div></details>`;
+  }).join("") : '<p class="context-empty">공시·재무·피어 연결 결과가 아직 없습니다.</p>';
+}
+
 function renderMarketContext() {
   const market = report.market_regime || {};
   const breadth = market.markets || [];
@@ -756,6 +824,7 @@ function rsCard(row, index) {
       <div><span>기다려야 하는 이유</span><strong>${escapeHtml(wait)}</strong></div>
       <div><span>트리거 / 무효화</span><strong>${escapeHtml(row.trigger || "재돌파 확인")} ${number(row.trigger_price) !== null ? `· ${escapeHtml(formatPrice(row.trigger_price))}` : ""}<br>${escapeHtml(formatPrice(row.invalidation_price))}</strong></div>
       <div><span>확인 근거</span><strong>테마 ${formatScore(row.theme_leadership_score)} · 수급 ${formatScore(row.flow_continuity_score)} · 진입 ${formatScore(row.entry_timing_score)}<br>${escapeHtml(row.short_borrow_classification || "공매도·대차 미확인")}</strong></div>
+      ${companyResearchDetail(row.symbol)}
     </div>
   </details>`;
 }
@@ -795,6 +864,9 @@ function renderData() {
     dataCard("시가총액", coverage.market_cap, coverage.market_cap?.available ? `${coverage.market_cap.symbol_count}개 종목` : coverage.market_cap?.reason),
     dataCard("시장경보", coverage.market_alert, coverage.market_alert?.reason),
     dataCard("예측 이벤트", coverage.predictive_events, coverage.predictive_events?.available ? `${coverage.predictive_events.event_count}건 · ${coverage.predictive_events.symbol_count}종목 · ${coverage.predictive_events.status}` : coverage.predictive_events?.reason),
+    dataCard("OpenDART 공시", coverage.official_disclosures, coverage.official_disclosures?.available ? `${coverage.official_disclosures.filing_count}건 · ${coverage.official_disclosures.symbol_count}종목` : coverage.official_disclosures?.reason),
+    dataCard("재무 actual", coverage.valuation_actuals, coverage.valuation_actuals?.available ? `${coverage.valuation_actuals.symbol_count}종목` : coverage.valuation_actuals?.reason),
+    dataCard("글로벌 피어", coverage.global_peers, coverage.global_peers?.available ? `${coverage.global_peers.symbol_count}종목` : coverage.global_peers?.reason),
     dataCard("거래일 세트", { available: true }, `1D ${names(coverage.dates_1d)} · 3D ${names(coverage.dates_3d)} · 5D ${names(coverage.dates_5d)}`),
   ];
   byId("data-grid").innerHTML = cards.join("");
@@ -817,6 +889,7 @@ function renderData() {
     <p><strong>예측 점수:</strong> ${escapeHtml(method.predictive_score_note || "근거 충족도이며 수익확률이 아님")}</p>
     <p><strong>예측 백테스트:</strong> ${escapeHtml(method.predictive_backtest_note || "다음 거래일 시가 체결과 갭 미체결을 반영")}</p>
     <p><strong>전 종목 구조 스크린:</strong> ${escapeHtml(method.all_market_screen_note || "뉴스 없이 전 종목을 먼저 판정하고 공식 이벤트는 강화 근거로만 사용")}</p>
+    <p><strong>공시·밸류·피어:</strong> ${escapeHtml(method.official_context_note || "OpenDART actual과 가치사슬 피어를 별도 근거로 사용하며 컨센서스 누락값을 만들지 않음")}</p>
     <p><strong>워크포워드 (${escapeHtml(walkForward.status || "기준선 형성 중")}):</strong> ${walkForwardRows || "결과 축적 중"}</p>
     <p>${escapeHtml(walkForward.method || "과거 시점 데이터만 사용하며 구현 이후 viability 후보는 전진 축적")}</p>
     <p><a href="${REPORT_URL}" target="_blank" rel="noopener">원본 구조화 JSON 열기 →</a></p>`;
@@ -855,6 +928,7 @@ function renderAll() {
   renderPredictive();
   renderFundCockpit();
   renderMarketContext();
+  renderOfficialContext();
   renderRs();
   renderRegimes();
   renderSubthemes();
