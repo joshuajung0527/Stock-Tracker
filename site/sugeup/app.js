@@ -1,6 +1,7 @@
 const REPORT_URL = "../data/korea-theme/sugeup_latest.json";
 const REPORT_POLL_INTERVAL_MS = 5 * 60 * 1000;
 const SCHEDULED_SLOTS_KST = new Set(["16:00", "18:00", "21:00"]);
+const TECHNICAL_CLASSIFICATIONS = ["수급+차트 동시", "지지선 눌림", "수급 강함·차트 대기", "차트 선행·수급 대기", "과열·추격 금지", "실패·회피"];
 
 let report = null;
 let reportRequestInFlight = false;
@@ -180,8 +181,10 @@ function allMarketCard(row) {
   const catalystText = catalyst.headline
     ? `${formatDate(catalyst.event_date)} · ${catalyst.headline}`
     : "공식 Catalyst 없이 구조 신호만 판정";
-  const riskStage = ["과열·추격 금지", "공급 압력·회피"].includes(row.stage);
+  const riskStage = ["기관성 거래량 확장·확인 대기", "과열·추격 금지", "공급 압력·회피"].includes(row.stage);
   const flow1d = row.flow?.["1d"] || {};
+  const activity = row.institutional_activity_signal || {};
+  const activityPrivate = activity.private_equity || {};
   const reasons = (row.reasons || []).join(" · ") || "구조 근거 부족";
   const risks = (row.risks || []).join(" · ") || "명시된 추가 위험 없음";
   return `<details class="predictive-card all-market-card ${row.research_candidate ? "is-research" : ""}">
@@ -195,6 +198,7 @@ function allMarketCard(row) {
     <div class="predictive-detail">
       <div class="predictive-detail-block"><span>1D 3자 수급</span><div class="predictive-flow">${predictiveFlow(flow1d)}</div><small>5D 3자 수급/거래대금 ${number(row.triad_intensity_5d) === null ? "—" : `${(number(row.triad_intensity_5d) * 100).toFixed(1)}%`}</small></div>
       <div class="predictive-detail-block"><span>가격 위치</span><strong>1D ${escapeHtml(formatPct(row.return_1d_pct))} · 5D ${escapeHtml(formatPct(row.return_5d_pct))}</strong><small>20일 고점 대비 ${escapeHtml(formatPct(row.drawdown_20d_pct))} · 거래대금 z ${number(row.turnover_zscore_20d)?.toFixed(2) ?? "—"}</small></div>
+      <div class="predictive-detail-block"><span>기관성 거래량</span><strong>${escapeHtml(activity.label || "기관성 거래량 확장 없음")}</strong><small>거래량 중앙값 ${multiple(activity.volume?.ratio_to_prior_20d_median)} · 사모 1D ${escapeHtml(formatMoneyMillion(activityPrivate.net_buy_1d_million_krw, true))} · 3D ${escapeHtml(formatMoneyMillion(activityPrivate.net_buy_3d_million_krw, true))}</small></div>
       <div class="predictive-detail-block"><span>체결·테마</span><strong>체결강도 ${number(row.execution_strength)?.toFixed(1) ?? "—"}</strong><small>테마 상승 참여 ${number(row.theme_breadth?.advance_pct)?.toFixed(1) ?? "—"}% · ${row.theme_breadth?.member_count ?? 0}종목</small></div>
       <div class="predictive-detail-block"><span>공매도·대차</span><strong>${escapeHtml(shortBorrow.classification || "데이터 부족")}</strong><small>공매도 금액비중 ${number(shortSale.short_sale_amount_ratio_1d) === null ? "—" : `${(number(shortSale.short_sale_amount_ratio_1d) * 100).toFixed(1)}%`} · 대차 3D ${number(borrow.borrow_balance_change_3d)?.toLocaleString("ko-KR") ?? "—"}</small></div>
       <div class="predictive-detail-block catalyst-block"><span>Catalyst 층</span><strong>${catalystUrl ? `<a href="${escapeHtml(catalystUrl)}" target="_blank" rel="noopener">${escapeHtml(catalystText)}</a>` : escapeHtml(catalystText)}</strong><small>${escapeHtml(row.catalyst_layer || "구조 신호만")}</small></div>
@@ -229,6 +233,54 @@ function renderAllMarketScreen() {
   byId("all-market-status").innerHTML = `
     <div><span class="freshness-badge ${statusClass(screen.status)}">${escapeHtml(screen.status || "미연결")}</span><strong>${screen.universe_count ?? 0}종목 전수 판정 · 구조 신호 ${screen.matched_count ?? 0}개</strong><small>연구 후보 ${screen.research_candidate_count ?? 0} · 실행 게이트 ${screen.execution_eligible_count ?? 0} · 화면 상위 ${screen.displayed_count ?? 0}</small></div>
     <p>${escapeHtml(screen.score_warning || "점수는 수익확률이 아닙니다.")}</p>`;
+}
+
+function institutionalActivityCard(row) {
+  const signal = row.signal || {};
+  const volume = signal.volume || {};
+  const turnover = signal.turnover || {};
+  const privateFlow = signal.private_equity || {};
+  const riskStage = ["resistance_confirmation_pending", "unconfirmed_activity_spike"].includes(signal.signal_code);
+  const reasons = (signal.reasons || []).join(" · ") || "기관성 거래량 근거 부족";
+  const risks = (signal.risks || []).join(" · ") || "명시된 추가 위험 없음";
+  return `<details class="predictive-card ${signal.signal_code === "confirmed_institutional_expansion" ? "is-eligible" : ""}">
+    <summary>
+      <div class="predictive-stage ${riskStage ? "is-risk" : ""}">${escapeHtml(signal.label || "관찰")}</div>
+      <div class="stock-name"><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.symbol)} · ${escapeHtml(row.market)} · ${escapeHtml(row.theme || "미분류")}</small></div>
+      <div class="predictive-score"><small>ACTIVITY</small><strong>${formatScore(signal.score)}</strong></div>
+      <div class="predictive-thesis"><strong>${escapeHtml((signal.reasons || [])[0] || "기준선 확인")}</strong><small>${escapeHtml(signal.action || "관찰")} · research_only</small></div>
+      <span class="expand-mark" aria-hidden="true"></span>
+    </summary>
+    <div class="predictive-detail">
+      <div class="predictive-detail-block"><span>거래량 충격</span><strong>20D 중앙값 ${multiple(volume.ratio_to_prior_20d_median)} · 5D 평균 ${multiple(volume.ratio_to_prior_5d_mean)}</strong><small>강건 log z ${number(volume.robust_log_zscore_prior_20d)?.toFixed(2) ?? "—"} · 일반 z ${number(volume.ordinary_zscore_prior_20d)?.toFixed(2) ?? "—"}${volume.outlier_contaminated_mean_warning ? " · 과거 극단치로 평균 z 왜곡" : ""}</small></div>
+      <div class="predictive-detail-block"><span>거래대금 충격</span><strong>20D 중앙값 ${multiple(turnover.ratio_to_prior_20d_median)} · 5D 평균 ${multiple(turnover.ratio_to_prior_5d_mean)}</strong><small>강건 log z ${number(turnover.robust_log_zscore_prior_20d)?.toFixed(2) ?? "—"} · 일반 z ${number(turnover.ordinary_zscore_prior_20d)?.toFixed(2) ?? "—"}</small></div>
+      <div class="predictive-detail-block"><span>사모 지속성</span><strong>1D ${escapeHtml(formatMoneyMillion(privateFlow.net_buy_1d_million_krw, true))} · 3D ${escapeHtml(formatMoneyMillion(privateFlow.net_buy_3d_million_krw, true))}</strong><small>1D 강도 ${number(privateFlow.intensity_1d) === null ? "—" : `${(number(privateFlow.intensity_1d) * 100).toFixed(2)}%`} · 3일 중 ${privateFlow.positive_days_3d ?? 0}일 순매수 · 과거 백분위 ${number(privateFlow.percentile_prior_60d)?.toFixed(0) ?? "—"}</small></div>
+      <div class="predictive-detail-block"><span>기관 폭·가격 확인</span><strong>국내 기관 ${signal.domestic_institution_positive_count_1d ?? 0}/3 양수 · 종가 위치 ${number(row.close_pos) === null ? "—" : `${(number(row.close_pos) * 100).toFixed(1)}%`}</strong><small>외국인 ${escapeHtml(formatMoneyMillion(signal.foreigner_net_buy_1d_million_krw, true))} · ${signal.price_confirmed ? "가격 확인 통과" : "저항·종가 확인 대기"}</small></div>
+      <div class="predictive-detail-block catalyst-block"><span>판정 근거</span><strong>${escapeHtml(reasons)}</strong><small>신호일을 제외한 과거값만 사용</small></div>
+      <div class="predictive-detail-block risk-copy"><span>위험·보류</span><strong>${escapeHtml(risks)}</strong><small>워크포워드 검증 전 순위 점수 미반영</small></div>
+      ${companyResearchDetail(row.symbol)}
+    </div>
+  </details>`;
+}
+
+function renderInstitutionalActivity() {
+  const radar = report.institutional_activity_radar || {};
+  const candidates = radar.candidates || [];
+  const filter = byId("institutional-activity-filter");
+  const current = filter.value;
+  const labels = [...new Map(candidates.map((row) => [row.signal?.signal_code, row.signal?.label]).filter(([code]) => code)).entries()];
+  filter.innerHTML = '<option value="">전체 신호</option>' + labels.map(([code, label]) => `<option value="${escapeHtml(code)}">${escapeHtml(label)}</option>`).join("");
+  if (labels.some(([code]) => code === current)) filter.value = current;
+  const query = byId("institutional-activity-search").value.trim().toLowerCase();
+  const rows = candidates.filter((row) => {
+    const haystack = `${row.name || ""} ${row.symbol || ""} ${row.theme || ""}`.toLowerCase();
+    return (!filter.value || row.signal?.signal_code === filter.value) && (!query || haystack.includes(query));
+  });
+  byId("institutional-activity-list").innerHTML = rows.map(institutionalActivityCard).join("");
+  byId("institutional-activity-empty").hidden = rows.length > 0;
+  byId("institutional-activity-status").innerHTML = `
+    <div><span class="freshness-badge ${statusClass(radar.status)}">${escapeHtml(radar.status || "미연결")}</span><strong>${radar.candidate_count ?? 0}종목 감지 · 화면 ${radar.displayed_count ?? 0}</strong><small>신호일 제외 baseline · 순위 반영 ${radar.ranking_impact === "none_until_walk_forward_validation" ? "보류" : "확인 필요"}</small></div>
+    <p>${escapeHtml(radar.definition || "거래량 충격과 기관 수급을 분리해 진단")}</p>`;
 }
 
 function predictiveFlow(values = {}) {
@@ -564,6 +616,8 @@ function leaderCard(stock) {
   const borrow = stock.borrow || {};
   const plan = stock.entry_plan || {};
   const auxiliary = stock.score_evidence?.auxiliary_sections || [];
+  const activity = stock.institutional_activity_signal || {};
+  const activityPrivate = activity.private_equity || {};
   return `
     <details class="leader-card">
       <summary class="leader-summary">
@@ -599,6 +653,13 @@ function leaderCard(stock) {
         <section class="detail-block">
           <h4>화면일 주체별 수급</h4>
           ${investorFlow(flow["1d"])}
+        </section>
+        <section class="detail-block">
+          <h4>기관성 거래량 확장</h4>
+          <p><span class="detail-label">판정</span>${escapeHtml(activity.label || "데이터 없음")}</p>
+          <p><span class="detail-label">거래량</span>20D 중앙값 ${multiple(activity.volume?.ratio_to_prior_20d_median)} · 강건 z ${number(activity.volume?.robust_log_zscore_prior_20d)?.toFixed(2) ?? "—"}</p>
+          <p><span class="detail-label">사모</span>1D ${escapeHtml(formatMoneyMillion(activityPrivate.net_buy_1d_million_krw, true))} · 3D ${escapeHtml(formatMoneyMillion(activityPrivate.net_buy_3d_million_krw, true))}</p>
+          <p><span class="detail-label">주의</span>${escapeHtml((activity.risks || []).join(" · ") || "추가 확인 위험 없음")}</p>
         </section>
         <section class="detail-block">
           <h4>체결 · 공매도 · 대차</h4>
@@ -787,6 +848,137 @@ function renderMarketContext() {
     : '<span class="context-empty">원천 상태 정보 없음</span>';
 }
 
+function technicalRows() {
+  const groups = report.technical_setup_radar?.categories || {};
+  const unique = new Map();
+  Object.values(groups).flat().forEach((row) => {
+    const prior = unique.get(row.symbol);
+    if (!prior || (number(row.technical_setup_score) ?? -Infinity) > (number(prior.technical_setup_score) ?? -Infinity)) unique.set(row.symbol, row);
+  });
+  return [...unique.values()].sort((a, b) => {
+    const classOrder = TECHNICAL_CLASSIFICATIONS.indexOf(a.execution_classification) - TECHNICAL_CLASSIFICATIONS.indexOf(b.execution_classification);
+    return classOrder || (number(b.technical_setup_score) ?? -Infinity) - (number(a.technical_setup_score) ?? -Infinity);
+  });
+}
+
+function setSelectOptions(id, label, values) {
+  const select = byId(id);
+  const current = select.value;
+  select.innerHTML = `<option value="">${escapeHtml(label)}</option>` + [...new Set(values.filter(Boolean))].sort().map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+  if ([...select.options].some((option) => option.value === current)) select.value = current;
+}
+
+function technicalCard(row) {
+  const daily = row.ichimoku_daily || {};
+  const weekly = row.ichimoku_weekly || {};
+  const momentum = row.momentum || {};
+  const pattern = row.best_pattern || {};
+  const trigger = row.trigger;
+  const invalidation = row.invalidation;
+  const hasChart = Boolean(report.technical_setup_radar?.charts?.[row.symbol]);
+  return `<details class="technical-card" data-technical-symbol="${escapeHtml(row.symbol)}">
+    <summary>
+      <div class="technical-score"><small>TECH</small><strong>${formatScore(row.technical_setup_score)}</strong></div>
+      <div class="stock-name"><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.symbol)} · ${escapeHtml(row.market)} · ${escapeHtml(row.theme || "미분류")}</small></div>
+      <span class="technical-class technical-${escapeHtml(row.execution_classification || "관찰")}">${escapeHtml(row.execution_classification || "관찰")}</span>
+      <div class="technical-snapshot"><span>${escapeHtml(daily.location || "이력 부족")}</span><span>${escapeHtml(momentum.macd_state || "MACD 없음")}</span><span>RSI ${number(momentum.rsi14)?.toFixed(1) ?? "—"}</span><span>${escapeHtml(pattern.label || "패턴 없음")}</span></div>
+      <span class="expand-mark" aria-hidden="true"></span>
+    </summary>
+    <div class="technical-detail">
+      <div class="technical-facts">
+        <div><span>일봉 / 완료 주봉</span><strong>${escapeHtml(daily.location || "—")} · ${escapeHtml(daily.tenkan_kijun || "—")}<br>${escapeHtml(weekly.location || "—")} · 미래 구름 ${escapeHtml(daily.future_cloud || "—")}</strong></div>
+        <div><span>모멘텀</span><strong>${escapeHtml(momentum.rsi_state || "—")}<br>${escapeHtml(momentum.macd_state || "—")}</strong></div>
+        <div><span>패턴</span><strong>${escapeHtml(pattern.label || "조건 충족 없음")} ${pattern.score != null ? formatScore(pattern.score) : ""}<br>${escapeHtml(pattern.status || pattern.detail || "—")}</strong></div>
+        <div><span>최근 레벨</span><strong>지지 ${formatPrice(row.nearest_support?.price)} · 저항 ${formatPrice(row.nearest_resistance?.price)}<br>${row.support_confirmed ? "지지 확인" : "지지 미확인"} · ${row.breakout_confirmed ? "돌파 확인" : "돌파 대기"}</strong></div>
+        <div><span>실행 조건</span><strong>트리거 ${escapeHtml(trigger?.kind || "없음")} ${formatPrice(trigger?.price)}<br>무효화 ${escapeHtml(invalidation?.kind || "없음")} ${formatPrice(invalidation?.price)}</strong></div>
+        <div><span>수급·RS</span><strong>${escapeHtml(row.flow_classification || "관찰")} · 수급 ${formatScore(row.flow_continuity_score)} · RS ${formatScore(row.rs_score)}<br>기술 계층은 research_only</strong></div>
+      </div>
+      ${hasChart ? `<div class="mini-chart-grid">
+        <figure><figcaption>최근 120일 · 가격/구름/Tenkan/Kijun/거래량</figcaption><canvas class="technical-canvas" data-timeframe="daily" aria-label="${escapeHtml(row.name)} 일봉 기술 차트"></canvas></figure>
+        <figure><figcaption>완료 주봉 60개 · 진행 주 제외</figcaption><canvas class="technical-canvas" data-timeframe="weekly" aria-label="${escapeHtml(row.name)} 주봉 기술 차트"></canvas></figure>
+      </div>` : '<p class="chart-omitted">상위 50개 고유 후보만 차트 시계열을 제공합니다. 요약 기술 판정은 전 종목에 계산됐습니다.</p>'}
+    </div>
+  </details>`;
+}
+
+function drawTechnicalChart(canvas, data, levels = {}) {
+  if (!canvas || !data?.c?.length) return;
+  const rect = canvas.getBoundingClientRect();
+  const width = Math.max(320, Math.floor(rect.width || 640));
+  const height = 250;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = width * dpr; canvas.height = height * dpr;
+  const ctx = canvas.getContext("2d"); ctx.scale(dpr, dpr);
+  const pad = { left: 8, right: 54, top: 12, bottom: 42 };
+  const plotHeight = height - pad.top - pad.bottom;
+  const volumeHeight = 34;
+  const priceHeight = plotHeight - volumeHeight - 8;
+  const values = [...(data.h || []), ...(data.l || []), ...(data.a || []), ...(data.b || [])].map(number).filter((value) => value !== null);
+  if (!values.length) return;
+  let min = Math.min(...values), max = Math.max(...values);
+  const margin = (max - min || max * .05 || 1) * .08; min -= margin; max += margin;
+  const x = (index) => pad.left + index * (width - pad.left - pad.right) / Math.max(1, data.c.length - 1);
+  const y = (value) => pad.top + (max - value) * priceHeight / Math.max(.0001, max - min);
+  ctx.fillStyle = "#08111e"; ctx.fillRect(0, 0, width, height);
+  ctx.strokeStyle = "rgba(148,163,184,.13)"; ctx.lineWidth = 1;
+  for (let line = 0; line <= 3; line += 1) { const yy = pad.top + priceHeight * line / 3; ctx.beginPath(); ctx.moveTo(pad.left, yy); ctx.lineTo(width - pad.right, yy); ctx.stroke(); }
+  for (let index = 1; index < data.c.length; index += 1) {
+    const a1 = number(data.a?.[index - 1]), b1 = number(data.b?.[index - 1]), a2 = number(data.a?.[index]), b2 = number(data.b?.[index]);
+    if ([a1, b1, a2, b2].some((value) => value === null)) continue;
+    ctx.fillStyle = ((a1 + a2) / 2 >= (b1 + b2) / 2) ? "rgba(45,212,191,.14)" : "rgba(248,113,113,.14)";
+    ctx.beginPath(); ctx.moveTo(x(index - 1), y(a1)); ctx.lineTo(x(index), y(a2)); ctx.lineTo(x(index), y(b2)); ctx.lineTo(x(index - 1), y(b1)); ctx.closePath(); ctx.fill();
+  }
+  const maxVolume = Math.max(...(data.v || []).map((value) => number(value) || 0), 1);
+  data.c.forEach((rawClose, index) => {
+    const close = number(rawClose), open = number(data.o?.[index]), high = number(data.h?.[index]), low = number(data.l?.[index]);
+    if ([close, open, high, low].some((value) => value === null)) return;
+    const color = close >= open ? "#2dd4bf" : "#fb7185"; const xx = x(index); const body = Math.max(1, Math.abs(y(open) - y(close)));
+    ctx.strokeStyle = color; ctx.beginPath(); ctx.moveTo(xx, y(high)); ctx.lineTo(xx, y(low)); ctx.stroke();
+    ctx.fillStyle = color; ctx.fillRect(xx - 1.5, Math.min(y(open), y(close)), 3, body);
+    const volume = number(data.v?.[index]) || 0; const vh = volumeHeight * volume / maxVolume; ctx.globalAlpha = .28; ctx.fillRect(xx - 1.5, pad.top + priceHeight + 8 + volumeHeight - vh, 3, vh); ctx.globalAlpha = 1;
+  });
+  const drawLine = (valuesToDraw, color, lineWidth = 1.2) => {
+    ctx.strokeStyle = color; ctx.lineWidth = lineWidth; ctx.beginPath(); let started = false;
+    valuesToDraw.forEach((raw, index) => { const value = number(raw); if (value === null) { started = false; return; } if (!started) { ctx.moveTo(x(index), y(value)); started = true; } else ctx.lineTo(x(index), y(value)); }); ctx.stroke();
+  };
+  drawLine(data.t || [], "#38bdf8"); drawLine(data.k || [], "#f59e0b", 1.5); drawLine(data.c || [], "rgba(226,232,240,.55)", .8);
+  [[levels.pivot, "#c084fc", "P"], [levels.support, "#2dd4bf", "S"], [levels.resistance, "#fb7185", "R"]].forEach(([raw, color, label]) => {
+    const value = number(raw); if (value === null || value < min || value > max) return; const yy = y(value); ctx.strokeStyle = color; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(pad.left, yy); ctx.lineTo(width - pad.right, yy); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = color; ctx.font = "10px system-ui"; ctx.fillText(`${label} ${Math.round(value).toLocaleString("ko-KR")}`, width - pad.right + 4, yy + 3);
+  });
+  ctx.fillStyle = "#64748b"; ctx.font = "10px system-ui"; ctx.fillText(data.d?.[0] || "", pad.left, height - 8); ctx.textAlign = "right"; ctx.fillText(data.d?.at(-1) || "", width - pad.right, height - 8); ctx.textAlign = "left";
+}
+
+function drawTechnicalDetails(details) {
+  const symbol = details.dataset.technicalSymbol;
+  const chart = report.technical_setup_radar?.charts?.[symbol];
+  if (!chart) return;
+  details.querySelectorAll("canvas[data-timeframe]").forEach((canvas) => drawTechnicalChart(canvas, chart[canvas.dataset.timeframe], chart));
+}
+
+function renderTechnical() {
+  const context = report.technical_setup_context || {};
+  const radar = report.technical_setup_radar || {};
+  const rows = technicalRows();
+  setSelectOptions("technical-class-filter", "전체 분류", TECHNICAL_CLASSIFICATIONS);
+  setSelectOptions("technical-pattern-filter", "전체 패턴", rows.map((row) => row.best_pattern?.label));
+  setSelectOptions("technical-ichimoku-filter", "전체 상태", rows.map((row) => row.ichimoku_daily?.location));
+  const query = byId("technical-search").value.trim().toLowerCase();
+  const classification = byId("technical-class-filter").value;
+  const pattern = byId("technical-pattern-filter").value;
+  const ichimoku = byId("technical-ichimoku-filter").value;
+  const filtered = rows.filter((row) => {
+    const haystack = [row.name, row.symbol, row.market, row.theme].join(" ").toLowerCase();
+    return (!query || haystack.includes(query)) && (!classification || row.execution_classification === classification) && (!pattern || row.best_pattern?.label === pattern) && (!ichimoku || row.ichimoku_daily?.location === ichimoku);
+  });
+  byId("technical-status").innerHTML = `<span class="freshness-badge ${statusClass(context.status)}">${escapeHtml(context.status || "미연결")}</span><strong>${context.analysed_symbol_count ?? 0}종목 계산 · 차트 ${Object.keys(radar.charts || {}).length}/50</strong><small>${escapeHtml(context.ichimoku || "표준 일목 9·26·52")} · <b>research_only</b></small>`;
+  byId("technical-list").innerHTML = filtered.map(technicalCard).join("");
+  byId("technical-empty").hidden = filtered.length > 0;
+  byId("technical-list").querySelectorAll("details[data-technical-symbol]").forEach((details) => details.addEventListener("toggle", () => { if (details.open) requestAnimationFrame(() => drawTechnicalDetails(details)); }));
+  const backtest = report.technical_backtest || {};
+  const tenDay = (backtest.results || []).filter((row) => row.horizon === 10);
+  byId("technical-backtest").innerHTML = `<strong>기술 게이트 홀드아웃</strong><span class="freshness-badge ${statusClass(backtest.status)}">${escapeHtml(backtest.status || "기준선 형성 중")}</span><p>${tenDay.length ? tenDay.map((row) => `${escapeHtml(row.cohort)} ${row.signal_count}건 · 10D 중앙 ${formatPct(row.median_net_return_pct)} · 승률 ${number(row.win_rate_pct)?.toFixed(1) ?? "—"}% · MAE ${formatPct(row.median_mae_pct)} · FDR q ${number(row.fdr_qvalue)?.toFixed(3) ?? "—"}`).join("<br>") : "성과 기준선 축적 중"}</p><small>${backtest.promotion_eligible ? "승격 조건 통과" : "실행 우선순위 미반영 — 비용 후 개선·MAE·100건·FDR 조건을 아직 모두 통과하지 않음"}</small>`;
+}
+
 function rsRows() {
   const leaderRows = report.relative_strength_leaders?.[rsHorizon] || [];
   const groups = report.viability_candidates?.[rsHorizon] || {};
@@ -867,6 +1059,7 @@ function renderData() {
     dataCard("OpenDART 공시", coverage.official_disclosures, coverage.official_disclosures?.available ? `${coverage.official_disclosures.filing_count}건 · ${coverage.official_disclosures.symbol_count}종목` : coverage.official_disclosures?.reason),
     dataCard("재무 actual", coverage.valuation_actuals, coverage.valuation_actuals?.available ? `${coverage.valuation_actuals.symbol_count}종목` : coverage.valuation_actuals?.reason),
     dataCard("글로벌 피어", coverage.global_peers, coverage.global_peers?.available ? `${coverage.global_peers.symbol_count}종목` : coverage.global_peers?.reason),
+    dataCard("차트 셋업", coverage.technical_setups, coverage.technical_setups?.available ? `${coverage.technical_setups.symbol_count}종목 · 미니차트 ${coverage.technical_setups.chart_symbol_count}개 · ${coverage.technical_setups.status}` : coverage.technical_setups?.reason),
     dataCard("거래일 세트", { available: true }, `1D ${names(coverage.dates_1d)} · 3D ${names(coverage.dates_3d)} · 5D ${names(coverage.dates_5d)}`),
   ];
   byId("data-grid").innerHTML = cards.join("");
@@ -889,7 +1082,9 @@ function renderData() {
     <p><strong>예측 점수:</strong> ${escapeHtml(method.predictive_score_note || "근거 충족도이며 수익확률이 아님")}</p>
     <p><strong>예측 백테스트:</strong> ${escapeHtml(method.predictive_backtest_note || "다음 거래일 시가 체결과 갭 미체결을 반영")}</p>
     <p><strong>전 종목 구조 스크린:</strong> ${escapeHtml(method.all_market_screen_note || "뉴스 없이 전 종목을 먼저 판정하고 공식 이벤트는 강화 근거로만 사용")}</p>
+    <p><strong>기관성 거래량:</strong> ${escapeHtml(method.institutional_activity_note || "신호일 제외 직전20일 강건 거래량과 사모 지속성을 결합하며 검증 전 순위에는 미반영")}</p>
     <p><strong>공시·밸류·피어:</strong> ${escapeHtml(method.official_context_note || "OpenDART actual과 가치사슬 피어를 별도 근거로 사용하며 컨센서스 누락값을 만들지 않음")}</p>
+    <p><strong>차트 실행 게이트:</strong> ${escapeHtml(method.technical_setup_note || "수급·RS와 분리된 research_only 기술 계층")}</p>
     <p><strong>워크포워드 (${escapeHtml(walkForward.status || "기준선 형성 중")}):</strong> ${walkForwardRows || "결과 축적 중"}</p>
     <p>${escapeHtml(walkForward.method || "과거 시점 데이터만 사용하며 구현 이후 viability 후보는 전진 축적")}</p>
     <p><a href="${REPORT_URL}" target="_blank" rel="noopener">원본 구조화 JSON 열기 →</a></p>`;
@@ -918,17 +1113,25 @@ function bindControls() {
   byId("all-market-stage-filter").addEventListener("change", renderAllMarketScreen);
   byId("all-market-catalyst-filter").addEventListener("change", renderAllMarketScreen);
   byId("all-market-research-only").addEventListener("change", renderAllMarketScreen);
+  byId("institutional-activity-filter").addEventListener("change", renderInstitutionalActivity);
+  byId("institutional-activity-search").addEventListener("input", renderInstitutionalActivity);
   byId("fund-nav-eok").addEventListener("input", renderSizing);
+  byId("technical-search").addEventListener("input", renderTechnical);
+  byId("technical-class-filter").addEventListener("change", renderTechnical);
+  byId("technical-pattern-filter").addEventListener("change", renderTechnical);
+  byId("technical-ichimoku-filter").addEventListener("change", renderTechnical);
 }
 
 function renderAll() {
   renderHero();
   renderSummaryCards();
   renderAllMarketScreen();
+  renderInstitutionalActivity();
   renderPredictive();
   renderFundCockpit();
   renderMarketContext();
   renderOfficialContext();
+  renderTechnical();
   renderRs();
   renderRegimes();
   renderSubthemes();
@@ -979,6 +1182,11 @@ async function loadReport({ showLoading = true } = {}) {
 document.addEventListener("DOMContentLoaded", () => {
   bindControls();
   loadReport();
+  let chartResizeTimer = null;
+  window.addEventListener("resize", () => {
+    window.clearTimeout(chartResizeTimer);
+    chartResizeTimer = window.setTimeout(() => document.querySelectorAll("details[data-technical-symbol][open]").forEach(drawTechnicalDetails), 120);
+  });
   window.setInterval(() => {
     if (document.visibilityState === "visible") loadReport({ showLoading: false });
   }, REPORT_POLL_INTERVAL_MS);

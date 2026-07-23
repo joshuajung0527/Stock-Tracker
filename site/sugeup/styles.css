@@ -2008,12 +2008,75 @@ footer {
 .research-warning { margin: 0; padding: 1rem; background: rgba(255,255,255,.9); color: var(--muted); font-size: .72rem; line-height: 1.6; }
 .official-evidence-block a { color: var(--blue); text-decoration: underline; text-underline-offset: 3px; }
 
+.technical-section {
+  position: relative;
+  border-radius: 30px;
+  padding: clamp(1.3rem, 3vw, 2.4rem);
+  background: linear-gradient(145deg, rgba(7, 18, 32, .98), rgba(14, 31, 51, .96));
+  color: #e2e8f0;
+  box-shadow: 0 28px 70px rgba(6, 18, 34, .18);
+}
+.technical-section .section-heading h2,
+.technical-section .section-kicker { color: #f8fafc; }
+.technical-section .section-heading > p { color: #94a3b8; }
+.technical-status {
+  display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+  margin: 1rem 0; padding: .8rem 1rem; border: 1px solid rgba(148,163,184,.18);
+  border-radius: 14px; background: rgba(15,23,42,.5);
+}
+.technical-status strong { font-size: .82rem; }
+.technical-status small { color: #94a3b8; margin-left: auto; }
+.technical-toolbar {
+  display: grid; grid-template-columns: 1.25fr repeat(3, minmax(145px, .75fr)); gap: .7rem; margin-bottom: 1rem;
+}
+.technical-toolbar label { display: grid; gap: .35rem; color: #94a3b8; font-size: .67rem; }
+.technical-toolbar input,
+.technical-toolbar select {
+  width: 100%; min-height: 42px; border: 1px solid rgba(148,163,184,.22); border-radius: 11px;
+  padding: .65rem .75rem; background: #0b1727; color: #e2e8f0;
+}
+.technical-list { display: grid; gap: .7rem; }
+.technical-card { border: 1px solid rgba(148,163,184,.18); border-radius: 16px; overflow: hidden; background: rgba(10,22,38,.76); }
+.technical-card summary {
+  display: grid; grid-template-columns: 58px minmax(180px, 1fr) minmax(130px, auto) minmax(320px, 1.4fr) 24px;
+  gap: .8rem; align-items: center; padding: .9rem 1rem; cursor: pointer; list-style: none;
+}
+.technical-card summary::-webkit-details-marker { display: none; }
+.technical-card[open] .expand-mark::after { transform: translate(-50%, -50%) rotate(0deg); }
+.technical-score { display: grid; text-align: center; }
+.technical-score small { color: #64748b; font-size: .58rem; letter-spacing: .12em; }
+.technical-score strong { color: #f8fafc; font: 700 1.25rem/1 var(--display); }
+.technical-card .stock-name strong { color: #f8fafc; }
+.technical-card .stock-name small { color: #64748b; }
+.technical-class { justify-self: start; border: 1px solid rgba(56,189,248,.25); border-radius: 999px; padding: .38rem .58rem; background: rgba(14,165,233,.1); color: #7dd3fc; font-size: .67rem; white-space: nowrap; }
+.technical-class[class*="과열"], .technical-class[class*="실패"] { color: #fda4af; border-color: rgba(251,113,133,.3); background: rgba(244,63,94,.1); }
+.technical-snapshot { display: flex; flex-wrap: wrap; gap: .4rem; }
+.technical-snapshot span { border-radius: 6px; padding: .28rem .42rem; background: rgba(148,163,184,.08); color: #cbd5e1; font-size: .64rem; }
+.technical-detail { border-top: 1px solid rgba(148,163,184,.18); }
+.technical-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: rgba(148,163,184,.16); }
+.technical-facts > div { display: grid; gap: .35rem; min-height: 105px; padding: .9rem; background: #0a1626; }
+.technical-facts span { color: #64748b; font-size: .63rem; text-transform: uppercase; letter-spacing: .06em; }
+.technical-facts strong { color: #cbd5e1; font-size: .73rem; line-height: 1.55; }
+.mini-chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1px; background: rgba(148,163,184,.16); border-top: 1px solid rgba(148,163,184,.16); }
+.mini-chart-grid figure { margin: 0; padding: .8rem; background: #08111e; }
+.mini-chart-grid figcaption { color: #64748b; font-size: .63rem; margin-bottom: .5rem; }
+.technical-canvas { display: block; width: 100%; height: 250px; border-radius: 8px; }
+.chart-omitted { margin: 0; padding: 1rem; border-top: 1px solid rgba(148,163,184,.16); color: #64748b; font-size: .7rem; }
+.technical-backtest { margin-top: 1rem; padding: 1rem; border: 1px solid rgba(148,163,184,.18); border-radius: 14px; background: rgba(15,23,42,.5); }
+.technical-backtest > strong { margin-right: .6rem; }
+.technical-backtest p { color: #cbd5e1; font-size: .72rem; line-height: 1.7; }
+.technical-backtest small { color: #94a3b8; }
+
 @media (max-width: 1080px) {
   .official-status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .all-market-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .predictive-card summary { grid-template-columns: 125px minmax(170px, 1fr) 75px 24px; }
   .predictive-thesis { display: none; }
   .predictive-detail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .technical-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .technical-card summary { grid-template-columns: 52px minmax(170px, 1fr) minmax(130px, auto) 24px; }
+  .technical-snapshot { display: none; }
+  .mini-chart-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {
@@ -2032,4 +2095,12 @@ footer {
   .predictive-detail { grid-template-columns: 1fr; }
   .predictive-detail-block { min-height: auto; }
   .predictive-cohorts { grid-template-columns: 1fr; }
+  .technical-status { align-items: flex-start; flex-direction: column; }
+  .technical-status small { margin-left: 0; }
+  .technical-toolbar { grid-template-columns: 1fr; }
+  .technical-card summary { grid-template-columns: 48px minmax(0, 1fr) 24px; }
+  .technical-class { grid-column: 2; }
+  .technical-facts { grid-template-columns: 1fr; }
+  .technical-facts > div { min-height: auto; }
+  .technical-canvas { height: 220px; }
 }

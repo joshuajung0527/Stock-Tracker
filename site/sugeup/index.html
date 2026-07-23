@@ -17,7 +17,7 @@
     <meta property="og:image" content="https://intraday-korean-stock-dashboard.pages.dev/sugeup/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <title>수급 레이더 · 테마 로테이션</title>
-    <link rel="stylesheet" href="./styles.css?v=5.0.0" />
+    <link rel="stylesheet" href="./styles.css?v=5.1.4" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">본문으로 이동</a>
@@ -34,10 +34,12 @@
       </a>
       <nav aria-label="주요 메뉴">
         <a href="#all-market-screen">전 종목</a>
+        <a href="#institutional-activity">기관 거래량</a>
         <a href="#predictive-radar">예측 레이더</a>
         <a href="#fund-cockpit">펀드 의사결정</a>
         <a href="#market-context">시장 레짐</a>
         <a href="#official-context">공시·밸류</a>
+        <a href="#technical-setups">차트 셋업</a>
         <a href="#rs-candidates">RS 후보</a>
         <a href="#themes">테마</a>
         <a href="#leaders">대표 종목</a>
@@ -113,6 +115,23 @@
         </div>
         <div class="all-market-list" id="all-market-list"></div>
         <p class="empty-state" id="all-market-empty" hidden>조건 충족 종목 0개</p>
+      </section>
+
+      <section class="section shell predictive-section" id="institutional-activity" aria-labelledby="institutional-activity-title">
+        <div class="section-heading predictive-heading">
+          <div>
+            <p class="section-kicker">00 · Causal activity × institutional sponsorship</p>
+            <h2 id="institutional-activity-title">평균에 가려진 기관성 거래량 확장</h2>
+          </div>
+          <p>신호일을 제외한 직전 20일 중앙값과 로그 강건 z-score로 거래량·거래대금 충격을 측정하고, 사모 1·3일 지속성, 연기금·투신 동행, 종가 위치를 분리해 봅니다. 워크포워드 검증 전에는 순위 점수에 넣지 않습니다.</p>
+        </div>
+        <div class="predictive-status" id="institutional-activity-status"></div>
+        <div class="predictive-toolbar">
+          <label><span>신호</span><select id="institutional-activity-filter"><option value="">전체</option></select></label>
+          <label><span>검색</span><input id="institutional-activity-search" type="search" placeholder="종목명 · 코드 · 테마" /></label>
+        </div>
+        <div class="predictive-list" id="institutional-activity-list"></div>
+        <p class="empty-state" id="institutional-activity-empty" hidden>조건 충족 종목 0개</p>
       </section>
 
       <section class="section shell predictive-section" id="predictive-radar" aria-labelledby="predictive-title">
@@ -227,6 +246,26 @@
           <div class="official-panel-head"><div><p class="table-label">Candidate context</p><h3>후보별 밸류에이션·글로벌 피어</h3></div><span class="table-note">후보 점수에는 아직 미반영</span></div>
           <div class="research-context-list" id="research-context-list"></div>
         </div>
+      </section>
+
+      <section class="section shell technical-section" id="technical-setups" aria-labelledby="technical-title">
+        <div class="section-heading technical-heading">
+          <div>
+            <p class="section-kicker">01 · Flow × chart execution gate</p>
+            <h2 id="technical-title">수급이 좋아도, 살 자리가 아니면 기다립니다</h2>
+          </div>
+          <p>기존 수급·RS 순위는 그대로 두고 일목 9·26·52, 확인된 지지·저항, MACD·RSI, 재현 가능한 패턴을 2단계 실행 게이트로 봅니다. 모든 신호는 EOD 기준이며 다음 거래일이 가장 빠른 실행 시점입니다.</p>
+        </div>
+        <div class="technical-status" id="technical-status"></div>
+        <div class="technical-toolbar">
+          <label><span>검색</span><input id="technical-search" type="search" placeholder="종목명 · 코드 · 테마" /></label>
+          <label><span>실행 분류</span><select id="technical-class-filter"><option value="">전체 분류</option></select></label>
+          <label><span>패턴</span><select id="technical-pattern-filter"><option value="">전체 패턴</option></select></label>
+          <label><span>일목 상태</span><select id="technical-ichimoku-filter"><option value="">전체 상태</option></select></label>
+        </div>
+        <div class="technical-list" id="technical-list"></div>
+        <p class="empty-state" id="technical-empty" hidden>조건 충족 종목 0개</p>
+        <div class="technical-backtest" id="technical-backtest"></div>
       </section>
 
       <section class="section shell rs-section" id="rs-candidates" aria-labelledby="rs-title">
@@ -361,6 +400,6 @@
       <p>수급과 테마를 정리하고 있습니다.</p>
     </div>
 
-    <script src="./app.js?v=5.0.0" defer></script>
+    <script src="./app.js?v=5.1.4" defer></script>
   </body>
 </html>
