@@ -848,6 +848,86 @@ function renderMarketContext() {
     : '<span class="context-empty">원천 상태 정보 없음</span>';
 }
 
+function investorLabel(value) {
+  return {
+    foreigner: "외국인",
+    private_equity: "사모",
+    pension: "연기금",
+    investment_trust: "투신",
+  }[value] || value;
+}
+
+function renderBottomRotation() {
+  const rotation = report.bottom_reacceleration_radar?.market_rotation || {};
+  const themes = (rotation.theme_counts || []).slice(0, 4);
+  const cards = [
+    ["시장 판정", rotation.classification || "데이터 없음", `${rotation.bottom_context_count ?? 0}종목이 바닥 문맥 · ${rotation.point_in_time_status === "historical_reconstruction" ? `NXT 재구성 ${rotation.historical_reconstruction_count ?? 0}개` : "strict 관측"}`],
+    ["NXT 활동 종목", `${rotation.active_nxt_gainer_count ?? 0}개`, "상승률 3%·거래대금 10억원 이상"],
+    ["바닥주 비중", formatPct(rotation.bottom_rotation_share_pct), `대테마 ${rotation.distinct_macro_theme_count ?? 0}개`],
+    ["테마 분산", themes.length ? themes.map((row) => `${row.theme} ${row.count}`).join(" · ") : "데이터 없음", `상위 테마 비중 ${formatPct(rotation.top_theme_share_pct)}`],
+  ];
+  byId("bottom-rotation-grid").innerHTML = cards.map(([label, value, detail]) => `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(detail)}</small></article>`).join("");
+}
+
+function bottomRadarCard(row) {
+  const impulse = row.impulse || {};
+  const base = row.base || {};
+  const trigger = row.trigger || {};
+  const activity = row.activity || {};
+  const venue = row.venue_confirmation || {};
+  const flow = row.flow_confirmation || {};
+  const supply = row.supply_context || {};
+  const overhead = row.overhead || {};
+  const positive = (flow.positive_investors || []).map(investorLabel);
+  const catalyst = row.catalyst_context || {};
+  const shortRatio = number(supply.short_sale_volume_ratio_1d);
+  return `<details class="bottom-radar-card">
+    <summary>
+      <div class="bottom-radar-score"><small>SETUP</small><strong>${formatScore(row.score)}</strong></div>
+      <div class="stock-name"><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.symbol)} · ${escapeHtml(row.market)} · ${escapeHtml(row.theme || "미분류")} · 시총 ${number(row.market_cap_eok)?.toLocaleString("ko-KR") ?? "—"}억</small></div>
+      <span class="bottom-stage stage-${escapeHtml(row.stage || "관찰")}">${escapeHtml(row.stage || "관찰")}</span>
+      <div class="bottom-radar-snapshot">
+        <span>점화 ${formatPct(impulse.rise_pct)}</span><span>박스 ${base.sessions ?? "—"}일 · ${formatPct(base.pullback_depth_pct)}</span>
+        <span>KRX 거래량 ${number(activity.volume_mean_ratio)?.toFixed(2) ?? "—"}×</span><span>60일선 ${number(overhead.krx_distance_to_sma60_atr)?.toFixed(2) ?? "—"} ATR</span>
+      </div>
+      <span class="expand-mark" aria-hidden="true"></span>
+    </summary>
+    <div class="bottom-radar-detail">
+      <div><span>실행 조건</span><strong>트리거 ${formatPrice(trigger.high_pivot)}<br>무효화 ${formatPrice(row.invalidation_price)}<br>다음 날 허용 갭 &lt; ${number(trigger.next_session_max_gap_pct)?.toFixed(0) ?? "8"}%</strong></div>
+      <div><span>거래소 확인</span><strong>KRX ${venue.krx_confirmed ? "돌파 확인" : "미확정"} · NXT ${venue.nxt_lead ? "선행" : "미통과"}<br>KRX ${formatPrice(venue.krx_close)} · NXT ${formatPrice(venue.nxt_close)}${venue.nxt_reconstruction ? "<br>과거 NXT는 reconstruction" : ""}</strong></div>
+      <div><span>수급 확인 ${escapeHtml(flow.grade || "C")}</span><strong>${escapeHtml(flow.label || "기관성 확인 없음")}<br>${positive.length ? positive.map(escapeHtml).join("·") + " 순매수" : "양수 기관군 없음"} · 개인 ${formatMoneyMillion(flow.individual_1d, true)}</strong></div>
+      <div><span>공급 부담</span><strong>${escapeHtml(supply.label || "데이터 없음")}<br>공매도 ${shortRatio === null ? "데이터 없음" : `${(shortRatio * 100).toFixed(1)}%`} · 대차 5D ${number(supply.borrow_balance_change_5d)?.toLocaleString("ko-KR") ?? "—"}주</strong></div>
+      <div><span>박스 품질</span><strong>종가 깊이 ${formatPct(base.close_box_depth_pct)} · 점화 대비 거래량 ${number(base.volume_to_ignition_ratio)?.toFixed(2) ?? "—"}×<br>변동성 ${base.volatility_contracted ? "수축" : "수축 미확인"} · KRX 거래대금 z ${number(activity.turnover_robust_z)?.toFixed(2) ?? "—"}</strong></div>
+      <div><span>촉매·판정</span><strong>${escapeHtml(catalyst.headline || "회사 직접 촉매 없음")}<br>${escapeHtml(row.action || "관찰")} · ${escapeHtml(row.status || "형성 중")} · research_only</strong></div>
+    </div>
+  </details>`;
+}
+
+function renderBottomReacceleration() {
+  const radar = report.bottom_reacceleration_radar || {};
+  const backtest = report.bottom_reacceleration_backtest || {};
+  const rows = radar.candidates || [];
+  setSelectOptions("bottom-radar-stage-filter", "전체 상태", rows.map((row) => row.stage));
+  setSelectOptions("bottom-radar-flow-filter", "전체 등급", rows.map((row) => row.flow_confirmation?.grade));
+  const query = byId("bottom-radar-search").value.trim().toLowerCase();
+  const stage = byId("bottom-radar-stage-filter").value;
+  const flow = byId("bottom-radar-flow-filter").value;
+  const coreOnly = byId("bottom-radar-core-only").checked;
+  const filtered = rows.filter((row) => {
+    const haystack = [row.name, row.symbol, row.market, row.theme].join(" ").toLowerCase();
+    return (!query || haystack.includes(query))
+      && (!stage || row.stage === stage)
+      && (!flow || row.flow_confirmation?.grade === flow)
+      && (!coreOnly || row.core_market_cap_preferred);
+  });
+  byId("bottom-radar-status").innerHTML = `<span class="freshness-badge ${statusClass(radar.status)}">${escapeHtml(radar.status || "미연결")}</span><strong>${radar.candidate_count ?? 0}개 공개 후보 · 게이트 전 ${radar.matched_before_public_gate ?? 0}개</strong><small>${escapeHtml(radar.venue_policy || "KRX 확정 · NXT 선행 분리")} · <b>research_only</b></small>`;
+  renderBottomRotation();
+  byId("bottom-radar-list").innerHTML = filtered.map(bottomRadarCard).join("");
+  byId("bottom-radar-empty").hidden = filtered.length > 0;
+  const tenDay = (backtest.results || []).filter((row) => row.horizon === 10);
+  byId("bottom-radar-backtest").innerHTML = `<strong>워크포워드 10일 비교</strong><span class="freshness-badge ${statusClass(backtest.status)}">${escapeHtml(backtest.status || "기준선 형성 중")}</span><p>${tenDay.length ? tenDay.map((row) => `${escapeHtml(row.cohort)} ${row.signal_count}건 · 중앙 ${formatPct(row.median_net_return_pct)} · 승률 ${number(row.win_rate_pct)?.toFixed(1) ?? "—"}% · 초과 ${formatPct(row.median_excess_return_pct)} · MAE ${formatPct(row.median_mae_pct)} · q ${number(row.fdr_qvalue)?.toFixed(3) ?? "—"}`).join("<br>") : "성과 기준선 축적 중"}</p><small>${backtest.promotion_eligible ? "승격 조건 통과" : "실행 순위 미반영 — 100건·비용 후 개선·MAE·FDR·과거 시총 재생 조건을 아직 모두 통과하지 않음"}</small>`;
+}
+
 function technicalRows() {
   const groups = report.technical_setup_radar?.categories || {};
   const unique = new Map();
@@ -1059,6 +1139,7 @@ function renderData() {
     dataCard("OpenDART 공시", coverage.official_disclosures, coverage.official_disclosures?.available ? `${coverage.official_disclosures.filing_count}건 · ${coverage.official_disclosures.symbol_count}종목` : coverage.official_disclosures?.reason),
     dataCard("재무 actual", coverage.valuation_actuals, coverage.valuation_actuals?.available ? `${coverage.valuation_actuals.symbol_count}종목` : coverage.valuation_actuals?.reason),
     dataCard("글로벌 피어", coverage.global_peers, coverage.global_peers?.available ? `${coverage.global_peers.symbol_count}종목` : coverage.global_peers?.reason),
+    dataCard("바닥 재가속", coverage.bottom_reacceleration, coverage.bottom_reacceleration?.available ? `${coverage.bottom_reacceleration.symbol_count}종목 계산 · ${coverage.bottom_reacceleration.candidate_count}개 공개 후보 · ${coverage.bottom_reacceleration.status}` : coverage.bottom_reacceleration?.reason),
     dataCard("차트 셋업", coverage.technical_setups, coverage.technical_setups?.available ? `${coverage.technical_setups.symbol_count}종목 · 미니차트 ${coverage.technical_setups.chart_symbol_count}개 · ${coverage.technical_setups.status}` : coverage.technical_setups?.reason),
     dataCard("거래일 세트", { available: true }, `1D ${names(coverage.dates_1d)} · 3D ${names(coverage.dates_3d)} · 5D ${names(coverage.dates_5d)}`),
   ];
@@ -1084,6 +1165,7 @@ function renderData() {
     <p><strong>전 종목 구조 스크린:</strong> ${escapeHtml(method.all_market_screen_note || "뉴스 없이 전 종목을 먼저 판정하고 공식 이벤트는 강화 근거로만 사용")}</p>
     <p><strong>기관성 거래량:</strong> ${escapeHtml(method.institutional_activity_note || "신호일 제외 직전20일 강건 거래량과 사모 지속성을 결합하며 검증 전 순위에는 미반영")}</p>
     <p><strong>공시·밸류·피어:</strong> ${escapeHtml(method.official_context_note || "OpenDART actual과 가치사슬 피어를 별도 근거로 사용하며 컨센서스 누락값을 만들지 않음")}</p>
+    <p><strong>바닥 박스 재가속:</strong> ${escapeHtml(method.bottom_reacceleration_note || "1차 거래활동 점화 뒤 2–12일 박스·수축·KRX 재확대를 별도 research_only 신호로 계산")}</p>
     <p><strong>차트 실행 게이트:</strong> ${escapeHtml(method.technical_setup_note || "수급·RS와 분리된 research_only 기술 계층")}</p>
     <p><strong>워크포워드 (${escapeHtml(walkForward.status || "기준선 형성 중")}):</strong> ${walkForwardRows || "결과 축적 중"}</p>
     <p>${escapeHtml(walkForward.method || "과거 시점 데이터만 사용하며 구현 이후 viability 후보는 전진 축적")}</p>
@@ -1116,6 +1198,10 @@ function bindControls() {
   byId("institutional-activity-filter").addEventListener("change", renderInstitutionalActivity);
   byId("institutional-activity-search").addEventListener("input", renderInstitutionalActivity);
   byId("fund-nav-eok").addEventListener("input", renderSizing);
+  byId("bottom-radar-search").addEventListener("input", renderBottomReacceleration);
+  byId("bottom-radar-stage-filter").addEventListener("change", renderBottomReacceleration);
+  byId("bottom-radar-flow-filter").addEventListener("change", renderBottomReacceleration);
+  byId("bottom-radar-core-only").addEventListener("change", renderBottomReacceleration);
   byId("technical-search").addEventListener("input", renderTechnical);
   byId("technical-class-filter").addEventListener("change", renderTechnical);
   byId("technical-pattern-filter").addEventListener("change", renderTechnical);
@@ -1131,6 +1217,7 @@ function renderAll() {
   renderFundCockpit();
   renderMarketContext();
   renderOfficialContext();
+  renderBottomReacceleration();
   renderTechnical();
   renderRs();
   renderRegimes();

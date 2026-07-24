@@ -2008,6 +2008,66 @@ footer {
 .research-warning { margin: 0; padding: 1rem; background: rgba(255,255,255,.9); color: var(--muted); font-size: .72rem; line-height: 1.6; }
 .official-evidence-block a { color: var(--blue); text-decoration: underline; text-underline-offset: 3px; }
 
+.bottom-radar-section {
+  position: relative;
+  border: 1px solid rgba(14, 116, 144, .16);
+  border-radius: 30px;
+  padding: clamp(1.3rem, 3vw, 2.4rem);
+  background: linear-gradient(145deg, rgba(238, 249, 248, .98), rgba(235, 245, 255, .96));
+  box-shadow: 0 24px 62px rgba(15, 78, 91, .1);
+}
+.bottom-radar-status {
+  display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+  margin: 1rem 0; padding: .8rem 1rem; border: 1px solid rgba(14, 116, 144, .14);
+  border-radius: 14px; background: rgba(255,255,255,.7);
+}
+.bottom-radar-status strong { font-size: .82rem; }
+.bottom-radar-status small { color: var(--muted); margin-left: auto; }
+.bottom-rotation-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; margin-bottom: 1rem;
+}
+.bottom-rotation-grid article {
+  display: grid; gap: .35rem; min-height: 112px; padding: .9rem;
+  border: 1px solid rgba(14, 116, 144, .13); border-radius: 14px; background: rgba(255,255,255,.76);
+}
+.bottom-rotation-grid span { color: var(--muted); font-size: .63rem; letter-spacing: .06em; text-transform: uppercase; }
+.bottom-rotation-grid strong { color: #0f3f49; font: 700 .94rem/1.35 var(--display); }
+.bottom-rotation-grid small { color: var(--muted); font-size: .66rem; line-height: 1.45; }
+.bottom-radar-toolbar {
+  display: grid; grid-template-columns: 1.25fr repeat(2, minmax(145px, .7fr)) minmax(170px, .75fr);
+  gap: .7rem; align-items: end; margin-bottom: 1rem;
+}
+.bottom-radar-toolbar label:not(.toggle) { display: grid; gap: .35rem; color: var(--muted); font-size: .67rem; }
+.bottom-radar-toolbar input,
+.bottom-radar-toolbar select {
+  width: 100%; min-height: 42px; border: 1px solid rgba(14, 116, 144, .18); border-radius: 11px;
+  padding: .65rem .75rem; background: rgba(255,255,255,.86); color: var(--ink);
+}
+.bottom-radar-toolbar .toggle { min-height: 42px; justify-content: center; border: 1px solid rgba(14,116,144,.16); border-radius: 11px; background: rgba(255,255,255,.7); }
+.bottom-radar-list { display: grid; gap: .7rem; }
+.bottom-radar-card { overflow: hidden; border: 1px solid rgba(14, 116, 144, .14); border-radius: 16px; background: rgba(255,255,255,.86); }
+.bottom-radar-card summary {
+  display: grid; grid-template-columns: 58px minmax(185px, 1fr) minmax(110px, auto) minmax(310px, 1.4fr) 24px;
+  gap: .8rem; align-items: center; padding: .9rem 1rem; cursor: pointer; list-style: none;
+}
+.bottom-radar-card summary::-webkit-details-marker { display: none; }
+.bottom-radar-card[open] .expand-mark::after { transform: translate(-50%, -50%) rotate(0deg); }
+.bottom-radar-score { display: grid; text-align: center; }
+.bottom-radar-score small { color: #5f7f86; font-size: .56rem; letter-spacing: .1em; }
+.bottom-radar-score strong { color: #0e6070; font: 700 1.25rem/1 var(--display); }
+.bottom-stage { justify-self: start; border: 1px solid rgba(14,116,144,.22); border-radius: 999px; padding: .38rem .58rem; background: rgba(14,116,144,.08); color: #0e6070; font-size: .67rem; white-space: nowrap; }
+.bottom-stage[class*="추격"], .bottom-stage[class*="실패"] { color: #be123c; border-color: rgba(190,18,60,.2); background: rgba(244,63,94,.07); }
+.bottom-radar-snapshot { display: flex; flex-wrap: wrap; gap: .4rem; }
+.bottom-radar-snapshot span { border-radius: 6px; padding: .28rem .42rem; background: rgba(14,116,144,.06); color: #365f67; font-size: .64rem; }
+.bottom-radar-detail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; border-top: 1px solid rgba(14,116,144,.13); background: rgba(14,116,144,.13); }
+.bottom-radar-detail > div { display: grid; gap: .35rem; min-height: 110px; padding: .9rem; background: rgba(252,254,254,.98); }
+.bottom-radar-detail span { color: var(--muted); font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; }
+.bottom-radar-detail strong { color: #294b52; font-size: .72rem; line-height: 1.6; }
+.bottom-radar-backtest { margin-top: 1rem; padding: 1rem; border: 1px solid rgba(14,116,144,.14); border-radius: 14px; background: rgba(255,255,255,.68); }
+.bottom-radar-backtest > strong { margin-right: .6rem; }
+.bottom-radar-backtest p { color: #365f67; font-size: .72rem; line-height: 1.7; }
+.bottom-radar-backtest small { color: var(--muted); }
+
 .technical-section {
   position: relative;
   border-radius: 30px;
@@ -2074,6 +2134,10 @@ footer {
   .predictive-thesis { display: none; }
   .predictive-detail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .technical-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bottom-rotation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bottom-radar-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bottom-radar-card summary { grid-template-columns: 52px minmax(170px, 1fr) minmax(120px, auto) 24px; }
+  .bottom-radar-snapshot { display: none; }
   .technical-card summary { grid-template-columns: 52px minmax(170px, 1fr) minmax(130px, auto) 24px; }
   .technical-snapshot { display: none; }
   .mini-chart-grid { grid-template-columns: 1fr; }
@@ -2096,6 +2160,14 @@ footer {
   .predictive-detail-block { min-height: auto; }
   .predictive-cohorts { grid-template-columns: 1fr; }
   .technical-status { align-items: flex-start; flex-direction: column; }
+  .bottom-radar-status { align-items: flex-start; flex-direction: column; }
+  .bottom-radar-status small { margin-left: 0; }
+  .bottom-rotation-grid,
+  .bottom-radar-toolbar { grid-template-columns: 1fr; }
+  .bottom-radar-card summary { grid-template-columns: 48px minmax(0, 1fr) 24px; }
+  .bottom-stage { grid-column: 2; }
+  .bottom-radar-detail { grid-template-columns: 1fr; }
+  .bottom-radar-detail > div { min-height: auto; }
   .technical-status small { margin-left: 0; }
   .technical-toolbar { grid-template-columns: 1fr; }
   .technical-card summary { grid-template-columns: 48px minmax(0, 1fr) 24px; }
