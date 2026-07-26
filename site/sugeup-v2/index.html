@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta
+      name="description"
+      content="한국 주식 테마·수급·실행 조건을 통합한 Korea Master Screener v2"
+    />
+    <title>Korea Master Screener v2</title>
+    <link rel="stylesheet" href="./styles.css?v=master-v2-20260724" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">본문으로 바로가기</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">K2</div>
+          <div>
+            <p class="eyebrow">Korea Master Thematic Screener</p>
+            <h1>테마에서 실행까지</h1>
+          </div>
+        </div>
+        <div class="preview-lockup">
+          <span class="preview-badge">LIVE DASHBOARD</span>
+          <span id="publication-mode" class="mode-badge">불러오는 중</span>
+        </div>
+      </div>
+      <nav class="section-nav" aria-label="주요 화면">
+        <div class="header-inner nav-scroll">
+          <a href="#action-center">다음 세션 우선 종목</a>
+          <a href="#v2-action-center">v2 실행 상태</a>
+          <a href="#legacy-baseline">기존 기준선</a>
+          <a href="#theme-map">테마 맵</a>
+          <a href="#stock-search">종목 검색</a>
+          <a href="../sugeup/">기존 수급 레이더</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section
+        id="action-center"
+        class="section-shell workspace-section priority-section"
+        aria-labelledby="priority-title"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">EXISTING SCREENER · EXECUTION FIRST</p>
+            <h2 id="priority-title">다음 세션 우선 종목</h2>
+            <p>
+              기존 전 종목 구조 스크리너가 <strong>조건부 매수</strong>로 분류한
+              후보를 순위대로 표시합니다. 종목마다 제시된 트리거를 확인한 뒤
+              진입하고, 무효화 가격 이탈 시 판단을 종료합니다.
+            </p>
+          </div>
+          <div class="priority-counter" aria-label="조건부 매수 종목 수">
+            <strong id="priority-count">0</strong>
+            <span>조건부 매수</span>
+          </div>
+        </div>
+        <div id="priority-list" class="priority-list" aria-live="polite"></div>
+      </section>
+
+      <section class="hero section-shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">NEXT-SESSION DECISION WORKBENCH</p>
+          <h2 id="hero-title">
+            움직이는 테마와<br />
+            <span>지금 가능한 행동</span>을 분리합니다.
+          </h2>
+          <p class="hero-description">
+            가격·수급·테마 확산·실행 강도를 한 화면에서 확인하고,
+            진입 조건과 추격 금지 조건을 같은 기준으로 비교하는 로컬 전용
+            실전 판단 대시보드입니다.
+          </p>
+        </div>
+        <dl class="run-stamp" aria-label="분석 실행 정보">
+          <div>
+            <dt>기준일</dt>
+            <dd id="screen-date">—</dd>
+          </div>
+          <div>
+            <dt>컷오프</dt>
+            <dd id="cutoff-kst">—</dd>
+          </div>
+          <div>
+            <dt>Taxonomy</dt>
+            <dd id="taxonomy-version">—</dd>
+          </div>
+          <div>
+            <dt>Decision</dt>
+            <dd id="decision-version">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="section-shell status-shell" aria-label="불러오기 상태">
+        <div id="app-status" class="app-status" role="status" aria-live="polite">
+          <span class="status-pulse" aria-hidden="true"></span>
+          <span>v2 결과를 불러오고 있습니다.</span>
+        </div>
+        <div id="coverage-notice" class="coverage-notice" hidden></div>
+        <div id="preview-blockers" class="blocker-grid" aria-label="v2 실행 차단 요인"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="summary-title">
+        <div class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">RUN SUMMARY</p>
+            <h2 id="summary-title">오늘의 판단 표면</h2>
+          </div>
+          <p id="generated-at" class="section-meta">—</p>
+        </div>
+        <div id="summary-cards" class="summary-grid" aria-live="polite"></div>
+      </section>
+
+      <section
+        id="v2-action-center"
+        class="section-shell workspace-section"
+        aria-labelledby="action-title"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ACTION WORKFLOW</p>
+            <h2 id="action-title">실행 센터</h2>
+            <p>
+              진입 가능, 회복 대기, 누적 관찰, 추격 금지 순으로 동일한
+              의사결정 객체를 읽습니다.
+            </p>
+          </div>
+          <div class="legend" aria-label="핵심 기준">
+            <span><i class="legend-dot is-green"></i>실행 가능</span>
+            <span><i class="legend-dot is-amber"></i>조건 확인</span>
+            <span><i class="legend-dot is-red"></i>진입 금지</span>
+          </div>
+        </div>
+
+        <div
+          id="action-tabs"
+          class="action-tabs"
+          role="tablist"
+          aria-label="실행 상태"
+        >
+          <button
+            class="action-tab is-active"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="action-panel"
+            data-tab="Enter Now"
+          >
+            <span>Enter Now</span>
+            <strong data-tab-count="Enter Now">0</strong>
+          </button>
+          <button
+            class="action-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="action-panel"
+            data-tab="pullback/reclaim"
+          >
+            <span>눌림·리클레임</span>
+            <strong data-tab-count="pullback/reclaim">0</strong>
+          </button>
+          <button
+            class="action-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="action-panel"
+            data-tab="accumulation"
+          >
+            <span>누적 관찰</span>
+            <strong data-tab-count="accumulation">0</strong>
+          </button>
+          <button
+            class="action-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="action-panel"
+            data-tab="no-chase/avoid"
+          >
+            <span>No Chase · Avoid</span>
+            <strong data-tab-count="no-chase/avoid">0</strong>
+          </button>
+        </div>
+
+        <div class="action-toolbar">
+          <label class="field-label" for="action-filter">
+            결과 내 검색
+            <input
+              id="action-filter"
+              type="search"
+              placeholder="종목명 · 코드 · 테마"
+              autocomplete="off"
+            />
+          </label>
+          <label class="field-label" for="action-sort">
+            정렬
+            <select id="action-sort">
+              <option value="rank">엔진 순위</option>
+              <option value="name">종목명</option>
+              <option value="theme">테마</option>
+            </select>
+          </label>
+        </div>
+
+        <div
+          id="action-panel"
+          class="action-grid"
+          role="tabpanel"
+          aria-live="polite"
+        ></div>
+      </section>
+
+      <section
+        id="legacy-baseline"
+        class="section-shell workspace-section baseline-section"
+        aria-labelledby="baseline-title"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">LEGACY V5.2 · READ-ONLY COMPARISON</p>
+            <h2 id="baseline-title">기존 스크리너 기준선</h2>
+            <p>
+              같은 기간의 기존 스크리너 결과를 비교용으로만 표시합니다.
+              아래 종목은 <strong>v2 진입 신호가 아니며</strong>, v2의 승인
+              멤버십·실행 게이트·트레이드 플랜을 통과한 것으로 해석할 수 없습니다.
+            </p>
+          </div>
+          <span class="baseline-badge">비교 전용 · 주문 판단 금지</span>
+        </div>
+        <div id="baseline-summary" class="summary-grid baseline-summary"></div>
+        <div class="baseline-columns">
+          <section aria-labelledby="baseline-leaders-title">
+            <div class="mini-heading">
+              <h3 id="baseline-leaders-title">기존 대표 종목</h3>
+              <span id="baseline-leader-count">0</span>
+            </div>
+            <div id="baseline-leaders" class="baseline-list"></div>
+          </section>
+          <section aria-labelledby="baseline-watch-title">
+            <div class="mini-heading">
+              <h3 id="baseline-watch-title">기존 관찰 목록</h3>
+              <span id="baseline-watch-count">0</span>
+            </div>
+            <div id="baseline-watch" class="baseline-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section
+        id="theme-map"
+        class="section-shell workspace-section"
+        aria-labelledby="theme-title"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">25 ANALYST WORKBENCHES</p>
+            <h2 id="theme-title">테마 맵</h2>
+            <p>
+              산업 분류와 일시적 내러티브를 섞지 않고, 루트·하위 테마·
+              밸류체인 상태를 함께 봅니다.
+            </p>
+          </div>
+          <div class="theme-map-stats" aria-label="테마 통계">
+            <span><strong id="root-count">0</strong> roots</span>
+            <span><strong id="node-count">0</strong> nodes</span>
+            <span><strong id="live-theme-count">0</strong> live</span>
+          </div>
+        </div>
+
+        <div class="theme-toolbar">
+          <label class="field-label" for="theme-filter">
+            테마 검색
+            <input
+              id="theme-filter"
+              type="search"
+              placeholder="HBM · LNG · 화장품 · 데이터센터"
+              autocomplete="off"
+            />
+          </label>
+          <label class="field-label" for="lifecycle-filter">
+            라이프사이클
+            <select id="lifecycle-filter">
+              <option value="ALL">전체</option>
+              <option value="ACTIVE">활성만</option>
+              <option value="DORMANT">DORMANT</option>
+              <option value="EMERGING">EMERGING</option>
+              <option value="BROADENING">BROADENING</option>
+              <option value="LEADERSHIP">LEADERSHIP</option>
+              <option value="CROWDED">CROWDED</option>
+              <option value="COOLING">COOLING</option>
+              <option value="REENTRY">REENTRY</option>
+              <option value="DISTRIBUTION">DISTRIBUTION</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="theme-grid" class="theme-grid" aria-live="polite"></div>
+      </section>
+
+      <section
+        id="stock-search"
+        class="section-shell workspace-section"
+        aria-labelledby="search-title"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">FULL-UNIVERSE LOOKUP</p>
+            <h2 id="search-title">종목 드릴다운</h2>
+            <p>
+              실행 후보가 아니어도 검색할 수 있습니다. 종목을 선택하면
+              30세션 가격, 테마 경로, 수급, 근거와 리스크를 필요한 순간에만
+              불러옵니다.
+            </p>
+          </div>
+        </div>
+        <form id="stock-search-form" class="stock-search-form" role="search">
+          <label class="sr-only" for="stock-query">종목 검색</label>
+          <input
+            id="stock-query"
+            type="search"
+            placeholder="종목명 또는 6자리 코드 입력"
+            autocomplete="off"
+            aria-controls="search-results"
+          />
+          <button type="submit">검색</button>
+        </form>
+        <div
+          id="search-results"
+          class="search-results"
+          aria-live="polite"
+        ></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="section-shell footer-inner">
+        <p>
+          Live decision dashboard · 주문 전송 없음 · Telegram 단독 신호는 진입과
+          사이징을 만들지 않음
+        </p>
+        <a href="#main-content">맨 위로</a>
+      </div>
+    </footer>
+
+    <dialog id="stock-dialog" class="stock-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">STOCK DRILLDOWN</p>
+          <h2 id="dialog-title">종목 상세</h2>
+        </div>
+        <button
+          id="dialog-close"
+          class="icon-button"
+          type="button"
+          aria-label="종목 상세 닫기"
+        >
+          ×
+        </button>
+      </div>
+      <div id="dialog-body" class="dialog-body"></div>
+    </dialog>
+
+    <noscript>
+      <div class="noscript">
+        이 대시보드는 JSON 결과를 읽기 위해 JavaScript가 필요합니다.
+      </div>
+    </noscript>
+    <script src="./app.js?v=master-v2-20260724" defer></script>
+  </body>
+</html>
