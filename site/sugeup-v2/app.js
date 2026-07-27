@@ -39,6 +39,69 @@ const ACTION_META = {
   },
 };
 
+const EARLY_TREND_META = [
+  {
+    key: "REBREAK_READY",
+    dataKey: "rebreak_ready",
+    label: "재돌파 임박",
+    shortLabel: "READY",
+    tone: "ready",
+    empty: "진입 가격까지 계산된 재돌파 준비 종목이 없습니다.",
+  },
+  {
+    key: "HEALTHY_PULLBACK",
+    dataKey: "healthy_pullback",
+    label: "건강한 눌림",
+    shortLabel: "PULLBACK",
+    tone: "pullback",
+    empty: "점화 몸통과 저활동성 조건을 지킨 눌림 종목이 없습니다.",
+  },
+  {
+    key: "FIRST_IGNITION",
+    dataKey: "first_ignition",
+    label: "초기 추세 점화",
+    shortLabel: "IGNITION",
+    tone: "ignition",
+    empty: "바닥 흡수 이후 첫 점화가 확인된 종목이 없습니다.",
+  },
+  {
+    key: "BASE_ABSORPTION",
+    dataKey: "base_absorption",
+    label: "바닥 수급흡수",
+    shortLabel: "BASE",
+    tone: "base",
+    empty: "바닥권 수급흡수 조건을 통과한 종목이 없습니다.",
+  },
+  {
+    key: "NO_CHASE_AVOID",
+    dataKey: "no_chase_avoid",
+    label: "추격 금지 · 구조 훼손",
+    shortLabel: "NO CHASE",
+    tone: "avoid",
+    empty: "추격 금지 또는 구조 실패 종목이 없습니다.",
+  },
+];
+
+const EARLY_GATE_LABELS = {
+  HISTORY_140: "KRX 140거래일",
+  KRX_PRICE_SOURCE: "KRX 가격 소스",
+  UNIFIED_FLOW_SOURCE: "UNIFIED 수급",
+  LIQUIDITY: "거래대금",
+  BASE_HEADROOM: "전고점 여유",
+  BASE_RANGE_POSITION: "바닥권 위치",
+  BASE_DRAWDOWN: "선행 조정폭",
+  SPONSOR_ABSORPTION: "전문투자자 흡수",
+  FIRST_IGNITION: "초기 추세 점화",
+  HEALTHY_PULLBACK: "건강한 눌림",
+  TREND_STACK: "EMA 추세 배열",
+  MACD_HISTOGRAM_POSITIVE: "MACD 양전환",
+  PRIOR_20D_HIGH_TEST: "20일 고점 시험",
+  EXECUTION_STRENGTH_105: "체결강도 105",
+  CURRENT_CANDLE: "재돌파 봉 품질",
+  ENTRY_GEOMETRY: "진입·손절 구조",
+  NO_CHASE_RESET_REQUIRED: "새 베이스 필요",
+};
+
 const STATUS_LABELS = {
   ENTER_NOW: "진입 가능",
   ENTER_CONDITIONAL: "조건부 진입",
@@ -151,6 +214,12 @@ function formatEokFromMillion(value, digits = 1) {
   const parsed = number(value);
   if (parsed === null) return "—";
   return `${parsed > 0 ? "+" : ""}${formatNumber(parsed / 100, digits)}억`;
+}
+
+function formatSignedNumber(value, digits = 1) {
+  const parsed = number(value);
+  if (parsed === null) return "—";
+  return `${parsed > 0 ? "+" : ""}${formatNumber(parsed, digits)}`;
 }
 
 function truncate(value, maxLength = 42) {
@@ -465,6 +534,595 @@ function renderSummary() {
       `,
     )
     .join("");
+}
+
+function earlyTrendPayload() {
+  return asObject(model.summary?.early_trend_transition);
+}
+
+function earlyTrendRows(meta) {
+  const payload = earlyTrendPayload();
+  const buckets = asObject(
+    firstValue(payload.buckets, payload.stage_buckets, payload.transitions),
+  );
+  const direct = firstValue(
+    payload[meta.dataKey],
+    payload[meta.key],
+    buckets[meta.dataKey],
+    buckets[meta.key],
+  );
+  if (Array.isArray(direct)) {
+    return direct.filter((row) => row && typeof row === "object");
+  }
+  if (direct && typeof direct === "object") {
+    return asArray(
+      firstValue(direct.candidates, direct.rows, direct.items, direct.symbols),
+    ).filter((row) => row && typeof row === "object");
+  }
+  return asArray(firstValue(payload.candidates, payload.rows))
+    .filter((row) => {
+      const state = String(
+        firstValue(row?.state, row?.stage, row?.setup_state, ""),
+      ).toUpperCase();
+      return state === meta.key;
+    })
+    .filter((row) => row && typeof row === "object");
+}
+
+function earlyTrendCount(meta) {
+  const funnel = asObject(earlyTrendPayload().funnel);
+  return firstValue(
+    number(funnel[meta.dataKey]),
+    number(funnel[meta.key]),
+    earlyTrendRows(meta).length,
+  );
+}
+
+function earlyStageScore(row, meta) {
+  const scores = asObject(row?.stage_scores);
+  return firstValue(
+    row?.total_score,
+    row?.stage_score,
+    scores[meta.dataKey],
+    scores[meta.key],
+    scores.total,
+    scores.overall,
+  );
+}
+
+function earlyScoreChips(row) {
+  const scores = asObject(row?.stage_scores);
+  const labels = {
+    base_absorption: "흡수",
+    first_ignition: "점화",
+    healthy_pullback: "눌림",
+    rebreak_ready: "READY",
+    no_chase_avoid: "회피",
+    total: "종합",
+  };
+  const entries = Object.entries(scores)
+    .filter(([, value]) => number(value) !== null)
+    .slice(0, 6);
+  if (!entries.length) return "";
+  return `
+    <div class="early-score-breakdown" aria-label="단계 점수 상세">
+      ${entries
+        .map(
+          ([key, value]) => `
+            <span>
+              ${escapeHtml(
+                labels[String(key).toLowerCase()] || key.replaceAll("_", " "),
+              )}
+              <strong>${escapeHtml(formatNumber(value, 1))}</strong>
+            </span>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function earlyCandidatePlan(row) {
+  const plan = asObject(row?.trade_plan);
+  return {
+    trigger: firstValue(row?.trigger_price, plan.trigger_price),
+    zoneLow: firstValue(row?.entry_zone_low, plan.entry_zone_low, plan.trigger_price),
+    zoneHigh: firstValue(
+      row?.entry_zone_high,
+      plan.entry_zone_high,
+      plan.trigger_price,
+    ),
+    stop: firstValue(row?.hard_stop_price, plan.hard_stop_price),
+  };
+}
+
+function earlyTriggerDistance(row, trigger) {
+  const explicit = number(
+    firstValue(
+      row?.distance_to_trigger_pct,
+      row?.trigger_distance_pct,
+      row?.distance_pct,
+    ),
+  );
+  if (explicit !== null) return explicit;
+  const close = number(
+    firstValue(row?.close, row?.close_price, row?.current_price, row?.price),
+  );
+  const level = number(trigger);
+  if (close === null || level === null || close === 0) return null;
+  return ((level / close) - 1) * 100;
+}
+
+function earlyFlowText(row) {
+  const flow = asObject(row?.flow);
+  const summary = firstValue(
+    flow.summary_ko,
+    flow.summary,
+    flow.label,
+    flow.display,
+  );
+  if (summary) return String(summary);
+
+  const foreigner = number(firstValue(flow.foreigner_5d, row?.foreigner_5d));
+  const institution = number(
+    firstValue(flow.institution_5d, row?.institution_5d),
+  );
+  const individualFlow = number(
+    firstValue(flow.individual_5d, row?.individual_5d),
+  );
+  if (
+    foreigner !== null ||
+    institution !== null ||
+    individualFlow !== null
+  ) {
+    return [
+      foreigner === null ? "" : `외 ${formatEokFromMillion(foreigner)}`,
+      institution === null ? "" : `기관 ${formatEokFromMillion(institution)}`,
+      individualFlow === null ? "" : `개인 ${formatEokFromMillion(individualFlow)}`,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
+  const sponsorEok = number(
+    firstValue(flow.sponsor_5d_eok, flow.sponsor_eok, row?.sponsor_5d_eok),
+  );
+  const individualEok = number(
+    firstValue(flow.individual_5d_eok, flow.individual_eok, row?.individual_5d_eok),
+  );
+  if (sponsorEok !== null || individualEok !== null) {
+    return [
+      sponsorEok === null ? "" : `S ${formatSignedNumber(sponsorEok)}억`,
+      individualEok === null ? "" : `개인 ${formatSignedNumber(individualEok)}억`,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
+  const sponsor = number(
+    firstValue(
+      flow.sponsor_5d,
+      flow.sponsor,
+      flow.sponsor_net_5d,
+      flow.sponsor_net_buy_5d,
+      flow.triad_5d,
+      row?.sponsor_5d,
+    ),
+  );
+  const individual = number(
+    firstValue(
+      flow.individual_5d,
+      flow.individual,
+      flow.individual_net_5d,
+      flow.individual_net_buy_5d,
+      row?.individual_5d,
+    ),
+  );
+  return [
+    sponsor === null ? "" : `Sponsor ${formatSignedNumber(sponsor)}`,
+    individual === null ? "" : `개인 ${formatSignedNumber(individual)}`,
+  ]
+    .filter(Boolean)
+    .join(" · ") || "—";
+}
+
+function earlyDivergenceText(row) {
+  const divergence = asObject(
+    firstValue(row?.divergence, row?.divergence_evidence),
+  );
+  if (divergence.bullish_divergence === true) return "상승 다이버전스";
+  if (divergence.macd_bullish_divergence === true) return "MACD 상승";
+  if (divergence.rsi_bullish_divergence === true) return "RSI 상승";
+  return "필수 아님";
+}
+
+function earlyIchimokuText(row) {
+  if (typeof row?.ichimoku === "string") return row.ichimoku;
+  const ichimoku = asObject(row?.ichimoku);
+  const label = firstValue(
+    ichimoku.state_ko,
+    ichimoku.position_ko,
+    ichimoku.signal_ko,
+    ichimoku.state,
+    ichimoku.position,
+    ichimoku.signal,
+  );
+  if (label) return String(label).replaceAll("_", " ");
+  if (ichimoku.cloud_reclaim === true) return "구름대 리클레임";
+  if (ichimoku.cloud_breakout === true) return "구름대 돌파";
+  if (ichimoku.above_cloud === true || ichimoku.close_above_cloud === true) {
+    return "구름대 상단";
+  }
+  if (ichimoku.inside_cloud === true) return "구름대 내부";
+  if (ichimoku.below_cloud === true) return "구름대 하단";
+  if (ichimoku.close_above_kijun === true) return "기준선 상단";
+  return "—";
+}
+
+function earlyListText(value, fallback = "—") {
+  const values = asArray(value)
+    .map((item) => {
+      if (item && typeof item === "object") {
+        const value = firstValue(
+          item.label_ko,
+          item.label,
+          item.message,
+          item.code,
+        );
+        return EARLY_GATE_LABELS[value] || value;
+      }
+      return EARLY_GATE_LABELS[item] || item;
+    })
+    .filter((item) => item !== null && item !== undefined && item !== "");
+  return values.length ? values.join(" · ") : fallback;
+}
+
+function earlyConditionText(value, fallback = "—") {
+  const text = earlyListText(value, fallback);
+  const triggerMatch = text.match(
+    /^Next session must trade ([\d,.]+) inside the permitted entry zone\.$/,
+  );
+  if (triggerMatch) {
+    return `다음 세션 ${formatNumber(
+      Number(triggerMatch[1].replaceAll(",", "")),
+    )}원 트리거를 허용 진입구간 안에서 확인`;
+  }
+  return (
+    {
+      "Close above EMA10>EMA20 while holding EMA60.":
+        "EMA10 > EMA20 배열을 회복하고 EMA60 지지를 확인",
+      "MACD histogram must turn positive.": "MACD 히스토그램 양전환 확인",
+      "KRX high must test at least 99% of the prior 20-day high.":
+        "KRX 고가가 직전 20일 고점의 99% 이상을 재시험",
+      "KRX execution strength must reach 105.": "KRX 체결강도 105 이상 확인",
+      "Five-day sponsor flow must be positive while individuals sell.":
+        "개인 순매도와 5일 주도 수급 순매수를 함께 확인",
+      "Wait for a controlled rebreak candle.": "과열 없는 재돌파 봉 확인",
+      "A valid 0.75ATR-to-10% structural stop is required.":
+        "0.75ATR 이상·10% 이하의 유효한 구조적 손절선 확보",
+      "Wait 1-5 sessions for activity to contract to <=80% of ignition while retaining >=93% of the ignition opening price.":
+        "점화 시가의 93% 이상을 지키며 1–5세션 내 거래활동이 80% 이하로 수축하는지 확인",
+      "Wait for a >=4.5% strong-close ignition with activity >=0.8x.":
+        "거래활동 0.8배 이상을 동반한 +4.5% 이상 강한 종가 점화 확인",
+      "Wait for a new base and a fresh non-extended rebreak.":
+        "새 베이스 형성과 과도하게 이격되지 않은 재돌파를 다시 확인",
+    }[text] || text
+  );
+}
+
+function earlyCandidateCard(row, meta, index) {
+  const plan = earlyCandidatePlan(row);
+  const score = number(earlyStageScore(row, meta));
+  const scoreWidth = score === null ? 0 : Math.max(0, Math.min(score, 100));
+  const triggerDistance = earlyTriggerDistance(row, plan.trigger);
+  const age = number(firstValue(row?.state_age_sessions, row?.state_age));
+  const missingGate = earlyListText(
+    firstValue(
+      row?.first_failed_gate,
+      row?.missing_gate,
+      row?.missing_gates,
+      row?.failed_gates,
+    ),
+    "현재 단계의 필수 게이트 통과",
+  );
+  const nextCondition = earlyConditionText(
+    firstValue(row?.next_condition, row?.next_gate, row?.action),
+    meta.key === "REBREAK_READY"
+      ? "다음 세션 트리거 체결 여부 확인"
+      : "다음 단계 조건 계산 대기",
+  );
+  const reconstruction = row?.reconstruction;
+  const reconstructionLabel =
+    reconstruction === true
+      ? "시점 재구성"
+      : reconstruction && typeof reconstruction === "object"
+        ? firstValue(
+            reconstruction.label_ko,
+            reconstruction.label,
+            reconstruction.status,
+            reconstruction.reconstructed === true ? "시점 재구성" : null,
+            reconstruction.point_in_time_valid === true ? "당시 데이터" : null,
+            "PIT 미확인",
+          )
+        : "";
+  const zone =
+    number(plan.zoneLow) === null
+      ? "—"
+      : `${formatNumber(plan.zoneLow)}–${formatNumber(
+          firstValue(plan.zoneHigh, plan.zoneLow),
+        )}`;
+
+  return `
+    <article class="early-candidate-card" data-tone="${escapeHtml(meta.tone)}">
+      <div class="early-card-head">
+        <div class="early-card-identity">
+          <div>
+            <span class="early-stage-chip">${escapeHtml(
+              row?.state_ko || meta.label,
+            )}</span>
+            <span class="early-shadow-badge">SHADOW</span>
+          </div>
+          <h4>${escapeHtml(row?.name || row?.symbol || "이름 없음")}</h4>
+          <p>${escapeHtml(row?.symbol || "—")} · ${escapeHtml(
+            row?.market || "KRX",
+          )}</p>
+        </div>
+        <div class="early-score">
+          <span>Stage score</span>
+          <strong>${escapeHtml(score === null ? "—" : formatNumber(score, 1))}</strong>
+          <small>#${escapeHtml(String(index + 1).padStart(2, "0"))}</small>
+        </div>
+      </div>
+
+      <div class="early-score-track" aria-hidden="true">
+        <i style="width:${escapeHtml(scoreWidth)}%"></i>
+      </div>
+      ${earlyScoreChips(row)}
+
+      <div class="early-state-meta">
+        <span>시작 ${escapeHtml(formatDate(row?.state_started_on))}</span>
+        <span>상태 ${escapeHtml(age === null ? "—" : `${formatNumber(age)}세션`)}</span>
+        ${
+          reconstructionLabel
+            ? `<span>${escapeHtml(reconstructionLabel)}</span>`
+            : ""
+        }
+      </div>
+
+      <div class="early-trade-geometry">
+        <div>
+          <span>Trigger 거리</span>
+          <strong>${escapeHtml(formatPct(triggerDistance, 1))}</strong>
+        </div>
+        <div>
+          <span>Trigger</span>
+          <strong>${escapeHtml(formatPrice(plan.trigger))}</strong>
+        </div>
+        <div>
+          <span>Entry zone</span>
+          <strong>${escapeHtml(zone)}</strong>
+        </div>
+        <div>
+          <span>Hard stop</span>
+          <strong>${escapeHtml(formatPrice(plan.stop))}</strong>
+        </div>
+      </div>
+
+      <div class="early-gate-panel">
+        <div>
+          <span>첫 미통과 게이트</span>
+          <strong>${escapeHtml(missingGate)}</strong>
+        </div>
+        <div>
+          <span>다음 확인 조건</span>
+          <strong>${escapeHtml(nextCondition)}</strong>
+        </div>
+      </div>
+
+      <div class="early-signal-strip">
+        <span><small>5D 수급</small>${escapeHtml(earlyFlowText(row))}</span>
+        <span><small>체결강도</small>${escapeHtml(
+          formatNumber(row?.execution_strength, 1),
+        )}</span>
+        <span><small>일목균형표</small>${escapeHtml(earlyIchimokuText(row))}</span>
+        <span><small>다이버전스</small>${escapeHtml(
+          earlyDivergenceText(row),
+        )}</span>
+      </div>
+
+      <div class="early-card-foot">
+        <span>
+          ${escapeHtml(
+            row?.ignition_date ? `점화 ${formatDate(row.ignition_date)}` : "점화일 —",
+          )}
+          ·
+          ${escapeHtml(
+            row?.reset_date ? `눌림 ${formatDate(row.reset_date)}` : "눌림일 —",
+          )}
+        </span>
+        ${
+          row?.symbol
+            ? `
+              <button
+                class="text-button"
+                type="button"
+                data-open-symbol="${escapeHtml(row.symbol)}"
+              >
+                종목 상세
+              </button>
+            `
+            : ""
+        }
+      </div>
+    </article>
+  `;
+}
+
+function nearestEarlyTrendCandidate() {
+  const stages = EARLY_TREND_META.filter(
+    (meta) => !["REBREAK_READY", "NO_CHASE_AVOID"].includes(meta.key),
+  );
+  for (const meta of stages) {
+    const rows = earlyTrendRows(meta);
+    if (!rows.length) continue;
+    const candidate = [...rows].sort(
+      (left, right) =>
+        (number(earlyStageScore(right, meta)) || -Infinity) -
+        (number(earlyStageScore(left, meta)) || -Infinity),
+    )[0];
+    return { meta, candidate };
+  }
+  const fallback = asArray(earlyTrendPayload().nearest_candidates)
+    .filter((row) => row && typeof row === "object")
+    .sort(
+      (left, right) =>
+        (number(right?.total_score) || -Infinity) -
+        (number(left?.total_score) || -Infinity),
+    )[0];
+  if (fallback) {
+    return {
+      meta: EARLY_TREND_META.find((meta) => meta.key === "BASE_ABSORPTION"),
+      candidate: fallback,
+    };
+  }
+  return null;
+}
+
+function renderEarlyTrendRadar() {
+  const payload = earlyTrendPayload();
+  const status = String(payload.feature_status || "SHADOW").toUpperCase();
+  const updateStatus = String(payload.update_status || "").toUpperCase();
+  const isAvailable =
+    Object.keys(payload).length > 0 &&
+    !["", "UNAVAILABLE", "FAILED", "ERROR"].includes(updateStatus);
+  const statusNode = byId("early-trend-status");
+  statusNode.textContent = status;
+  statusNode.classList.toggle("is-production", status === "PRODUCTION");
+  statusNode.title = payload.update_status
+    ? `업데이트 상태: ${payload.update_status}`
+    : "기존 의사결정에 영향을 주지 않는 연구 신호";
+  byId("early-trend-version").textContent = payload.feature_version || "—";
+
+  if (!isAvailable) {
+    byId("early-trend-funnel").innerHTML = "";
+    const nearestNode = byId("early-trend-nearest");
+    nearestNode.hidden = true;
+    nearestNode.innerHTML = "";
+    byId("early-trend-buckets").innerHTML = `
+      <div class="early-radar-empty">
+        <strong>조기 추세 전환 데이터가 아직 준비되지 않았습니다.</strong>
+        <p>다음 확정 DuckDB 계산이 완료되면 단계별 후보가 이곳에 표시됩니다.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const funnel = asObject(payload.funnel);
+  const universe = firstValue(
+    number(funnel.universe),
+    number(payload.universe_count),
+  );
+  byId("early-trend-funnel").innerHTML = `
+    ${EARLY_TREND_META.map(
+      (meta) => `
+        <article data-tone="${escapeHtml(meta.tone)}">
+          <span>${escapeHtml(meta.shortLabel)}</span>
+          <strong>${escapeHtml(formatNumber(earlyTrendCount(meta)))}</strong>
+          <small>${escapeHtml(meta.label)}</small>
+        </article>
+      `,
+    ).join("")}
+    <article class="early-funnel-universe">
+      <span>UNIVERSE</span>
+      <strong>${escapeHtml(formatNumber(universe))}</strong>
+      <small>검사 종목</small>
+    </article>
+  `;
+
+  const readyRows = earlyTrendRows(EARLY_TREND_META[0]);
+  const nearestNode = byId("early-trend-nearest");
+  if (!readyRows.length) {
+    const nearest = nearestEarlyTrendCandidate();
+    nearestNode.hidden = false;
+    nearestNode.innerHTML = nearest
+      ? `
+        <div>
+          <span>READY 0건 · 가장 가까운 후보</span>
+          <strong>${escapeHtml(
+            nearest.candidate?.name || nearest.candidate?.symbol || "이름 없음",
+          )}</strong>
+          <small>
+            ${escapeHtml(nearest.meta.label)} ·
+            ${escapeHtml(
+              earlyListText(
+                firstValue(
+                  nearest.candidate?.first_failed_gate,
+                  nearest.candidate?.missing_gate,
+                ),
+                "다음 게이트 확인 대기",
+              ),
+            )}
+          </small>
+        </div>
+        ${
+          nearest.candidate?.symbol
+            ? `
+              <button
+                class="text-button"
+                type="button"
+                data-open-symbol="${escapeHtml(nearest.candidate.symbol)}"
+              >
+                ${escapeHtml(
+                  earlyConditionText(
+                    nearest.candidate?.next_condition,
+                    "다음 조건 보기",
+                  ),
+                )}
+              </button>
+            `
+            : ""
+        }
+      `
+      : `
+        <div>
+          <span>READY 0건</span>
+          <strong>다음 단계에 가까운 후보도 없습니다.</strong>
+          <small>새로운 바닥 수급흡수와 첫 점화를 기다립니다.</small>
+        </div>
+      `;
+  } else {
+    nearestNode.hidden = true;
+    nearestNode.innerHTML = "";
+  }
+
+  byId("early-trend-buckets").innerHTML = EARLY_TREND_META.map((meta) => {
+        const rows = earlyTrendRows(meta);
+        return `
+          <section class="early-stage-bucket" data-tone="${escapeHtml(meta.tone)}">
+            <div class="early-bucket-heading">
+              <div>
+                <span>${escapeHtml(meta.shortLabel)}</span>
+                <h3>${escapeHtml(meta.label)}</h3>
+              </div>
+              <strong>${escapeHtml(formatNumber(earlyTrendCount(meta)))}</strong>
+            </div>
+            <div class="early-candidate-grid">
+              ${
+                rows.length
+                  ? rows
+                      .map((row, index) => earlyCandidateCard(row, meta, index))
+                      .join("")
+                  : `
+                    <div class="early-empty">
+                      <span>0</span>
+                      <p>${escapeHtml(meta.empty)}</p>
+                    </div>
+                  `
+              }
+            </div>
+          </section>
+        `;
+      }).join("");
 }
 
 function priorityCandidates() {
@@ -1442,6 +2100,7 @@ function bindEvents() {
 
 function renderAll() {
   renderRunMetadata();
+  renderEarlyTrendRadar();
   renderPriorityCandidates();
   renderCoverageNotice();
   renderBlockers();
@@ -1485,6 +2144,7 @@ async function loadApplication() {
         : "";
     setStatus(`v2 결과를 불러오지 못했습니다: ${error.message}.${fileHint}`, "error");
     renderRunMetadata();
+    renderEarlyTrendRadar();
     renderPriorityCandidates();
     renderCoverageNotice();
     renderSummary();

@@ -9,7 +9,7 @@
       content="한국 주식 테마·수급·실행 조건을 통합한 Korea Master Screener v2"
     />
     <title>Korea Master Screener v2</title>
-    <link rel="stylesheet" href="./styles.css?v=master-v2-20260724" />
+    <link rel="stylesheet" href="./styles.css?v=early-trend-20260727" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">본문으로 바로가기</a>
@@ -44,24 +44,65 @@
       <section
         id="action-center"
         class="section-shell workspace-section priority-section"
-        aria-labelledby="priority-title"
+        aria-label="Action Center"
       >
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">EXISTING SCREENER · EXECUTION FIRST</p>
-            <h2 id="priority-title">다음 세션 우선 종목</h2>
-            <p>
-              기존 전 종목 구조 스크리너가 <strong>조건부 매수</strong>로 분류한
-              후보를 순위대로 표시합니다. 종목마다 제시된 트리거를 확인한 뒤
-              진입하고, 무효화 가격 이탈 시 판단을 종료합니다.
-            </p>
+        <div class="early-trend-radar" aria-labelledby="early-trend-title">
+          <div class="early-trend-heading">
+            <div>
+              <div class="early-trend-kicker">
+                <p class="eyebrow">ORDERED TRANSITION RADAR</p>
+                <span id="early-trend-status" class="early-trend-status">SHADOW</span>
+              </div>
+              <h2 id="early-trend-title">조기 추세 전환 레이더</h2>
+              <p>
+                바닥 수급흡수부터 첫 점화, 건강한 눌림, 재돌파 준비까지
+                <strong>순서가 이어진 종목</strong>을 가장 먼저 보여줍니다.
+                SHADOW 신호는 기존 매수 결정과 사이징을 변경하지 않습니다.
+              </p>
+            </div>
+            <div class="early-trend-version">
+              <span>Feature</span>
+              <strong id="early-trend-version">—</strong>
+            </div>
           </div>
-          <div class="priority-counter" aria-label="조건부 매수 종목 수">
-            <strong id="priority-count">0</strong>
-            <span>조건부 매수</span>
-          </div>
+
+          <div
+            id="early-trend-funnel"
+            class="early-trend-funnel"
+            aria-label="조기 추세 전환 단계별 종목 수"
+          ></div>
+
+          <div
+            id="early-trend-nearest"
+            class="early-trend-nearest"
+            aria-live="polite"
+            hidden
+          ></div>
+
+          <div
+            id="early-trend-buckets"
+            class="early-trend-buckets"
+          ></div>
         </div>
-        <div id="priority-list" class="priority-list" aria-live="polite"></div>
+
+        <div class="priority-existing">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">EXISTING SCREENER · EXECUTION FIRST</p>
+              <h2 id="priority-title">다음 세션 우선 종목</h2>
+              <p>
+                기존 전 종목 구조 스크리너가 <strong>조건부 매수</strong>로 분류한
+                후보를 순위대로 표시합니다. 종목마다 제시된 트리거를 확인한 뒤
+                진입하고, 무효화 가격 이탈 시 판단을 종료합니다.
+              </p>
+            </div>
+            <div class="priority-counter" aria-label="조건부 매수 종목 수">
+              <strong id="priority-count">0</strong>
+              <span>조건부 매수</span>
+            </div>
+          </div>
+          <div id="priority-list" class="priority-list" aria-live="polite"></div>
+        </div>
       </section>
 
       <section class="hero section-shell" aria-labelledby="hero-title">
@@ -373,6 +414,6 @@
         이 대시보드는 JSON 결과를 읽기 위해 JavaScript가 필요합니다.
       </div>
     </noscript>
-    <script src="./app.js?v=master-v2-20260724" defer></script>
+    <script src="./app.js?v=early-trend-20260727" defer></script>
   </body>
 </html>
