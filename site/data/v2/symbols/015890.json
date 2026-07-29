@@ -1,9 +1,9 @@
 {
-  "content_hash": "c7501e2f35554ad94a6af7c7ca0e1c4f4d712f4e82acd7c2e399835490f217a7",
+  "content_hash": "9a485a6b0b5ac1dd66957f03bdf97f75844ebcc0a49a97885d292d7415a61777",
   "data_health": {
     "issues": [
       "decision_code:CATALYST_NONE_STALE_OR_UNVERIFIED",
-      "decision_code:SHORT_BORROW_DATA_MISSING",
+      "decision_code:MARKET_NEUTRAL_OR_UNAVAILABLE",
       "decision_code:THEME_UNMAPPED",
       "decision_code:UNIVERSE_THEME_UNMAPPED"
     ],
@@ -28,15 +28,15 @@
     "axes": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
-      "market_regime": "M0_RISK_OFF",
-      "risk_tier": "R1_SOFT_CAP",
+      "market_regime": "M1_NEUTRAL",
+      "risk_tier": "R0_HARD_STOP",
       "theme_tier": "T0_INVALID"
     },
     "axes_v2": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
-      "market_regime": "M0_RISK_OFF",
-      "risk_tier": "R1_SOFT_CAP",
+      "market_regime": "M1_NEUTRAL",
+      "risk_tier": "R0_HARD_STOP",
       "theme_tier": "T0_INVALID"
     },
     "axis_details": {
@@ -52,45 +52,49 @@
       },
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution": {
-        "execution_strength": 0.0,
-        "flow_continuity_score": 50.0,
+        "execution_strength": 93.19,
+        "flow_continuity_score": 70.0,
         "rank": 0,
         "reasons": [
           "EXECUTION_GATE_INCOMPLETE",
-          "TECHNICAL_CONFIRMATION"
+          "FLOW_5D_AND_CONTINUITY_CONFIRMED",
+          "TAPE_CONFIRMED"
         ],
-        "sponsor_5d": 64.0,
-        "tape_confirmed": false,
-        "technical_confirmation": true,
-        "technical_score": 60.0,
+        "sponsor_5d": 130.0,
+        "tape_confirmed": true,
+        "technical_confirmation": false,
+        "technical_score": 0.0,
         "tier": "E0_FAILED"
       },
       "execution_tier": "E0_FAILED",
       "market": {
-        "breadth_pct": 20.0,
-        "market_return_1d_pct": -3.0,
-        "rank": 0,
-        "reasons": [
-          "MARKET_RISK_OFF_NO_NEW_LONGS"
-        ],
-        "tier": "M0_RISK_OFF"
-      },
-      "market_regime": "M0_RISK_OFF",
-      "risk": {
-        "hard": false,
-        "hard_reasons": [],
+        "breadth_pct": 40.0,
+        "market_return_1d_pct": 0.0,
         "rank": 1,
         "reasons": [
+          "MARKET_NEUTRAL_OR_UNAVAILABLE"
+        ],
+        "tier": "M1_NEUTRAL"
+      },
+      "market_regime": "M1_NEUTRAL",
+      "risk": {
+        "hard": true,
+        "hard_reasons": [
+          "FAILED_BREAKOUT"
+        ],
+        "rank": 0,
+        "reasons": [
           "EXPLICIT_SOFT_RISK",
-          "SHORT_BORROW_DATA_MISSING"
+          "FAILED_BREAKOUT",
+          "TAPE_NOT_FULLY_CONFIRMED"
         ],
         "soft_reasons": [
           "EXPLICIT_SOFT_RISK",
-          "SHORT_BORROW_DATA_MISSING"
+          "TAPE_NOT_FULLY_CONFIRMED"
         ],
-        "tier": "R1_SOFT_CAP"
+        "tier": "R0_HARD_STOP"
       },
-      "risk_tier": "R1_SOFT_CAP",
+      "risk_tier": "R0_HARD_STOP",
       "theme": {
         "active_member_count": 0,
         "breadth_pct": 0.0,
@@ -119,9 +123,9 @@
       },
       "theme_tier": "T0_INVALID",
       "universe": {
-        "average_turnover_20d_million_krw": 213.85,
+        "average_turnover_20d_million_krw": 229.35,
         "mapped": false,
-        "market_cap_eok": 1332.831,
+        "market_cap_eok": 1310.9094375,
         "public_eligible": false,
         "rank": 0,
         "reasons": [
@@ -131,12 +135,12 @@
         ],
         "tactical_eligible": false,
         "tier": "RESEARCH_ONLY",
-        "turnover_million_krw": 254.0
+        "turnover_million_krw": 395.0
       },
       "universe_tier": "RESEARCH_ONLY"
     },
-    "conviction_score": 20.333333,
-    "cutoff_kst": "21:17",
+    "conviction_score": 25.538833,
+    "cutoff_kst": "16:16",
     "data_health": {
       "flow_venue": "KRX",
       "has_krx": true,
@@ -150,8 +154,9 @@
       "technical_stale": false,
       "unified_source": "fallback_merge"
     },
-    "decision_score": 20.333333,
+    "decision_score": 25.538833,
     "decision_version": "master-trade-v1",
+    "execution_instruction": "DO_NOT_ENTER",
     "feature_registry_status": {
       "advanced_chart_pattern_score": "SHADOW",
       "bottom_reacceleration_ranking": "SHADOW",
@@ -244,13 +249,13 @@
     "narrative_projections": [],
     "narrative_theme_ids": [],
     "narrative_theme_paths": [],
-    "order_state": "NOT_PLACED",
+    "order_state": "FAILED",
     "order_tracking": {
       "elapsed_sessions": 0,
       "fill_price": null,
       "plan_id": null,
       "started_on": null,
-      "state": "NOT_PLACED",
+      "state": "FAILED",
       "tracking_basis": "MARKET_REPLAY_NOT_BROKER_EXECUTION"
     },
     "price_confirmation_venue": "KRX",
@@ -261,21 +266,22 @@
     "primary_theme_node_path": null,
     "primary_theme_path": null,
     "primary_theme_selection": {},
-    "priority_score": 20.333333,
-    "production_decision_hash": "731a18acf8c209547db5d55eaa252034b05393d5ef73c357921f9102d634ff00",
-    "rank": 308,
-    "rank_3_10d": 308,
+    "priority_score": 25.538833,
+    "production_decision_hash": "41046efe7f2e3d09d93345e4ea1040f74b787ab9410468d5a7af75ad2c263ac4",
+    "rank": 467,
+    "rank_3_10d": 467,
     "reason_codes": [
-      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
-      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
+      "FLOW_5D_AND_CONTINUITY_CONFIRMED",
+      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
-      "MARKET_RISK_OFF_NO_NEW_LONGS",
+      "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
+      "RISK_CAP",
       "STATE_CAP",
-      "TECHNICAL_CONFIRMATION",
+      "TAPE_CONFIRMED",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
       "THEME_UNMAPPED",
@@ -286,11 +292,12 @@
     "recommended_horizon": "NONE",
     "risk_codes": [
       "EXPLICIT_SOFT_RISK",
-      "SHORT_BORROW_DATA_MISSING"
+      "FAILED_BREAKOUT",
+      "TAPE_NOT_FULLY_CONFIRMED"
     ],
-    "screen_date": "20260728",
-    "setup_state": "OBSERVE",
-    "setup_state_ko": "관찰",
+    "screen_date": "20260729",
+    "setup_state": "DISTRIBUTION_AVOID",
+    "setup_state_ko": "분산/회피",
     "shadow_annotations": [
       {
         "feature": "unscoped_or_nonprimary_catalyst",
@@ -304,7 +311,76 @@
         "feature": "institutional_activity_surprise",
         "registry_feature_name": "causal_institutional_activity_surprise",
         "status": "SHADOW",
-        "value": null
+        "value": {
+          "action": "기존 수급·차트 판정 유지",
+          "activity_expanded": false,
+          "domestic_institution_positive_count_1d": 2,
+          "dual_activity_expanded": false,
+          "foreigner_net_buy_1d_million_krw": 62,
+          "label": "기관성 거래량 확장 없음",
+          "methodology": "가격 예측치가 아닌 causal activity×investor sponsorship 진단; 신호일 포함 평균 금지",
+          "price_confirmed": false,
+          "private_equity": {
+            "intensity_1d": 0.0177,
+            "intensity_3d": 0.01,
+            "net_buy_1d_million_krw": 7,
+            "net_buy_3d_million_krw": 7,
+            "percentile_prior_60d": 96.67,
+            "positive_days_3d": 1,
+            "sponsorship_confirmed": false,
+            "zscore_prior_20d": null
+          },
+          "reasons": [
+            "사모·연기금·투신 중 2/3 순매수",
+            "외국인 +62백만원 동행"
+          ],
+          "research_only": true,
+          "risks": [],
+          "score": 15,
+          "signal_code": "none",
+          "sponsor_net_buy_1d_million_krw": 76,
+          "status": "정상",
+          "turnover": {
+            "available": true,
+            "current": 395,
+            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
+            "expanded": false,
+            "log_zscore_prior_20d": 1.2917,
+            "ordinary_zscore_prior_20d": 1.2786,
+            "outlier_contaminated_mean_warning": false,
+            "prior_20d_mean": 213.85,
+            "prior_20d_median": 177.5,
+            "prior_5d_mean": 131,
+            "prior_5d_median": 94,
+            "prior_observation_count": 20,
+            "ratio_to_prior_20d_mean": 1.8471,
+            "ratio_to_prior_20d_median": 2.2254,
+            "ratio_to_prior_5d_mean": 3.0153,
+            "ratio_to_prior_5d_median": 4.2021,
+            "robust_log_zscore_prior_20d": 1.0954,
+            "status": "정상"
+          },
+          "volume": {
+            "available": true,
+            "current": 87804,
+            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
+            "expanded": false,
+            "log_zscore_prior_20d": 1.3311,
+            "ordinary_zscore_prior_20d": 1.3518,
+            "outlier_contaminated_mean_warning": false,
+            "prior_20d_mean": 46354.95,
+            "prior_20d_median": 38347.5,
+            "prior_5d_mean": 28391.4,
+            "prior_5d_median": 20414,
+            "prior_observation_count": 20,
+            "ratio_to_prior_20d_mean": 1.8942,
+            "ratio_to_prior_20d_median": 2.2897,
+            "ratio_to_prior_5d_mean": 3.0926,
+            "ratio_to_prior_5d_median": 4.3012,
+            "robust_log_zscore_prior_20d": 1.1223,
+            "status": "정상"
+          }
+        }
       },
       {
         "feature": "advanced_chart_pattern",
@@ -325,10 +401,10 @@
         "value": null
       }
     ],
-    "state": "OBSERVE",
-    "state_age_sessions": 2,
-    "state_ko": "관찰",
-    "state_started_on": "20260727",
+    "state": "DISTRIBUTION_AVOID",
+    "state_age_sessions": 1,
+    "state_ko": "분산/회피",
+    "state_started_on": "20260729",
     "symbol": "015890",
     "theme_ids": [],
     "theme_node_paths": [],
@@ -345,9 +421,9 @@
     "trade_plan": {
       "actionable": false,
       "adv_participation_cap_pct": 5.0,
-      "average_turnover_20d_million_krw": 213.85,
+      "average_turnover_20d_million_krw": 229.35,
       "capacity_rule": "MIN(risk budget, NAV weight cap, 2% ADV20 for TACTICAL/Tier1; 5% ADV20 otherwise)",
-      "capacity_turnover_million_krw": 213.85,
+      "capacity_turnover_million_krw": 229.35,
       "entry_confirmation": [],
       "entry_legs": [],
       "entry_method": null,
@@ -375,11 +451,11 @@
       "trigger_price": null,
       "trigger_type": null
     },
-    "trade_status": "WATCH",
-    "trade_status_display": "WATCH",
-    "trade_status_label": "WATCH",
+    "trade_status": "FAILED",
+    "trade_status_display": "FAILED",
+    "trade_status_label": "FAILED",
     "transition": {
-      "candidate_state": "OBSERVE",
+      "candidate_state": "DISTRIBUTION_AVOID",
       "overheat_reset_required": false,
       "previous_state": "OBSERVE",
       "rearmed": false
@@ -390,16 +466,17 @@
   "early_trend_transition": {},
   "evidence": {
     "decision_reason_codes": [
-      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
-      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
+      "FLOW_5D_AND_CONTINUITY_CONFIRMED",
+      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
-      "MARKET_RISK_OFF_NO_NEW_LONGS",
+      "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
+      "RISK_CAP",
       "STATE_CAP",
-      "TECHNICAL_CONFIRMATION",
+      "TAPE_CONFIRMED",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
       "THEME_UNMAPPED",
@@ -409,7 +486,8 @@
     ],
     "decision_risk_codes": [
       "EXPLICIT_SOFT_RISK",
-      "SHORT_BORROW_DATA_MISSING"
+      "FAILED_BREAKOUT",
+      "TAPE_NOT_FULLY_CONFIRMED"
     ],
     "decision_shadow_annotations": [
       {
@@ -424,7 +502,76 @@
         "feature": "institutional_activity_surprise",
         "registry_feature_name": "causal_institutional_activity_surprise",
         "status": "SHADOW",
-        "value": null
+        "value": {
+          "action": "기존 수급·차트 판정 유지",
+          "activity_expanded": false,
+          "domestic_institution_positive_count_1d": 2,
+          "dual_activity_expanded": false,
+          "foreigner_net_buy_1d_million_krw": 62,
+          "label": "기관성 거래량 확장 없음",
+          "methodology": "가격 예측치가 아닌 causal activity×investor sponsorship 진단; 신호일 포함 평균 금지",
+          "price_confirmed": false,
+          "private_equity": {
+            "intensity_1d": 0.0177,
+            "intensity_3d": 0.01,
+            "net_buy_1d_million_krw": 7,
+            "net_buy_3d_million_krw": 7,
+            "percentile_prior_60d": 96.67,
+            "positive_days_3d": 1,
+            "sponsorship_confirmed": false,
+            "zscore_prior_20d": null
+          },
+          "reasons": [
+            "사모·연기금·투신 중 2/3 순매수",
+            "외국인 +62백만원 동행"
+          ],
+          "research_only": true,
+          "risks": [],
+          "score": 15,
+          "signal_code": "none",
+          "sponsor_net_buy_1d_million_krw": 76,
+          "status": "정상",
+          "turnover": {
+            "available": true,
+            "current": 395,
+            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
+            "expanded": false,
+            "log_zscore_prior_20d": 1.2917,
+            "ordinary_zscore_prior_20d": 1.2786,
+            "outlier_contaminated_mean_warning": false,
+            "prior_20d_mean": 213.85,
+            "prior_20d_median": 177.5,
+            "prior_5d_mean": 131,
+            "prior_5d_median": 94,
+            "prior_observation_count": 20,
+            "ratio_to_prior_20d_mean": 1.8471,
+            "ratio_to_prior_20d_median": 2.2254,
+            "ratio_to_prior_5d_mean": 3.0153,
+            "ratio_to_prior_5d_median": 4.2021,
+            "robust_log_zscore_prior_20d": 1.0954,
+            "status": "정상"
+          },
+          "volume": {
+            "available": true,
+            "current": 87804,
+            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
+            "expanded": false,
+            "log_zscore_prior_20d": 1.3311,
+            "ordinary_zscore_prior_20d": 1.3518,
+            "outlier_contaminated_mean_warning": false,
+            "prior_20d_mean": 46354.95,
+            "prior_20d_median": 38347.5,
+            "prior_5d_mean": 28391.4,
+            "prior_5d_median": 20414,
+            "prior_observation_count": 20,
+            "ratio_to_prior_20d_mean": 1.8942,
+            "ratio_to_prior_20d_median": 2.2897,
+            "ratio_to_prior_5d_mean": 3.0926,
+            "ratio_to_prior_5d_median": 4.3012,
+            "robust_log_zscore_prior_20d": 1.1223,
+            "status": "정상"
+          }
+        }
       },
       {
         "feature": "advanced_chart_pattern",
@@ -450,54 +597,54 @@
   "flow": {
     "flow": {
       "1d": {
-        "foreigner": -23.0,
-        "individual": 10.0,
-        "investment_trust": 0.0,
+        "foreigner": 62.0,
+        "individual": -64.0,
+        "investment_trust": 7.0,
         "observation_count": 1,
         "pension": 0.0,
-        "positive_count": 0,
-        "private_equity": 0.0,
-        "sponsor": -23.0
+        "positive_count": 2,
+        "private_equity": 7.0,
+        "sponsor": 76.0
       },
       "3d": {
-        "foreigner": 11.0,
-        "individual": -23.0,
-        "investment_trust": 0.0,
+        "foreigner": 38.0,
+        "individual": -47.0,
+        "investment_trust": 7.0,
         "observation_count": 3,
         "pension": 0.0,
-        "positive_count": 1,
-        "private_equity": 0.0,
-        "sponsor": 11.0
+        "positive_count": 2,
+        "private_equity": 7.0,
+        "sponsor": 52.0
       },
       "5d": {
-        "foreigner": 64.0,
-        "individual": -67.0,
-        "investment_trust": 0.0,
+        "foreigner": 116.0,
+        "individual": -131.0,
+        "investment_trust": 7.0,
         "observation_count": 5,
         "pension": 0.0,
-        "positive_count": 1,
-        "private_equity": 0.0,
-        "sponsor": 64.0
+        "positive_count": 2,
+        "private_equity": 7.0,
+        "sponsor": 130.0
       },
       "period": {
-        "foreigner": 688.0,
-        "individual": -721.0,
-        "investment_trust": 0.0,
+        "foreigner": 742.0,
+        "individual": -774.0,
+        "investment_trust": 7.0,
         "observation_count": 20,
         "pension": 0.0,
-        "positive_count": 1,
-        "private_equity": 0.0,
-        "sponsor": 688.0
+        "positive_count": 2,
+        "private_equity": 7.0,
+        "sponsor": 756.0
       }
     },
-    "individual_5d": -67.0,
-    "sponsor_3d": 11.0,
-    "sponsor_5d": 64.0,
+    "individual_5d": -131.0,
+    "sponsor_3d": 52.0,
+    "sponsor_5d": 130.0,
     "sponsor_positive_days_5d": 3
   },
   "fundamentals": {
-    "market_cap_as_of": "20260728",
-    "market_cap_eok": 1332.831
+    "market_cap_as_of": "20260729",
+    "market_cap_eok": 1310.9094375
   },
   "identity": {
     "instrument_type": "common_stock",
@@ -508,23 +655,23 @@
   "legacy_source": {
     "actionable": false,
     "actionable_rank": null,
-    "adv20_krw": 213850000.0,
+    "adv20_krw": 229350000.0,
     "adverse_narrative_theme_ids": [],
     "alert_text": null,
     "analysis_scope": "FULL_ANALYSIS",
-    "average_turnover_20d_million_krw": 213.85,
+    "average_turnover_20d_million_krw": 229.35,
     "axes": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
-      "market_regime": "M0_RISK_OFF",
-      "risk_tier": "R1_SOFT_CAP",
+      "market_regime": "M1_NEUTRAL",
+      "risk_tier": "R0_HARD_STOP",
       "theme_tier": "T0_INVALID"
     },
     "axes_v2": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
-      "market_regime": "M0_RISK_OFF",
-      "risk_tier": "R1_SOFT_CAP",
+      "market_regime": "M1_NEUTRAL",
+      "risk_tier": "R0_HARD_STOP",
       "theme_tier": "T0_INVALID"
     },
     "axis_details": {
@@ -540,45 +687,49 @@
       },
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution": {
-        "execution_strength": 0.0,
-        "flow_continuity_score": 50.0,
+        "execution_strength": 93.19,
+        "flow_continuity_score": 70.0,
         "rank": 0,
         "reasons": [
           "EXECUTION_GATE_INCOMPLETE",
-          "TECHNICAL_CONFIRMATION"
+          "FLOW_5D_AND_CONTINUITY_CONFIRMED",
+          "TAPE_CONFIRMED"
         ],
-        "sponsor_5d": 64.0,
-        "tape_confirmed": false,
-        "technical_confirmation": true,
-        "technical_score": 60.0,
+        "sponsor_5d": 130.0,
+        "tape_confirmed": true,
+        "technical_confirmation": false,
+        "technical_score": 0.0,
         "tier": "E0_FAILED"
       },
       "execution_tier": "E0_FAILED",
       "market": {
-        "breadth_pct": 20.0,
-        "market_return_1d_pct": -3.0,
-        "rank": 0,
-        "reasons": [
-          "MARKET_RISK_OFF_NO_NEW_LONGS"
-        ],
-        "tier": "M0_RISK_OFF"
-      },
-      "market_regime": "M0_RISK_OFF",
-      "risk": {
-        "hard": false,
-        "hard_reasons": [],
+        "breadth_pct": 40.0,
+        "market_return_1d_pct": 0.0,
         "rank": 1,
         "reasons": [
+          "MARKET_NEUTRAL_OR_UNAVAILABLE"
+        ],
+        "tier": "M1_NEUTRAL"
+      },
+      "market_regime": "M1_NEUTRAL",
+      "risk": {
+        "hard": true,
+        "hard_reasons": [
+          "FAILED_BREAKOUT"
+        ],
+        "rank": 0,
+        "reasons": [
           "EXPLICIT_SOFT_RISK",
-          "SHORT_BORROW_DATA_MISSING"
+          "FAILED_BREAKOUT",
+          "TAPE_NOT_FULLY_CONFIRMED"
         ],
         "soft_reasons": [
           "EXPLICIT_SOFT_RISK",
-          "SHORT_BORROW_DATA_MISSING"
+          "TAPE_NOT_FULLY_CONFIRMED"
         ],
-        "tier": "R1_SOFT_CAP"
+        "tier": "R0_HARD_STOP"
       },
-      "risk_tier": "R1_SOFT_CAP",
+      "risk_tier": "R0_HARD_STOP",
       "theme": {
         "active_member_count": 0,
         "breadth_pct": 0.0,
@@ -607,9 +758,9 @@
       },
       "theme_tier": "T0_INVALID",
       "universe": {
-        "average_turnover_20d_million_krw": 213.85,
+        "average_turnover_20d_million_krw": 229.35,
         "mapped": false,
-        "market_cap_eok": 1332.831,
+        "market_cap_eok": 1310.9094375,
         "public_eligible": false,
         "rank": 0,
         "reasons": [
@@ -619,36 +770,36 @@
         ],
         "tactical_eligible": false,
         "tier": "RESEARCH_ONLY",
-        "turnover_million_krw": 254.0
+        "turnover_million_krw": 395.0
       },
       "universe_tier": "RESEARCH_ONLY"
     },
     "classified_news_events": [],
-    "close_position": 0.0,
-    "conviction_score": 20.333333,
+    "close_position": 0.32608695652173914,
+    "conviction_score": 25.538833,
     "current": {
-      "change_rate": -1.83,
-      "close": 4560.0,
-      "collected_at": "2026-07-28T21:00:49",
-      "foreigner": -23.0,
+      "change_rate": -1.64,
+      "close": 4485.0,
+      "collected_at": "2026-07-29T16:00:34",
+      "foreigner": 62.0,
       "has_krx": 1,
       "has_nxt": 0,
-      "high": 4650.0,
-      "individual": 10.0,
-      "investment_trust": 0.0,
-      "low": 4560.0,
+      "high": 4640.0,
+      "individual": -64.0,
+      "investment_trust": 7.0,
+      "low": 4410.0,
       "market": "KOSPI",
-      "open": 4650.0,
+      "open": 4560.0,
       "pension": 0.0,
-      "private_equity": 0.0,
-      "source_row_count": 2,
+      "private_equity": 7.0,
+      "source_row_count": 1,
       "symbol": "015890",
       "symbol_name": "태경산업",
-      "trade_date": "20260728",
-      "turnover_million_krw": 254.0,
+      "trade_date": "20260729",
+      "turnover_million_krw": 395.0,
       "unified_source": "fallback_merge"
     },
-    "cutoff_kst": "21:17",
+    "cutoff_kst": "16:16",
     "data_health": {
       "flow_venue": "KRX",
       "has_krx": true,
@@ -662,10 +813,12 @@
       "technical_stale": false,
       "unified_source": "fallback_merge"
     },
-    "decision_score": 20.333333,
+    "data_mode": "SCREEN_DATE_LATEST",
+    "decision_score": 25.538833,
     "decision_version": "master-trade-v1",
     "display_theme_paths": [],
-    "drawdown_20d_pct": -4.9009384775808185,
+    "drawdown_20d_pct": -6.465067778936396,
+    "execution_instruction": "DO_NOT_ENTER",
     "exposure_paths": [],
     "feature_registry_status": {
       "advanced_chart_pattern_score": "SHADOW",
@@ -693,44 +846,44 @@
     },
     "flow": {
       "1d": {
-        "foreigner": -23.0,
-        "individual": 10.0,
-        "investment_trust": 0.0,
+        "foreigner": 62.0,
+        "individual": -64.0,
+        "investment_trust": 7.0,
         "observation_count": 1,
         "pension": 0.0,
-        "positive_count": 0,
-        "private_equity": 0.0,
-        "sponsor": -23.0
+        "positive_count": 2,
+        "private_equity": 7.0,
+        "sponsor": 76.0
       },
       "3d": {
-        "foreigner": 11.0,
-        "individual": -23.0,
-        "investment_trust": 0.0,
+        "foreigner": 38.0,
+        "individual": -47.0,
+        "investment_trust": 7.0,
         "observation_count": 3,
         "pension": 0.0,
-        "positive_count": 1,
-        "private_equity": 0.0,
-        "sponsor": 11.0
+        "positive_count": 2,
+        "private_equity": 7.0,
+        "sponsor": 52.0
       },
       "5d": {
-        "foreigner": 64.0,
-        "individual": -67.0,
-        "investment_trust": 0.0,
+        "foreigner": 116.0,
+        "individual": -131.0,
+        "investment_trust": 7.0,
         "observation_count": 5,
         "pension": 0.0,
-        "positive_count": 1,
-        "private_equity": 0.0,
-        "sponsor": 64.0
+        "positive_count": 2,
+        "private_equity": 7.0,
+        "sponsor": 130.0
       },
       "period": {
-        "foreigner": 688.0,
-        "individual": -721.0,
-        "investment_trust": 0.0,
+        "foreigner": 742.0,
+        "individual": -774.0,
+        "investment_trust": 7.0,
         "observation_count": 20,
         "pension": 0.0,
-        "positive_count": 1,
-        "private_equity": 0.0,
-        "sponsor": 688.0
+        "positive_count": 2,
+        "private_equity": 7.0,
+        "sponsor": 756.0
       }
     },
     "flow_source": "TR_A_2006_UNIFIED_TURNOVER",
@@ -800,18 +953,18 @@
         ]
       }
     },
-    "individual_5d": -67.0,
+    "individual_5d": -131.0,
     "krx_confirmed": true,
     "legacy_signal": {
       "catalyst_layer": "구조 신호만",
       "components": {
-        "execution_tape": 0.0,
-        "flow_timing": 50.0,
-        "institutional_activity_research_only": 0.0,
-        "price_location": 20.0,
-        "relative_strength": 55.46,
+        "execution_tape": 57.97,
+        "flow_timing": 70.0,
+        "institutional_activity_research_only": 15.0,
+        "price_location": 50.0,
+        "relative_strength": 63.99,
         "short_borrow_supply": 60.0,
-        "theme_confirmation": 2.4
+        "theme_confirmation": 8.2
       },
       "execution_eligible": false,
       "flags": {
@@ -820,23 +973,24 @@
         "institutional_activity_expanded": false,
         "institutional_activity_signal_code": "none",
         "late": false,
-        "price_flow_divergence": false,
+        "price_flow_divergence": true,
         "private_equity_sponsorship": false,
         "rolling_reset": false,
         "short_borrow_supply_pressure": false,
         "short_cover_support": false,
-        "tape_confirmed": false,
+        "tape_confirmed": true,
         "theme_confirmed": false
       },
       "reasons": [
-        "선행 조건 미충족"
+        "가격 약세 속 장기성 자금 흡수",
+        "체결·거래대금 확인"
       ],
       "risks": [
         "거래대금 30억원 미달",
         "테마 매핑 미확인"
       ],
-      "stage": "관찰",
-      "structural_score": 28.91
+      "stage": "가격-수급 괴리",
+      "structural_score": 52.83
     },
     "legacy_theme": {
       "assignment_confidence": "medium",
@@ -865,37 +1019,26 @@
     },
     "market": "KOSPI",
     "market_cap_age_days": 0,
-    "market_cap_as_of": "20260728",
-    "market_cap_eok": 1332.831,
+    "market_cap_as_of": "20260729",
+    "market_cap_collected_at": "2026-07-29T16:00:17",
+    "market_cap_eok": 1310.9094375,
     "market_cap_stale": false,
     "memberships": [],
     "name": "태경산업",
     "narrative_projections": [],
     "narrative_theme_ids": [],
     "narrative_theme_paths": [],
-    "order_state": "NOT_PLACED",
+    "order_state": "FAILED",
     "order_tracking": {
       "elapsed_sessions": 0,
       "fill_price": null,
       "plan_id": null,
       "started_on": null,
-      "state": "NOT_PLACED",
+      "state": "FAILED",
       "tracking_basis": "MARKET_REPLAY_NOT_BROKER_EXECUTION"
     },
     "price_confirmation_venue": "KRX",
     "price_history": [
-      {
-        "change_rate": -0.21,
-        "close": 4765.0,
-        "has_krx": true,
-        "has_nxt": false,
-        "high": 4835.0,
-        "low": 4745.0,
-        "open": 4835.0,
-        "trade_date": "20260616",
-        "turnover_million_krw": 76.0,
-        "unified_source": "fallback_merge"
-      },
       {
         "change_rate": 0.52,
         "close": 4790.0,
@@ -1243,6 +1386,18 @@
         "trade_date": "20260728",
         "turnover_million_krw": 254.0,
         "unified_source": "fallback_merge"
+      },
+      {
+        "change_rate": -1.64,
+        "close": 4485.0,
+        "has_krx": true,
+        "has_nxt": false,
+        "high": 4640.0,
+        "low": 4410.0,
+        "open": 4560.0,
+        "trade_date": "20260729",
+        "turnover_million_krw": 395.0,
+        "unified_source": "fallback_merge"
       }
     ],
     "price_source": "TR_1843_EXECUTION_STRENGTH_DAILY_KRX",
@@ -1254,22 +1409,23 @@
     "primary_theme_node_path": null,
     "primary_theme_path": null,
     "primary_theme_selection": {},
-    "prior_close": 4645.0,
-    "priority_score": 20.333333,
-    "production_decision_hash": "731a18acf8c209547db5d55eaa252034b05393d5ef73c357921f9102d634ff00",
-    "rank": 308,
-    "rank_3_10d": 308,
+    "prior_close": 4560.0,
+    "priority_score": 25.538833,
+    "production_decision_hash": "41046efe7f2e3d09d93345e4ea1040f74b787ab9410468d5a7af75ad2c263ac4",
+    "rank": 467,
+    "rank_3_10d": 467,
     "reason_codes": [
-      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
-      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
+      "FLOW_5D_AND_CONTINUITY_CONFIRMED",
+      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
-      "MARKET_RISK_OFF_NO_NEW_LONGS",
+      "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
+      "RISK_CAP",
       "STATE_CAP",
-      "TECHNICAL_CONFIRMATION",
+      "TAPE_CONFIRMED",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
       "THEME_UNMAPPED",
@@ -1278,7 +1434,204 @@
       "UNIVERSE_THEME_UNMAPPED"
     ],
     "recommended_horizon": "NONE",
-    "report_context": {},
+    "report_context": {
+      "action": "관찰 등록·반전 확인",
+      "average_turnover_20d_million_krw": 229.35,
+      "catalyst_layer": "구조 신호만",
+      "catalyst_rotation_absorption": {
+        "detected": false,
+        "reason": "recent_company_catalyst_missing"
+      },
+      "components": {
+        "execution_tape": 57.97,
+        "flow_timing": 70,
+        "institutional_activity_research_only": 15,
+        "price_location": 50,
+        "relative_strength": 63.99,
+        "short_borrow_supply": 60,
+        "theme_confirmation": 8.2
+      },
+      "drawdown_20d_pct": -6.4651,
+      "execution_eligible": false,
+      "execution_strength": 93.19,
+      "flags": {
+        "catalyst_rotation_absorption": false,
+        "first_three_way_inflow": false,
+        "institutional_activity_expanded": false,
+        "institutional_activity_signal_code": "none",
+        "late": false,
+        "price_flow_divergence": true,
+        "private_equity_sponsorship": false,
+        "rolling_reset": false,
+        "short_borrow_supply_pressure": false,
+        "short_cover_support": false,
+        "tape_confirmed": true,
+        "theme_confirmed": false
+      },
+      "flow": {
+        "1d": {
+          "foreigner": 62,
+          "individual": -64,
+          "investment_trust": 7,
+          "pension": 0,
+          "positive_count": 2,
+          "private_equity": 7,
+          "triad": 69
+        },
+        "3d": {
+          "foreigner": 38,
+          "individual": -47,
+          "investment_trust": 7,
+          "pension": 0,
+          "positive_count": 2,
+          "private_equity": 7,
+          "triad": 45
+        },
+        "5d": {
+          "foreigner": 116,
+          "individual": -131,
+          "investment_trust": 7,
+          "pension": 0,
+          "positive_count": 2,
+          "private_equity": 7,
+          "triad": 123
+        }
+      },
+      "institutional_activity_signal": {
+        "action": "기존 수급·차트 판정 유지",
+        "activity_expanded": false,
+        "domestic_institution_positive_count_1d": 2,
+        "dual_activity_expanded": false,
+        "foreigner_net_buy_1d_million_krw": 62,
+        "label": "기관성 거래량 확장 없음",
+        "methodology": "가격 예측치가 아닌 causal activity×investor sponsorship 진단; 신호일 포함 평균 금지",
+        "price_confirmed": false,
+        "private_equity": {
+          "intensity_1d": 0.0177,
+          "intensity_3d": 0.01,
+          "net_buy_1d_million_krw": 7,
+          "net_buy_3d_million_krw": 7,
+          "percentile_prior_60d": 96.67,
+          "positive_days_3d": 1,
+          "sponsorship_confirmed": false,
+          "zscore_prior_20d": null
+        },
+        "reasons": [
+          "사모·연기금·투신 중 2/3 순매수",
+          "외국인 +62백만원 동행"
+        ],
+        "research_only": true,
+        "risks": [],
+        "score": 15,
+        "signal_code": "none",
+        "sponsor_net_buy_1d_million_krw": 76,
+        "status": "정상",
+        "turnover": {
+          "available": true,
+          "current": 395,
+          "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
+          "expanded": false,
+          "log_zscore_prior_20d": 1.2917,
+          "ordinary_zscore_prior_20d": 1.2786,
+          "outlier_contaminated_mean_warning": false,
+          "prior_20d_mean": 213.85,
+          "prior_20d_median": 177.5,
+          "prior_5d_mean": 131,
+          "prior_5d_median": 94,
+          "prior_observation_count": 20,
+          "ratio_to_prior_20d_mean": 1.8471,
+          "ratio_to_prior_20d_median": 2.2254,
+          "ratio_to_prior_5d_mean": 3.0153,
+          "ratio_to_prior_5d_median": 4.2021,
+          "robust_log_zscore_prior_20d": 1.0954,
+          "status": "정상"
+        },
+        "volume": {
+          "available": true,
+          "current": 87804,
+          "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
+          "expanded": false,
+          "log_zscore_prior_20d": 1.3311,
+          "ordinary_zscore_prior_20d": 1.3518,
+          "outlier_contaminated_mean_warning": false,
+          "prior_20d_mean": 46354.95,
+          "prior_20d_median": 38347.5,
+          "prior_5d_mean": 28391.4,
+          "prior_5d_median": 20414,
+          "prior_observation_count": 20,
+          "ratio_to_prior_20d_mean": 1.8942,
+          "ratio_to_prior_20d_median": 2.2897,
+          "ratio_to_prior_5d_mean": 3.0926,
+          "ratio_to_prior_5d_median": 4.3012,
+          "robust_log_zscore_prior_20d": 1.1223,
+          "status": "정상"
+        }
+      },
+      "invalidation_price": 4410,
+      "latest_catalyst": null,
+      "market": "KOSPI",
+      "market_cap_as_of": "2026-07-29",
+      "market_cap_eok": 1310.9094,
+      "market_cap_source": "TR_RB001×TR_A_2006",
+      "name": "태경산업",
+      "reasons": [
+        "가격 약세 속 장기성 자금 흡수",
+        "체결·거래대금 확인"
+      ],
+      "research_candidate": false,
+      "return_10d_pct": -2.9341,
+      "return_1d_pct": -1.64,
+      "return_5d_pct": -1.3223,
+      "risks": [
+        "거래대금 30억원 미달",
+        "테마 매핑 미확인"
+      ],
+      "screen_date": "20260729",
+      "short_borrow": {
+        "absorption_watch": false,
+        "available": true,
+        "borrow": {
+          "available": true,
+          "borrow_balance_amount_1d_thousand_krw": 1820775,
+          "borrow_balance_change_1d": 0,
+          "borrow_balance_change_3d": -2000,
+          "borrow_balance_change_5d": -2000,
+          "borrow_balance_shares_1d": 405970,
+          "net_borrow_1d": 0,
+          "net_borrow_3d": -2000,
+          "net_borrow_5d": -2000
+        },
+        "borrow_increase_only": false,
+        "classification": "대차 공급 완화",
+        "cover_support": false,
+        "interpretation": "대차 공급 완화",
+        "short_sale": {
+          "available": true,
+          "pressure_level": "낮은 공매도 압력",
+          "short_sale_amount_1d_krw": 737915,
+          "short_sale_amount_3d_krw": 882080,
+          "short_sale_amount_5d_krw": 1080170,
+          "short_sale_amount_period_krw": 68335590,
+          "short_sale_amount_ratio_1d": 0.0019,
+          "short_sale_volume_1d": 163,
+          "short_sale_volume_ratio_1d": 0.0019
+        },
+        "supply_pressure": false
+      },
+      "stage": "가격-수급 괴리",
+      "structural_score": 52.83,
+      "symbol": "015890",
+      "theme": "테마 매핑 확인 필요",
+      "theme_breadth": {
+        "advance_pct": 8.2011,
+        "member_count": 756,
+        "strong_participation_pct": 1.8519
+      },
+      "trade_status": "관찰",
+      "triad_intensity_5d": 0.1275,
+      "trigger_price": 4640,
+      "turnover_zscore_20d": 1.153
+    },
     "research_business_roles": [],
     "research_mapping_health": {
       "best_quality_class": null,
@@ -1291,19 +1644,20 @@
     "research_only": true,
     "research_primary_theme_path": null,
     "research_theme_paths": [],
-    "return_10d_pct": -0.240057,
-    "return_1d_pct": -1.83,
-    "return_3d_pct": -0.984042,
-    "return_5d_pct": -0.339163,
-    "return_prior_5d_pct": 0.099442,
+    "return_10d_pct": -2.934138,
+    "return_1d_pct": -1.64,
+    "return_3d_pct": -3.130996,
+    "return_5d_pct": -1.322328,
+    "return_prior_5d_pct": -1.63341,
     "risk_codes": [
       "EXPLICIT_SOFT_RISK",
-      "SHORT_BORROW_DATA_MISSING"
+      "FAILED_BREAKOUT",
+      "TAPE_NOT_FULLY_CONFIRMED"
     ],
-    "robust_turnover_zscore_20d": 0.6370180972222222,
-    "screen_date": "20260728",
-    "setup_state": "OBSERVE",
-    "setup_state_ko": "관찰",
+    "robust_turnover_zscore_20d": 1.4239228055555555,
+    "screen_date": "20260729",
+    "setup_state": "DISTRIBUTION_AVOID",
+    "setup_state_ko": "분산/회피",
     "shadow_annotations": [
       {
         "feature": "unscoped_or_nonprimary_catalyst",
@@ -1317,7 +1671,76 @@
         "feature": "institutional_activity_surprise",
         "registry_feature_name": "causal_institutional_activity_surprise",
         "status": "SHADOW",
-        "value": null
+        "value": {
+          "action": "기존 수급·차트 판정 유지",
+          "activity_expanded": false,
+          "domestic_institution_positive_count_1d": 2,
+          "dual_activity_expanded": false,
+          "foreigner_net_buy_1d_million_krw": 62,
+          "label": "기관성 거래량 확장 없음",
+          "methodology": "가격 예측치가 아닌 causal activity×investor sponsorship 진단; 신호일 포함 평균 금지",
+          "price_confirmed": false,
+          "private_equity": {
+            "intensity_1d": 0.0177,
+            "intensity_3d": 0.01,
+            "net_buy_1d_million_krw": 7,
+            "net_buy_3d_million_krw": 7,
+            "percentile_prior_60d": 96.67,
+            "positive_days_3d": 1,
+            "sponsorship_confirmed": false,
+            "zscore_prior_20d": null
+          },
+          "reasons": [
+            "사모·연기금·투신 중 2/3 순매수",
+            "외국인 +62백만원 동행"
+          ],
+          "research_only": true,
+          "risks": [],
+          "score": 15,
+          "signal_code": "none",
+          "sponsor_net_buy_1d_million_krw": 76,
+          "status": "정상",
+          "turnover": {
+            "available": true,
+            "current": 395,
+            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
+            "expanded": false,
+            "log_zscore_prior_20d": 1.2917,
+            "ordinary_zscore_prior_20d": 1.2786,
+            "outlier_contaminated_mean_warning": false,
+            "prior_20d_mean": 213.85,
+            "prior_20d_median": 177.5,
+            "prior_5d_mean": 131,
+            "prior_5d_median": 94,
+            "prior_observation_count": 20,
+            "ratio_to_prior_20d_mean": 1.8471,
+            "ratio_to_prior_20d_median": 2.2254,
+            "ratio_to_prior_5d_mean": 3.0153,
+            "ratio_to_prior_5d_median": 4.2021,
+            "robust_log_zscore_prior_20d": 1.0954,
+            "status": "정상"
+          },
+          "volume": {
+            "available": true,
+            "current": 87804,
+            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
+            "expanded": false,
+            "log_zscore_prior_20d": 1.3311,
+            "ordinary_zscore_prior_20d": 1.3518,
+            "outlier_contaminated_mean_warning": false,
+            "prior_20d_mean": 46354.95,
+            "prior_20d_median": 38347.5,
+            "prior_5d_mean": 28391.4,
+            "prior_5d_median": 20414,
+            "prior_observation_count": 20,
+            "ratio_to_prior_20d_mean": 1.8942,
+            "ratio_to_prior_20d_median": 2.2897,
+            "ratio_to_prior_5d_mean": 3.0926,
+            "ratio_to_prior_5d_median": 4.3012,
+            "robust_log_zscore_prior_20d": 1.1223,
+            "status": "정상"
+          }
+        }
       },
       {
         "feature": "advanced_chart_pattern",
@@ -1340,37 +1763,37 @@
     ],
     "shadow_theme_paths": [],
     "soft_risk": false,
-    "source_available_at": "2026-07-28T21:00:49",
+    "source_available_at": "2026-07-29T16:00:34",
     "source_stale": false,
-    "sponsor_3d": 11.0,
-    "sponsor_5d": 64.0,
+    "sponsor_3d": 52.0,
+    "sponsor_5d": 130.0,
     "sponsor_positive_days_10d": 7,
     "sponsor_positive_days_5d": 3,
-    "state": "OBSERVE",
-    "state_age_sessions": 2,
-    "state_ko": "관찰",
-    "state_started_on": "20260727",
+    "state": "DISTRIBUTION_AVOID",
+    "state_age_sessions": 1,
+    "state_ko": "분산/회피",
+    "state_started_on": "20260729",
     "symbol": "015890",
     "technical": {
-      "atr14": 118.26354693133533,
+      "atr14": 126.23943360064163,
       "breakout_confirmed": false,
-      "cloud_bottom": 4776.216912533092,
-      "cloud_top": 4881.569773027107,
-      "collected_at": "2026-07-28T12:16:30.774926+00:00",
+      "cloud_bottom": 4781.016339563278,
+      "cloud_top": 4881.3346853365765,
+      "collected_at": "2026-07-29T07:15:20.842931+00:00",
       "config_version": "technical-5.2.0-ichimoku-9-26-52",
-      "ema20": 4613.58582678618,
-      "failed_breakout": false,
-      "invalidation_price": 4997.312365937716,
-      "kijun": 4548.50378699873,
+      "ema20": 4601.138535702994,
+      "failed_breakout": true,
+      "invalidation_price": 4997.071704290418,
+      "kijun": 4548.284739171826,
       "nearest_support": null,
       "reclaim_confirmed": false,
-      "rsi14": 44.764970471349685,
-      "source_as_of": "20260728",
-      "support_confirmed": true,
+      "rsi14": 40.14613021900951,
+      "source_as_of": "20260729",
+      "support_confirmed": false,
       "support_price": null,
-      "technical_score": 60.0,
-      "trigger_price": 5342.623124953568,
-      "volume_ratio_20d": 1.221931261674608
+      "technical_score": 0.0,
+      "trigger_price": 5342.365833756222,
+      "volume_ratio_20d": 1.894166642397414
     },
     "technical_age_days": 0,
     "technical_stale": false,
@@ -1389,9 +1812,9 @@
     "trade_plan": {
       "actionable": false,
       "adv_participation_cap_pct": 5.0,
-      "average_turnover_20d_million_krw": 213.85,
+      "average_turnover_20d_million_krw": 229.35,
       "capacity_rule": "MIN(risk budget, NAV weight cap, 2% ADV20 for TACTICAL/Tier1; 5% ADV20 otherwise)",
-      "capacity_turnover_million_krw": 213.85,
+      "capacity_turnover_million_krw": 229.35,
       "entry_confirmation": [],
       "entry_legs": [],
       "entry_method": null,
@@ -1419,59 +1842,47 @@
       "trigger_price": null,
       "trigger_type": null
     },
-    "trade_status": "WATCH",
-    "trade_status_display": "WATCH",
+    "trade_status": "FAILED",
+    "trade_status_display": "FAILED",
     "transition": {
-      "candidate_state": "OBSERVE",
+      "candidate_state": "DISTRIBUTION_AVOID",
       "overheat_reset_required": false,
       "previous_state": "OBSERVE",
       "rearmed": false
     },
-    "turnover_million_krw": 254.0,
-    "turnover_zscore_20d": 0.28339564593373207,
+    "turnover_million_krw": 395.0,
+    "turnover_zscore_20d": 1.1529599247709552,
     "unified_source": "fallback_merge",
     "universe_tier": "RESEARCH_ONLY",
-    "upper_wick": 0.0
+    "upper_wick": 0.34782608695652173
   },
   "market_data": {
-    "close_position": 0.0,
+    "close_position": 0.32608695652173914,
     "current": {
-      "change_rate": -1.83,
-      "close": 4560.0,
-      "collected_at": "2026-07-28T21:00:49",
-      "foreigner": -23.0,
+      "change_rate": -1.64,
+      "close": 4485.0,
+      "collected_at": "2026-07-29T16:00:34",
+      "foreigner": 62.0,
       "has_krx": 1,
       "has_nxt": 0,
-      "high": 4650.0,
-      "individual": 10.0,
-      "investment_trust": 0.0,
-      "low": 4560.0,
+      "high": 4640.0,
+      "individual": -64.0,
+      "investment_trust": 7.0,
+      "low": 4410.0,
       "market": "KOSPI",
-      "open": 4650.0,
+      "open": 4560.0,
       "pension": 0.0,
-      "private_equity": 0.0,
-      "source_row_count": 2,
+      "private_equity": 7.0,
+      "source_row_count": 1,
       "symbol": "015890",
       "symbol_name": "태경산업",
-      "trade_date": "20260728",
-      "turnover_million_krw": 254.0,
+      "trade_date": "20260729",
+      "turnover_million_krw": 395.0,
       "unified_source": "fallback_merge"
     },
-    "drawdown_20d_pct": -4.9009384775808185,
+    "drawdown_20d_pct": -6.465067778936396,
     "history_sessions": 30,
     "price_history": [
-      {
-        "change_rate": -0.21,
-        "close": 4765.0,
-        "has_krx": true,
-        "has_nxt": false,
-        "high": 4835.0,
-        "low": 4745.0,
-        "open": 4835.0,
-        "trade_date": "20260616",
-        "turnover_million_krw": 76.0,
-        "unified_source": "fallback_merge"
-      },
       {
         "change_rate": 0.52,
         "close": 4790.0,
@@ -1819,47 +2230,59 @@
         "trade_date": "20260728",
         "turnover_million_krw": 254.0,
         "unified_source": "fallback_merge"
+      },
+      {
+        "change_rate": -1.64,
+        "close": 4485.0,
+        "has_krx": true,
+        "has_nxt": false,
+        "high": 4640.0,
+        "low": 4410.0,
+        "open": 4560.0,
+        "trade_date": "20260729",
+        "turnover_million_krw": 395.0,
+        "unified_source": "fallback_merge"
       }
     ],
-    "return_10d_pct": -0.240057,
-    "return_1d_pct": -1.83,
-    "return_3d_pct": -0.984042,
-    "return_5d_pct": -0.339163,
+    "return_10d_pct": -2.934138,
+    "return_1d_pct": -1.64,
+    "return_3d_pct": -3.130996,
+    "return_5d_pct": -1.322328,
     "technical": {
-      "atr14": 118.26354693133533,
+      "atr14": 126.23943360064163,
       "breakout_confirmed": false,
-      "cloud_bottom": 4776.216912533092,
-      "cloud_top": 4881.569773027107,
-      "collected_at": "2026-07-28T12:16:30.774926+00:00",
+      "cloud_bottom": 4781.016339563278,
+      "cloud_top": 4881.3346853365765,
+      "collected_at": "2026-07-29T07:15:20.842931+00:00",
       "config_version": "technical-5.2.0-ichimoku-9-26-52",
-      "ema20": 4613.58582678618,
-      "failed_breakout": false,
-      "invalidation_price": 4997.312365937716,
-      "kijun": 4548.50378699873,
+      "ema20": 4601.138535702994,
+      "failed_breakout": true,
+      "invalidation_price": 4997.071704290418,
+      "kijun": 4548.284739171826,
       "nearest_support": null,
       "reclaim_confirmed": false,
-      "rsi14": 44.764970471349685,
-      "source_as_of": "20260728",
-      "support_confirmed": true,
+      "rsi14": 40.14613021900951,
+      "source_as_of": "20260729",
+      "support_confirmed": false,
       "support_price": null,
-      "technical_score": 60.0,
-      "trigger_price": 5342.623124953568,
-      "volume_ratio_20d": 1.221931261674608
+      "technical_score": 0.0,
+      "trigger_price": 5342.365833756222,
+      "volume_ratio_20d": 1.894166642397414
     },
-    "upper_wick": 0.0
+    "upper_wick": 0.34782608695652173
   },
   "publication": {
-    "cutoff_kst": "21:17",
+    "cutoff_kst": "16:16",
     "decision_version": "master-trade-v1",
-    "generated_at": "2026-07-28T21:17:00+09:00",
+    "generated_at": "2026-07-29T16:16:00+09:00",
     "mode": "production",
     "production": true,
-    "screen_date": "20260728",
+    "screen_date": "20260729",
     "shadow": false,
     "taxonomy_version": "v2.0.0"
   },
   "schema_version": "2.0.0",
-  "screen_date": "20260728",
+  "screen_date": "20260729",
   "symbol": "015890",
   "themes": {
     "adverse_narrative_theme_ids": [],
@@ -1891,9 +2314,9 @@
   "trade_plan": {
     "actionable": false,
     "adv_participation_cap_pct": 5.0,
-    "average_turnover_20d_million_krw": 213.85,
+    "average_turnover_20d_million_krw": 229.35,
     "capacity_rule": "MIN(risk budget, NAV weight cap, 2% ADV20 for TACTICAL/Tier1; 5% ADV20 otherwise)",
-    "capacity_turnover_million_krw": 213.85,
+    "capacity_turnover_million_krw": 229.35,
     "entry_confirmation": [],
     "entry_legs": [],
     "entry_method": null,
