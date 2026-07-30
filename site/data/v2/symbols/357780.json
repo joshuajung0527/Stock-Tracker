@@ -1,9 +1,10 @@
 {
-  "content_hash": "de8f15b00da62c52349f3923853813fd73af8b687de42d921142195e8b0a4340",
+  "content_hash": "e01913cfb8c8802e3cdfe462a37a061a601d8ec798289e42e47710bba0820c1d",
   "data_health": {
     "issues": [
       "decision_code:CATALYST_NONE_STALE_OR_UNVERIFIED",
       "decision_code:MARKET_NEUTRAL_OR_UNAVAILABLE",
+      "decision_code:SHORT_BORROW_DATA_MISSING",
       "decision_code:THEME_UNMAPPED",
       "decision_code:UNIVERSE_THEME_UNMAPPED"
     ],
@@ -29,14 +30,14 @@
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
       "market_regime": "M1_NEUTRAL",
-      "risk_tier": "R1_SOFT_CAP",
+      "risk_tier": "R0_HARD_STOP",
       "theme_tier": "T0_INVALID"
     },
     "axes_v2": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
       "market_regime": "M1_NEUTRAL",
-      "risk_tier": "R1_SOFT_CAP",
+      "risk_tier": "R0_HARD_STOP",
       "theme_tier": "T0_INVALID"
     },
     "axis_details": {
@@ -52,7 +53,7 @@
       },
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution": {
-        "execution_strength": 81.4,
+        "execution_strength": 28.5,
         "flow_continuity_score": 70.0,
         "rank": 0,
         "reasons": [
@@ -76,18 +77,23 @@
       },
       "market_regime": "M1_NEUTRAL",
       "risk": {
-        "hard": false,
-        "hard_reasons": [],
-        "rank": 1,
+        "hard": true,
+        "hard_reasons": [
+          "SHORT_BORROW_SUPPLY_PRESSURE"
+        ],
+        "rank": 0,
         "reasons": [
-          "TAPE_NOT_FULLY_CONFIRMED"
+          "EXPLICIT_SOFT_RISK",
+          "SHORT_BORROW_DATA_MISSING",
+          "SHORT_BORROW_SUPPLY_PRESSURE"
         ],
         "soft_reasons": [
-          "TAPE_NOT_FULLY_CONFIRMED"
+          "EXPLICIT_SOFT_RISK",
+          "SHORT_BORROW_DATA_MISSING"
         ],
-        "tier": "R1_SOFT_CAP"
+        "tier": "R0_HARD_STOP"
       },
-      "risk_tier": "R1_SOFT_CAP",
+      "risk_tier": "R0_HARD_STOP",
       "theme": {
         "active_member_count": 0,
         "breadth_pct": 0.0,
@@ -131,8 +137,8 @@
       },
       "universe_tier": "RESEARCH_ONLY"
     },
-    "conviction_score": 33.6175,
-    "cutoff_kst": "18:19",
+    "conviction_score": 19.945833,
+    "cutoff_kst": "21:19",
     "data_health": {
       "flow_venue": "KRX",
       "has_krx": true,
@@ -146,8 +152,9 @@
       "technical_stale": false,
       "unified_source": "fallback_merge"
     },
-    "decision_score": 33.6175,
+    "decision_score": 19.945833,
     "decision_version": "master-trade-v1",
+    "execution_instruction": "DO_NOT_ENTER",
     "feature_registry_status": {
       "advanced_chart_pattern_score": "SHADOW",
       "bottom_reacceleration_ranking": "SHADOW",
@@ -240,13 +247,13 @@
     "narrative_projections": [],
     "narrative_theme_ids": [],
     "narrative_theme_paths": [],
-    "order_state": "NOT_PLACED",
+    "order_state": "FAILED",
     "order_tracking": {
       "elapsed_sessions": 0,
       "fill_price": null,
       "plan_id": null,
       "started_on": null,
-      "state": "NOT_PLACED",
+      "state": "FAILED",
       "tracking_basis": "MARKET_REPLAY_NOT_BROKER_EXECUTION"
     },
     "price_confirmation_venue": "KRX",
@@ -257,19 +264,19 @@
     "primary_theme_node_path": null,
     "primary_theme_path": null,
     "primary_theme_selection": {},
-    "priority_score": 33.6175,
-    "production_decision_hash": "1e5177bc1051e5333d78bb6ea317b8bf49c5fadeedc8a51ccc115d1da9459696",
-    "rank": 399,
-    "rank_3_10d": 399,
+    "priority_score": 19.945833,
+    "production_decision_hash": "7e3fe2347cc78971700c246577b2ea78c959da3b2d0bcf94b5cb893616fa0e8d",
+    "rank": 1060,
+    "rank_3_10d": 1060,
     "reason_codes": [
-      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
-      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
+      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
       "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
+      "RISK_CAP",
       "STATE_CAP",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
@@ -279,11 +286,13 @@
     ],
     "recommended_horizon": "NONE",
     "risk_codes": [
-      "TAPE_NOT_FULLY_CONFIRMED"
+      "EXPLICIT_SOFT_RISK",
+      "SHORT_BORROW_DATA_MISSING",
+      "SHORT_BORROW_SUPPLY_PRESSURE"
     ],
     "screen_date": "20260730",
-    "setup_state": "OBSERVE",
-    "setup_state_ko": "관찰",
+    "setup_state": "DISTRIBUTION_AVOID",
+    "setup_state_ko": "분산/회피",
     "shadow_annotations": [
       {
         "feature": "unscoped_or_nonprimary_catalyst",
@@ -291,87 +300,13 @@
         "registry_feature_name": "telegram_only_catalyst_boost",
         "status": "SHADOW",
         "theme_id": null,
-        "value": {
-          "event_date": "20260726",
-          "headline": "에코프로비엠과 솔브레인, 애경케미칼이 나트륨(소듐)이온 배터리 핵심 소재를 공동 개발한다. 양극재와 전해액, 하드카본 음극재를 하나의 소재 패키지로 묶어 배터리 업체와 완성차 업체에 공급할 계획이다.에코프로비엠은 지난 22일 충북 오창 본사에서 솔브레인, 애경케미칼과 업무협약을 맺고 'K-소듐 얼라이언스(K-Sodium Alliance)'를 출범시켰다고 26일 밝혔다.3사는 나트륨이온 배터리용 양극재와 전해액, 하드카본 ...",
-          "point_in_time_status": "locally_observed_unverified",
-          "source": "디일렉(THEELEC)",
-          "source_url": "https://t.me/theelec/29899"
-        }
+        "value": null
       },
       {
         "feature": "institutional_activity_surprise",
         "registry_feature_name": "causal_institutional_activity_surprise",
         "status": "SHADOW",
-        "value": {
-          "action": "기존 수급·차트 판정 유지",
-          "activity_expanded": false,
-          "domestic_institution_positive_count_1d": 1,
-          "dual_activity_expanded": false,
-          "foreigner_net_buy_1d_million_krw": 3732,
-          "label": "기관성 거래량 확장 없음",
-          "methodology": "가격 예측치가 아닌 causal activity×investor sponsorship 진단; 신호일 포함 평균 금지",
-          "price_confirmed": false,
-          "private_equity": {
-            "intensity_1d": -0.0544,
-            "intensity_3d": -0.0255,
-            "net_buy_1d_million_krw": -712,
-            "net_buy_3d_million_krw": -965,
-            "percentile_prior_60d": 20,
-            "positive_days_3d": 1,
-            "sponsorship_confirmed": false,
-            "zscore_prior_20d": -0.8119
-          },
-          "reasons": [
-            "외국인 +3732백만원 동행"
-          ],
-          "research_only": true,
-          "risks": [],
-          "score": 10,
-          "signal_code": "none",
-          "sponsor_net_buy_1d_million_krw": 2176,
-          "status": "정상",
-          "turnover": {
-            "available": true,
-            "current": 13093,
-            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
-            "expanded": false,
-            "log_zscore_prior_20d": -0.425,
-            "ordinary_zscore_prior_20d": -0.3916,
-            "outlier_contaminated_mean_warning": false,
-            "prior_20d_mean": 22916,
-            "prior_20d_median": 16412,
-            "prior_5d_mean": 11267.8,
-            "prior_5d_median": 10982,
-            "prior_observation_count": 20,
-            "ratio_to_prior_20d_mean": 0.5713,
-            "ratio_to_prior_20d_median": 0.7978,
-            "ratio_to_prior_5d_mean": 1.162,
-            "ratio_to_prior_5d_median": 1.1922,
-            "robust_log_zscore_prior_20d": -0.3826,
-            "status": "정상"
-          },
-          "volume": {
-            "available": true,
-            "current": 56594,
-            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
-            "expanded": false,
-            "log_zscore_prior_20d": -0.0732,
-            "ordinary_zscore_prior_20d": -0.2517,
-            "outlier_contaminated_mean_warning": false,
-            "prior_20d_mean": 74749.9,
-            "prior_20d_median": 56434.5,
-            "prior_5d_mean": 43176.8,
-            "prior_5d_median": 44300,
-            "prior_observation_count": 20,
-            "ratio_to_prior_20d_mean": 0.7571,
-            "ratio_to_prior_20d_median": 1.0028,
-            "ratio_to_prior_5d_mean": 1.3108,
-            "ratio_to_prior_5d_median": 1.2775,
-            "robust_log_zscore_prior_20d": 0.0061,
-            "status": "정상"
-          }
-        }
+        "value": null
       },
       {
         "feature": "advanced_chart_pattern",
@@ -392,10 +327,10 @@
         "value": null
       }
     ],
-    "state": "OBSERVE",
-    "state_age_sessions": 2,
-    "state_ko": "관찰",
-    "state_started_on": "20260727",
+    "state": "DISTRIBUTION_AVOID",
+    "state_age_sessions": 1,
+    "state_ko": "분산/회피",
+    "state_started_on": "20260730",
     "symbol": "357780",
     "theme_ids": [],
     "theme_node_paths": [],
@@ -442,11 +377,11 @@
       "trigger_price": null,
       "trigger_type": null
     },
-    "trade_status": "WATCH",
-    "trade_status_display": "WATCH",
-    "trade_status_label": "WATCH",
+    "trade_status": "FAILED",
+    "trade_status_display": "FAILED",
+    "trade_status_label": "FAILED",
     "transition": {
-      "candidate_state": "OBSERVE",
+      "candidate_state": "DISTRIBUTION_AVOID",
       "overheat_reset_required": false,
       "previous_state": "OBSERVE",
       "rearmed": false
@@ -456,7 +391,7 @@
   },
   "early_trend_transition": {
     "actionable": false,
-    "availability_hash": "5215a6f42115a1f6360e4bf6887cab30e22fa10e776dfba8040f467a00c90f21",
+    "availability_hash": "76d489c3dc0fb2a66c4ca2a2774ed33779ca4b1df993ed2f16dd87217e6f87c7",
     "base": {
       "absorption_path": "BROAD_SPONSOR_SHADOW",
       "broad_sponsor_10d": 154.0,
@@ -478,7 +413,7 @@
     },
     "calculation_hash": "e1024ba1771d34369c345cdd1f85f2593f61918aa38978e707cdbe099f0f615a",
     "close": 224500.0,
-    "cutoff_kst": "18:19",
+    "cutoff_kst": "21:19",
     "data_mode": "SCREEN_DATE_LATEST",
     "distance_to_trigger_pct": 8.4633,
     "divergence": {
@@ -760,7 +695,7 @@
       "supply_risk_status": null
     },
     "reconstruction": {
-      "available_at_kst": "2026-07-30T18:07:42",
+      "available_at_kst": "2026-07-30T21:07:33",
       "flow_reconstruction": false,
       "point_in_time_valid": true,
       "price_reconstruction": false,
@@ -783,16 +718,16 @@
     "research_theme_paths": [],
     "reset_date": null,
     "score": 100.0,
-    "source_hash": "507bd0fc1dc6e9e73432f82bb07aec15bc8d205af9611ba898ae8ea0a69a79bf",
+    "source_hash": "dcaff48dadf7e4e4f85b89a805a0b6556edd7a8fa634189a22be0d87feb39f5b",
     "source_metadata": {
-      "available_at_kst": "2026-07-30T18:07:42",
+      "available_at_kst": "2026-07-30T21:07:33",
       "data_mode": "SCREEN_DATE_LATEST",
-      "finalized_at": "2026-07-30T18:07:42",
-      "flow_collected_at": "2026-07-30T18:01:19",
+      "finalized_at": "2026-07-30T21:07:33",
+      "flow_collected_at": "2026-07-30T21:01:01",
       "flow_reconstruction": false,
       "flow_source": "TR_A_2006_UNIFIED_TURNOVER",
       "point_in_time_valid": true,
-      "price_collected_at": "2026-07-30T18:07:42",
+      "price_collected_at": "2026-07-30T21:07:33",
       "price_reconstruction": false,
       "price_source": "TR_1843_EXECUTION_STRENGTH_DAILY_KRX",
       "price_venue": "KRX",
@@ -881,14 +816,14 @@
   },
   "evidence": {
     "decision_reason_codes": [
-      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
-      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
+      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
       "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
+      "RISK_CAP",
       "STATE_CAP",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
@@ -897,7 +832,9 @@
       "UNIVERSE_THEME_UNMAPPED"
     ],
     "decision_risk_codes": [
-      "TAPE_NOT_FULLY_CONFIRMED"
+      "EXPLICIT_SOFT_RISK",
+      "SHORT_BORROW_DATA_MISSING",
+      "SHORT_BORROW_SUPPLY_PRESSURE"
     ],
     "decision_shadow_annotations": [
       {
@@ -906,87 +843,13 @@
         "registry_feature_name": "telegram_only_catalyst_boost",
         "status": "SHADOW",
         "theme_id": null,
-        "value": {
-          "event_date": "20260726",
-          "headline": "에코프로비엠과 솔브레인, 애경케미칼이 나트륨(소듐)이온 배터리 핵심 소재를 공동 개발한다. 양극재와 전해액, 하드카본 음극재를 하나의 소재 패키지로 묶어 배터리 업체와 완성차 업체에 공급할 계획이다.에코프로비엠은 지난 22일 충북 오창 본사에서 솔브레인, 애경케미칼과 업무협약을 맺고 'K-소듐 얼라이언스(K-Sodium Alliance)'를 출범시켰다고 26일 밝혔다.3사는 나트륨이온 배터리용 양극재와 전해액, 하드카본 ...",
-          "point_in_time_status": "locally_observed_unverified",
-          "source": "디일렉(THEELEC)",
-          "source_url": "https://t.me/theelec/29899"
-        }
+        "value": null
       },
       {
         "feature": "institutional_activity_surprise",
         "registry_feature_name": "causal_institutional_activity_surprise",
         "status": "SHADOW",
-        "value": {
-          "action": "기존 수급·차트 판정 유지",
-          "activity_expanded": false,
-          "domestic_institution_positive_count_1d": 1,
-          "dual_activity_expanded": false,
-          "foreigner_net_buy_1d_million_krw": 3732,
-          "label": "기관성 거래량 확장 없음",
-          "methodology": "가격 예측치가 아닌 causal activity×investor sponsorship 진단; 신호일 포함 평균 금지",
-          "price_confirmed": false,
-          "private_equity": {
-            "intensity_1d": -0.0544,
-            "intensity_3d": -0.0255,
-            "net_buy_1d_million_krw": -712,
-            "net_buy_3d_million_krw": -965,
-            "percentile_prior_60d": 20,
-            "positive_days_3d": 1,
-            "sponsorship_confirmed": false,
-            "zscore_prior_20d": -0.8119
-          },
-          "reasons": [
-            "외국인 +3732백만원 동행"
-          ],
-          "research_only": true,
-          "risks": [],
-          "score": 10,
-          "signal_code": "none",
-          "sponsor_net_buy_1d_million_krw": 2176,
-          "status": "정상",
-          "turnover": {
-            "available": true,
-            "current": 13093,
-            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
-            "expanded": false,
-            "log_zscore_prior_20d": -0.425,
-            "ordinary_zscore_prior_20d": -0.3916,
-            "outlier_contaminated_mean_warning": false,
-            "prior_20d_mean": 22916,
-            "prior_20d_median": 16412,
-            "prior_5d_mean": 11267.8,
-            "prior_5d_median": 10982,
-            "prior_observation_count": 20,
-            "ratio_to_prior_20d_mean": 0.5713,
-            "ratio_to_prior_20d_median": 0.7978,
-            "ratio_to_prior_5d_mean": 1.162,
-            "ratio_to_prior_5d_median": 1.1922,
-            "robust_log_zscore_prior_20d": -0.3826,
-            "status": "정상"
-          },
-          "volume": {
-            "available": true,
-            "current": 56594,
-            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
-            "expanded": false,
-            "log_zscore_prior_20d": -0.0732,
-            "ordinary_zscore_prior_20d": -0.2517,
-            "outlier_contaminated_mean_warning": false,
-            "prior_20d_mean": 74749.9,
-            "prior_20d_median": 56434.5,
-            "prior_5d_mean": 43176.8,
-            "prior_5d_median": 44300,
-            "prior_observation_count": 20,
-            "ratio_to_prior_20d_mean": 0.7571,
-            "ratio_to_prior_20d_median": 1.0028,
-            "ratio_to_prior_5d_mean": 1.3108,
-            "ratio_to_prior_5d_median": 1.2775,
-            "robust_log_zscore_prior_20d": 0.0061,
-            "status": "정상"
-          }
-        }
+        "value": null
       },
       {
         "feature": "advanced_chart_pattern",
@@ -1079,14 +942,14 @@
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
       "market_regime": "M1_NEUTRAL",
-      "risk_tier": "R1_SOFT_CAP",
+      "risk_tier": "R0_HARD_STOP",
       "theme_tier": "T0_INVALID"
     },
     "axes_v2": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
       "market_regime": "M1_NEUTRAL",
-      "risk_tier": "R1_SOFT_CAP",
+      "risk_tier": "R0_HARD_STOP",
       "theme_tier": "T0_INVALID"
     },
     "axis_details": {
@@ -1102,7 +965,7 @@
       },
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution": {
-        "execution_strength": 81.4,
+        "execution_strength": 28.5,
         "flow_continuity_score": 70.0,
         "rank": 0,
         "reasons": [
@@ -1126,18 +989,23 @@
       },
       "market_regime": "M1_NEUTRAL",
       "risk": {
-        "hard": false,
-        "hard_reasons": [],
-        "rank": 1,
+        "hard": true,
+        "hard_reasons": [
+          "SHORT_BORROW_SUPPLY_PRESSURE"
+        ],
+        "rank": 0,
         "reasons": [
-          "TAPE_NOT_FULLY_CONFIRMED"
+          "EXPLICIT_SOFT_RISK",
+          "SHORT_BORROW_DATA_MISSING",
+          "SHORT_BORROW_SUPPLY_PRESSURE"
         ],
         "soft_reasons": [
-          "TAPE_NOT_FULLY_CONFIRMED"
+          "EXPLICIT_SOFT_RISK",
+          "SHORT_BORROW_DATA_MISSING"
         ],
-        "tier": "R1_SOFT_CAP"
+        "tier": "R0_HARD_STOP"
       },
-      "risk_tier": "R1_SOFT_CAP",
+      "risk_tier": "R0_HARD_STOP",
       "theme": {
         "active_member_count": 0,
         "breadth_pct": 0.0,
@@ -1183,11 +1051,11 @@
     },
     "classified_news_events": [],
     "close_position": 0.13636363636363635,
-    "conviction_score": 33.6175,
+    "conviction_score": 19.945833,
     "current": {
       "change_rate": -3.85,
       "close": 224500.0,
-      "collected_at": "2026-07-30T18:01:19",
+      "collected_at": "2026-07-30T21:01:01",
       "foreigner": 3732.0,
       "has_krx": 1,
       "has_nxt": 0,
@@ -1206,7 +1074,7 @@
       "turnover_million_krw": 13093.0,
       "unified_source": "fallback_merge"
     },
-    "cutoff_kst": "18:19",
+    "cutoff_kst": "21:19",
     "data_health": {
       "flow_venue": "KRX",
       "has_krx": true,
@@ -1221,13 +1089,13 @@
       "unified_source": "fallback_merge"
     },
     "data_mode": "SCREEN_DATE_LATEST",
-    "decision_score": 33.6175,
+    "decision_score": 19.945833,
     "decision_version": "master-trade-v1",
     "display_theme_paths": [],
     "drawdown_20d_pct": -33.77581120943953,
     "early_trend_transition": {
       "actionable": false,
-      "availability_hash": "5215a6f42115a1f6360e4bf6887cab30e22fa10e776dfba8040f467a00c90f21",
+      "availability_hash": "76d489c3dc0fb2a66c4ca2a2774ed33779ca4b1df993ed2f16dd87217e6f87c7",
       "base": {
         "absorption_path": "BROAD_SPONSOR_SHADOW",
         "broad_sponsor_10d": 154.0,
@@ -1249,7 +1117,7 @@
       },
       "calculation_hash": "e1024ba1771d34369c345cdd1f85f2593f61918aa38978e707cdbe099f0f615a",
       "close": 224500.0,
-      "cutoff_kst": "18:19",
+      "cutoff_kst": "21:19",
       "data_mode": "SCREEN_DATE_LATEST",
       "distance_to_trigger_pct": 8.4633,
       "divergence": {
@@ -1531,7 +1399,7 @@
         "supply_risk_status": null
       },
       "reconstruction": {
-        "available_at_kst": "2026-07-30T18:07:42",
+        "available_at_kst": "2026-07-30T21:07:33",
         "flow_reconstruction": false,
         "point_in_time_valid": true,
         "price_reconstruction": false,
@@ -1554,16 +1422,16 @@
       "research_theme_paths": [],
       "reset_date": null,
       "score": 100.0,
-      "source_hash": "507bd0fc1dc6e9e73432f82bb07aec15bc8d205af9611ba898ae8ea0a69a79bf",
+      "source_hash": "dcaff48dadf7e4e4f85b89a805a0b6556edd7a8fa634189a22be0d87feb39f5b",
       "source_metadata": {
-        "available_at_kst": "2026-07-30T18:07:42",
+        "available_at_kst": "2026-07-30T21:07:33",
         "data_mode": "SCREEN_DATE_LATEST",
-        "finalized_at": "2026-07-30T18:07:42",
-        "flow_collected_at": "2026-07-30T18:01:19",
+        "finalized_at": "2026-07-30T21:07:33",
+        "flow_collected_at": "2026-07-30T21:01:01",
         "flow_reconstruction": false,
         "flow_source": "TR_A_2006_UNIFIED_TURNOVER",
         "point_in_time_valid": true,
-        "price_collected_at": "2026-07-30T18:07:42",
+        "price_collected_at": "2026-07-30T21:07:33",
         "price_reconstruction": false,
         "price_source": "TR_1843_EXECUTION_STRENGTH_DAILY_KRX",
         "price_venue": "KRX",
@@ -1650,6 +1518,7 @@
       },
       "trigger_price": 243500.0
     },
+    "execution_instruction": "DO_NOT_ENTER",
     "exposure_paths": [],
     "feature_registry_status": {
       "advanced_chart_pattern_score": "SHADOW",
@@ -1794,7 +1663,7 @@
         "institutional_activity_research_only": 10.0,
         "price_location": 65.0,
         "relative_strength": 24.86,
-        "short_borrow_supply": 60.0,
+        "short_borrow_supply": 20.0,
         "theme_confirmation": 0.0
       },
       "execution_eligible": false,
@@ -1807,7 +1676,7 @@
         "price_flow_divergence": true,
         "private_equity_sponsorship": false,
         "rolling_reset": true,
-        "short_borrow_supply_pressure": false,
+        "short_borrow_supply_pressure": true,
         "short_cover_support": false,
         "tape_confirmed": false,
         "theme_confirmed": false
@@ -1816,9 +1685,11 @@
         "가격 약세 속 장기성 자금 흡수",
         "20일 고점 대비 눌림 구간"
       ],
-      "risks": [],
-      "stage": "가격-수급 괴리",
-      "structural_score": 47.01
+      "risks": [
+        "공매도·대차 공급 압력"
+      ],
+      "stage": "공급 압력·회피",
+      "structural_score": 45.01
     },
     "legacy_theme": {
       "assignment_confidence": "high",
@@ -1848,7 +1719,7 @@
     "market": "KOSDAQ",
     "market_cap_age_days": 0,
     "market_cap_as_of": "20260730",
-    "market_cap_collected_at": "2026-07-30T18:00:40",
+    "market_cap_collected_at": "2026-07-30T21:00:30",
     "market_cap_eok": 17462.88067,
     "market_cap_stale": false,
     "memberships": [],
@@ -1856,13 +1727,13 @@
     "narrative_projections": [],
     "narrative_theme_ids": [],
     "narrative_theme_paths": [],
-    "order_state": "NOT_PLACED",
+    "order_state": "FAILED",
     "order_tracking": {
       "elapsed_sessions": 0,
       "fill_price": null,
       "plan_id": null,
       "started_on": null,
-      "state": "NOT_PLACED",
+      "state": "FAILED",
       "tracking_basis": "MARKET_REPLAY_NOT_BROKER_EXECUTION"
     },
     "price_confirmation_venue": "KRX",
@@ -2238,19 +2109,19 @@
     "primary_theme_path": null,
     "primary_theme_selection": {},
     "prior_close": 233500.0,
-    "priority_score": 33.6175,
-    "production_decision_hash": "1e5177bc1051e5333d78bb6ea317b8bf49c5fadeedc8a51ccc115d1da9459696",
-    "rank": 399,
-    "rank_3_10d": 399,
+    "priority_score": 19.945833,
+    "production_decision_hash": "7e3fe2347cc78971700c246577b2ea78c959da3b2d0bcf94b5cb893616fa0e8d",
+    "rank": 1060,
+    "rank_3_10d": 1060,
     "reason_codes": [
-      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
-      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
+      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
       "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
+      "RISK_CAP",
       "STATE_CAP",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
@@ -2259,227 +2130,7 @@
       "UNIVERSE_THEME_UNMAPPED"
     ],
     "recommended_horizon": "NONE",
-    "report_context": {
-      "action": "관찰 등록·반전 확인",
-      "average_turnover_20d_million_krw": 17338.2,
-      "catalyst_layer": "직접 회사뉴스·공식 확인 대기",
-      "catalyst_rotation_absorption": {
-        "catalyst_basis": "locally_observed_direct_company_news",
-        "catalyst_official_anchor": false,
-        "confirmation_required": true,
-        "cumulative_3d_million_krw": {
-          "investment_trust": -2057,
-          "pension": 326,
-          "private_equity": -965
-        },
-        "cumulative_positive_group_count": 1,
-        "detected": false,
-        "distinct_lead_groups_3d": [
-          "pension"
-        ],
-        "event_low": 215500,
-        "event_low_defended": true,
-        "execution_strength": 81.4,
-        "individual_3d_million_krw": -3228,
-        "lead_groups_3d": [
-          "pension",
-          "pension"
-        ],
-        "positive_sponsor_days_3d": 2,
-        "professional_total_3d_million_krw": -2696
-      },
-      "components": {
-        "execution_tape": 28.5,
-        "flow_timing": 70,
-        "institutional_activity_research_only": 10,
-        "price_location": 65,
-        "relative_strength": 24.86,
-        "short_borrow_supply": 60,
-        "theme_confirmation": 0
-      },
-      "drawdown_20d_pct": -33.7758,
-      "execution_eligible": false,
-      "execution_strength": 81.4,
-      "flags": {
-        "catalyst_rotation_absorption": false,
-        "first_three_way_inflow": false,
-        "institutional_activity_expanded": false,
-        "institutional_activity_signal_code": "none",
-        "late": false,
-        "price_flow_divergence": true,
-        "private_equity_sponsorship": false,
-        "rolling_reset": true,
-        "short_borrow_supply_pressure": false,
-        "short_cover_support": false,
-        "tape_confirmed": false,
-        "theme_confirmed": false
-      },
-      "flow": {
-        "1d": {
-          "foreigner": 3732,
-          "individual": -1327,
-          "investment_trust": -990,
-          "pension": 146,
-          "positive_count": 2,
-          "private_equity": -712,
-          "triad": 3166
-        },
-        "3d": {
-          "foreigner": 6448,
-          "individual": -3228,
-          "investment_trust": -2057,
-          "pension": 326,
-          "positive_count": 2,
-          "private_equity": -965,
-          "triad": 5809
-        },
-        "5d": {
-          "foreigner": 3753,
-          "individual": -995,
-          "investment_trust": -2872,
-          "pension": 135,
-          "positive_count": 2,
-          "private_equity": -1092,
-          "triad": 2796
-        }
-      },
-      "institutional_activity_signal": {
-        "action": "기존 수급·차트 판정 유지",
-        "activity_expanded": false,
-        "domestic_institution_positive_count_1d": 1,
-        "dual_activity_expanded": false,
-        "foreigner_net_buy_1d_million_krw": 3732,
-        "label": "기관성 거래량 확장 없음",
-        "methodology": "가격 예측치가 아닌 causal activity×investor sponsorship 진단; 신호일 포함 평균 금지",
-        "price_confirmed": false,
-        "private_equity": {
-          "intensity_1d": -0.0544,
-          "intensity_3d": -0.0255,
-          "net_buy_1d_million_krw": -712,
-          "net_buy_3d_million_krw": -965,
-          "percentile_prior_60d": 20,
-          "positive_days_3d": 1,
-          "sponsorship_confirmed": false,
-          "zscore_prior_20d": -0.8119
-        },
-        "reasons": [
-          "외국인 +3732백만원 동행"
-        ],
-        "research_only": true,
-        "risks": [],
-        "score": 10,
-        "signal_code": "none",
-        "sponsor_net_buy_1d_million_krw": 2176,
-        "status": "정상",
-        "turnover": {
-          "available": true,
-          "current": 13093,
-          "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
-          "expanded": false,
-          "log_zscore_prior_20d": -0.425,
-          "ordinary_zscore_prior_20d": -0.3916,
-          "outlier_contaminated_mean_warning": false,
-          "prior_20d_mean": 22916,
-          "prior_20d_median": 16412,
-          "prior_5d_mean": 11267.8,
-          "prior_5d_median": 10982,
-          "prior_observation_count": 20,
-          "ratio_to_prior_20d_mean": 0.5713,
-          "ratio_to_prior_20d_median": 0.7978,
-          "ratio_to_prior_5d_mean": 1.162,
-          "ratio_to_prior_5d_median": 1.1922,
-          "robust_log_zscore_prior_20d": -0.3826,
-          "status": "정상"
-        },
-        "volume": {
-          "available": true,
-          "current": 56594,
-          "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
-          "expanded": false,
-          "log_zscore_prior_20d": -0.0732,
-          "ordinary_zscore_prior_20d": -0.2517,
-          "outlier_contaminated_mean_warning": false,
-          "prior_20d_mean": 74749.9,
-          "prior_20d_median": 56434.5,
-          "prior_5d_mean": 43176.8,
-          "prior_5d_median": 44300,
-          "prior_observation_count": 20,
-          "ratio_to_prior_20d_mean": 0.7571,
-          "ratio_to_prior_20d_median": 1.0028,
-          "ratio_to_prior_5d_mean": 1.3108,
-          "ratio_to_prior_5d_median": 1.2775,
-          "robust_log_zscore_prior_20d": 0.0061,
-          "status": "정상"
-        }
-      },
-      "invalidation_price": 221500,
-      "latest_catalyst": {
-        "event_date": "20260726",
-        "headline": "에코프로비엠과 솔브레인, 애경케미칼이 나트륨(소듐)이온 배터리 핵심 소재를 공동 개발한다. 양극재와 전해액, 하드카본 음극재를 하나의 소재 패키지로 묶어 배터리 업체와 완성차 업체에 공급할 계획이다.에코프로비엠은 지난 22일 충북 오창 본사에서 솔브레인, 애경케미칼과 업무협약을 맺고 'K-소듐 얼라이언스(K-Sodium Alliance)'를 출범시켰다고 26일 밝혔다.3사는 나트륨이온 배터리용 양극재와 전해액, 하드카본 ...",
-        "point_in_time_status": "locally_observed_unverified",
-        "source": "디일렉(THEELEC)",
-        "source_url": "https://t.me/theelec/29899"
-      },
-      "market": "KOSDAQ",
-      "market_cap_as_of": "2026-07-30",
-      "market_cap_eok": 17462.8807,
-      "market_cap_source": "TR_RB001×TR_A_2006",
-      "name": "솔브레인",
-      "reasons": [
-        "가격 약세 속 장기성 자금 흡수",
-        "20일 고점 대비 눌림 구간"
-      ],
-      "research_candidate": true,
-      "return_10d_pct": -26.7479,
-      "return_1d_pct": -3.85,
-      "return_5d_pct": -24.1492,
-      "risks": [],
-      "screen_date": "20260730",
-      "short_borrow": {
-        "absorption_watch": false,
-        "available": true,
-        "borrow": {
-          "available": true,
-          "borrow_balance_amount_1d_thousand_krw": 114891018,
-          "borrow_balance_change_1d": 0,
-          "borrow_balance_change_3d": -1489,
-          "borrow_balance_change_5d": -9367,
-          "borrow_balance_shares_1d": 511764,
-          "net_borrow_1d": 5162,
-          "net_borrow_3d": 3673,
-          "net_borrow_5d": -4205
-        },
-        "borrow_increase_only": false,
-        "classification": "공매도 출회 위험",
-        "cover_support": false,
-        "interpretation": "공매도 출회 위험",
-        "short_sale": {
-          "available": true,
-          "pressure_level": "유의미한 공매도 압력",
-          "short_sale_amount_1d_krw": 1199201500,
-          "short_sale_amount_3d_krw": 3093458000,
-          "short_sale_amount_5d_krw": 4618245500,
-          "short_sale_amount_period_krw": 45341636250,
-          "short_sale_amount_ratio_1d": 0.0916,
-          "short_sale_volume_1d": 5149,
-          "short_sale_volume_ratio_1d": 0.091
-        },
-        "supply_pressure": false
-      },
-      "stage": "가격-수급 괴리",
-      "structural_score": 47.01,
-      "symbol": "357780",
-      "theme": "PCB / 첨단기판",
-      "theme_breadth": {
-        "advance_pct": 0,
-        "member_count": 8,
-        "strong_participation_pct": 0
-      },
-      "trade_status": "관찰",
-      "triad_intensity_5d": 0.0499,
-      "trigger_price": 243500,
-      "turnover_zscore_20d": -0.4593
-    },
+    "report_context": {},
     "research_business_roles": [],
     "research_mapping_health": {
       "best_quality_class": null,
@@ -2498,12 +2149,14 @@
     "return_5d_pct": -24.14922,
     "return_prior_5d_pct": -3.425991,
     "risk_codes": [
-      "TAPE_NOT_FULLY_CONFIRMED"
+      "EXPLICIT_SOFT_RISK",
+      "SHORT_BORROW_DATA_MISSING",
+      "SHORT_BORROW_SUPPLY_PRESSURE"
     ],
     "robust_turnover_zscore_20d": -0.2879858289748954,
     "screen_date": "20260730",
-    "setup_state": "OBSERVE",
-    "setup_state_ko": "관찰",
+    "setup_state": "DISTRIBUTION_AVOID",
+    "setup_state_ko": "분산/회피",
     "shadow_annotations": [
       {
         "feature": "unscoped_or_nonprimary_catalyst",
@@ -2511,87 +2164,13 @@
         "registry_feature_name": "telegram_only_catalyst_boost",
         "status": "SHADOW",
         "theme_id": null,
-        "value": {
-          "event_date": "20260726",
-          "headline": "에코프로비엠과 솔브레인, 애경케미칼이 나트륨(소듐)이온 배터리 핵심 소재를 공동 개발한다. 양극재와 전해액, 하드카본 음극재를 하나의 소재 패키지로 묶어 배터리 업체와 완성차 업체에 공급할 계획이다.에코프로비엠은 지난 22일 충북 오창 본사에서 솔브레인, 애경케미칼과 업무협약을 맺고 'K-소듐 얼라이언스(K-Sodium Alliance)'를 출범시켰다고 26일 밝혔다.3사는 나트륨이온 배터리용 양극재와 전해액, 하드카본 ...",
-          "point_in_time_status": "locally_observed_unverified",
-          "source": "디일렉(THEELEC)",
-          "source_url": "https://t.me/theelec/29899"
-        }
+        "value": null
       },
       {
         "feature": "institutional_activity_surprise",
         "registry_feature_name": "causal_institutional_activity_surprise",
         "status": "SHADOW",
-        "value": {
-          "action": "기존 수급·차트 판정 유지",
-          "activity_expanded": false,
-          "domestic_institution_positive_count_1d": 1,
-          "dual_activity_expanded": false,
-          "foreigner_net_buy_1d_million_krw": 3732,
-          "label": "기관성 거래량 확장 없음",
-          "methodology": "가격 예측치가 아닌 causal activity×investor sponsorship 진단; 신호일 포함 평균 금지",
-          "price_confirmed": false,
-          "private_equity": {
-            "intensity_1d": -0.0544,
-            "intensity_3d": -0.0255,
-            "net_buy_1d_million_krw": -712,
-            "net_buy_3d_million_krw": -965,
-            "percentile_prior_60d": 20,
-            "positive_days_3d": 1,
-            "sponsorship_confirmed": false,
-            "zscore_prior_20d": -0.8119
-          },
-          "reasons": [
-            "외국인 +3732백만원 동행"
-          ],
-          "research_only": true,
-          "risks": [],
-          "score": 10,
-          "signal_code": "none",
-          "sponsor_net_buy_1d_million_krw": 2176,
-          "status": "정상",
-          "turnover": {
-            "available": true,
-            "current": 13093,
-            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
-            "expanded": false,
-            "log_zscore_prior_20d": -0.425,
-            "ordinary_zscore_prior_20d": -0.3916,
-            "outlier_contaminated_mean_warning": false,
-            "prior_20d_mean": 22916,
-            "prior_20d_median": 16412,
-            "prior_5d_mean": 11267.8,
-            "prior_5d_median": 10982,
-            "prior_observation_count": 20,
-            "ratio_to_prior_20d_mean": 0.5713,
-            "ratio_to_prior_20d_median": 0.7978,
-            "ratio_to_prior_5d_mean": 1.162,
-            "ratio_to_prior_5d_median": 1.1922,
-            "robust_log_zscore_prior_20d": -0.3826,
-            "status": "정상"
-          },
-          "volume": {
-            "available": true,
-            "current": 56594,
-            "definition": "신호일을 제외한 직전 20일 기준; 로그 MAD 강건 z와 중앙값·직전 5일 배수를 병행",
-            "expanded": false,
-            "log_zscore_prior_20d": -0.0732,
-            "ordinary_zscore_prior_20d": -0.2517,
-            "outlier_contaminated_mean_warning": false,
-            "prior_20d_mean": 74749.9,
-            "prior_20d_median": 56434.5,
-            "prior_5d_mean": 43176.8,
-            "prior_5d_median": 44300,
-            "prior_observation_count": 20,
-            "ratio_to_prior_20d_mean": 0.7571,
-            "ratio_to_prior_20d_median": 1.0028,
-            "ratio_to_prior_5d_mean": 1.3108,
-            "ratio_to_prior_5d_median": 1.2775,
-            "robust_log_zscore_prior_20d": 0.0061,
-            "status": "정상"
-          }
-        }
+        "value": null
       },
       {
         "feature": "advanced_chart_pattern",
@@ -2614,23 +2193,23 @@
     ],
     "shadow_theme_paths": [],
     "soft_risk": false,
-    "source_available_at": "2026-07-30T18:01:19",
+    "source_available_at": "2026-07-30T21:01:01",
     "source_stale": false,
     "sponsor_3d": 3752.0,
     "sponsor_5d": -76.0,
     "sponsor_positive_days_10d": 4,
     "sponsor_positive_days_5d": 2,
-    "state": "OBSERVE",
-    "state_age_sessions": 2,
-    "state_ko": "관찰",
-    "state_started_on": "20260727",
+    "state": "DISTRIBUTION_AVOID",
+    "state_age_sessions": 1,
+    "state_ko": "분산/회피",
+    "state_started_on": "20260730",
     "symbol": "357780",
     "technical": {
       "atr14": 29089.187948092993,
       "breakout_confirmed": false,
       "cloud_bottom": 395921.8820711713,
       "cloud_top": 406883.4432576947,
-      "collected_at": "2026-07-30T09:17:55.402251+00:00",
+      "collected_at": "2026-07-30T12:17:33.545053+00:00",
       "config_version": "technical-5.2.0-ichimoku-9-26-52",
       "ema20": 286256.84042724484,
       "failed_breakout": false,
@@ -2693,10 +2272,10 @@
       "trigger_price": null,
       "trigger_type": null
     },
-    "trade_status": "WATCH",
-    "trade_status_display": "WATCH",
+    "trade_status": "FAILED",
+    "trade_status_display": "FAILED",
     "transition": {
-      "candidate_state": "OBSERVE",
+      "candidate_state": "DISTRIBUTION_AVOID",
       "overheat_reset_required": false,
       "previous_state": "OBSERVE",
       "rearmed": false
@@ -2712,7 +2291,7 @@
     "current": {
       "change_rate": -3.85,
       "close": 224500.0,
-      "collected_at": "2026-07-30T18:01:19",
+      "collected_at": "2026-07-30T21:01:01",
       "foreigner": 3732.0,
       "has_krx": 1,
       "has_nxt": 0,
@@ -3104,7 +2683,7 @@
       "breakout_confirmed": false,
       "cloud_bottom": 395921.8820711713,
       "cloud_top": 406883.4432576947,
-      "collected_at": "2026-07-30T09:17:55.402251+00:00",
+      "collected_at": "2026-07-30T12:17:33.545053+00:00",
       "config_version": "technical-5.2.0-ichimoku-9-26-52",
       "ema20": 286256.84042724484,
       "failed_breakout": false,
@@ -3123,9 +2702,9 @@
     "upper_wick": 0.5227272727272727
   },
   "publication": {
-    "cutoff_kst": "18:19",
+    "cutoff_kst": "21:19",
     "decision_version": "master-trade-v1",
-    "generated_at": "2026-07-30T18:19:00+09:00",
+    "generated_at": "2026-07-30T21:19:00+09:00",
     "mode": "production",
     "production": true,
     "screen_date": "20260730",
