@@ -1,5 +1,5 @@
 {
-  "content_hash": "8396fd3a7da852432caf6f977865310871c35bb791c6c3bd1196402ff62f1c4d",
+  "content_hash": "6931c3ead7f3243f1eb40e42eb0ff1b156e855fdded11bc984b896d070b02e4f",
   "data_health": {
     "issues": [
       "decision_code:CATALYST_NONE_STALE_OR_UNVERIFIED",
@@ -30,14 +30,14 @@
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
       "market_regime": "M1_NEUTRAL",
-      "risk_tier": "R0_HARD_STOP",
+      "risk_tier": "R1_SOFT_CAP",
       "theme_tier": "T0_INVALID"
     },
     "axes_v2": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
       "market_regime": "M1_NEUTRAL",
-      "risk_tier": "R0_HARD_STOP",
+      "risk_tier": "R1_SOFT_CAP",
       "theme_tier": "T0_INVALID"
     },
     "axis_details": {
@@ -54,15 +54,16 @@
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution": {
         "execution_strength": 0.0,
-        "flow_continuity_score": 40.0,
+        "flow_continuity_score": 20.0,
         "rank": 0,
         "reasons": [
-          "EXECUTION_GATE_INCOMPLETE"
+          "EXECUTION_GATE_INCOMPLETE",
+          "TECHNICAL_CONFIRMATION"
         ],
-        "sponsor_5d": -1216.0,
+        "sponsor_5d": 214.0,
         "tape_confirmed": false,
-        "technical_confirmation": false,
-        "technical_score": 0.0,
+        "technical_confirmation": true,
+        "technical_score": 30.75,
         "tier": "E0_FAILED"
       },
       "execution_tier": "E0_FAILED",
@@ -77,25 +78,20 @@
       },
       "market_regime": "M1_NEUTRAL",
       "risk": {
-        "hard": true,
-        "hard_reasons": [
-          "FAILED_BREAKOUT",
-          "SHORT_BORROW_SUPPLY_PRESSURE"
-        ],
-        "rank": 0,
+        "hard": false,
+        "hard_reasons": [],
+        "rank": 1,
         "reasons": [
           "EXPLICIT_SOFT_RISK",
-          "FAILED_BREAKOUT",
-          "SHORT_BORROW_DATA_MISSING",
-          "SHORT_BORROW_SUPPLY_PRESSURE"
+          "SHORT_BORROW_DATA_MISSING"
         ],
         "soft_reasons": [
           "EXPLICIT_SOFT_RISK",
           "SHORT_BORROW_DATA_MISSING"
         ],
-        "tier": "R0_HARD_STOP"
+        "tier": "R1_SOFT_CAP"
       },
-      "risk_tier": "R0_HARD_STOP",
+      "risk_tier": "R1_SOFT_CAP",
       "theme": {
         "active_member_count": 0,
         "breadth_pct": 0.0,
@@ -124,9 +120,9 @@
       },
       "theme_tier": "T0_INVALID",
       "universe": {
-        "average_turnover_20d_million_krw": 6244.3,
+        "average_turnover_20d_million_krw": 6248.6,
         "mapped": false,
-        "market_cap_eok": 3124.333498,
+        "market_cap_eok": 3217.1895635,
         "public_eligible": false,
         "rank": 0,
         "reasons": [
@@ -135,12 +131,12 @@
         ],
         "tactical_eligible": false,
         "tier": "RESEARCH_ONLY",
-        "turnover_million_krw": 2628.0
+        "turnover_million_krw": 4449.0
       },
       "universe_tier": "RESEARCH_ONLY"
     },
-    "conviction_score": 11.166667,
-    "cutoff_kst": "21:19",
+    "conviction_score": 19.920833,
+    "cutoff_kst": "16:20",
     "data_health": {
       "flow_venue": "KRX",
       "has_krx": true,
@@ -154,9 +150,8 @@
       "technical_stale": false,
       "unified_source": "fallback_merge"
     },
-    "decision_score": 11.166667,
+    "decision_score": 19.920833,
     "decision_version": "master-trade-v1",
-    "execution_instruction": "DO_NOT_ENTER",
     "feature_registry_status": {
       "advanced_chart_pattern_score": "SHADOW",
       "bottom_reacceleration_ranking": "SHADOW",
@@ -249,13 +244,13 @@
     "narrative_projections": [],
     "narrative_theme_ids": [],
     "narrative_theme_paths": [],
-    "order_state": "FAILED",
+    "order_state": "NOT_PLACED",
     "order_tracking": {
       "elapsed_sessions": 0,
       "fill_price": null,
       "plan_id": null,
       "started_on": null,
-      "state": "FAILED",
+      "state": "NOT_PLACED",
       "tracking_basis": "MARKET_REPLAY_NOT_BROKER_EXECUTION"
     },
     "price_confirmation_venue": "KRX",
@@ -266,20 +261,21 @@
     "primary_theme_node_path": null,
     "primary_theme_path": null,
     "primary_theme_selection": {},
-    "priority_score": 11.166667,
-    "production_decision_hash": "05cbdb59d53dece3dcab95b5eb963f0bc6d798e3af26c77a87617cf106d81ca3",
-    "rank": 1225,
-    "rank_3_10d": 1225,
+    "priority_score": 19.920833,
+    "production_decision_hash": "c47b3420af0f02d9839ada238eecda98f9e14cd50035952106bb987406027548",
+    "rank": 1235,
+    "rank_3_10d": 1235,
     "reason_codes": [
+      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
+      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
-      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
       "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
-      "RISK_CAP",
       "STATE_CAP",
+      "TECHNICAL_CONFIRMATION",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
       "THEME_UNMAPPED",
@@ -289,13 +285,11 @@
     "recommended_horizon": "NONE",
     "risk_codes": [
       "EXPLICIT_SOFT_RISK",
-      "FAILED_BREAKOUT",
-      "SHORT_BORROW_DATA_MISSING",
-      "SHORT_BORROW_SUPPLY_PRESSURE"
+      "SHORT_BORROW_DATA_MISSING"
     ],
-    "screen_date": "20260803",
-    "setup_state": "DISTRIBUTION_AVOID",
-    "setup_state_ko": "분산/회피",
+    "screen_date": "20260804",
+    "setup_state": "OBSERVE",
+    "setup_state_ko": "관찰",
     "shadow_annotations": [
       {
         "feature": "unscoped_or_nonprimary_catalyst",
@@ -330,10 +324,10 @@
         "value": null
       }
     ],
-    "state": "DISTRIBUTION_AVOID",
-    "state_age_sessions": 1,
-    "state_ko": "분산/회피",
-    "state_started_on": "20260803",
+    "state": "OBSERVE",
+    "state_age_sessions": 2,
+    "state_ko": "관찰",
+    "state_started_on": "20260727",
     "symbol": "160980",
     "theme_ids": [],
     "theme_node_paths": [],
@@ -350,9 +344,9 @@
     "trade_plan": {
       "actionable": false,
       "adv_participation_cap_pct": 5.0,
-      "average_turnover_20d_million_krw": 6244.3,
+      "average_turnover_20d_million_krw": 6248.6,
       "capacity_rule": "MIN(risk budget, NAV weight cap, 2% ADV20 for TACTICAL/Tier1; 5% ADV20 otherwise)",
-      "capacity_turnover_million_krw": 6244.3,
+      "capacity_turnover_million_krw": 6248.6,
       "entry_confirmation": [],
       "entry_legs": [],
       "entry_method": null,
@@ -380,11 +374,11 @@
       "trigger_price": null,
       "trigger_type": null
     },
-    "trade_status": "FAILED",
-    "trade_status_display": "FAILED",
-    "trade_status_label": "FAILED",
+    "trade_status": "WATCH",
+    "trade_status_display": "WATCH",
+    "trade_status_label": "WATCH",
     "transition": {
-      "candidate_state": "DISTRIBUTION_AVOID",
+      "candidate_state": "OBSERVE",
       "overheat_reset_required": false,
       "previous_state": "OBSERVE",
       "rearmed": false
@@ -394,62 +388,62 @@
   },
   "early_trend_transition": {
     "actionable": false,
-    "availability_hash": "13f7cd7a01bea5a689f41d82fc729e60de53c2a09df6f8b846337d10f7594b6b",
+    "availability_hash": "7ab9ef0520bb976fab2bbdc2ad16f0942b2f17cd88542dac6c5aff17ba3560fb",
     "base": {
-      "absorption_path": null,
-      "broad_sponsor_10d": -665.0,
-      "broad_sponsor_5d": -252.0,
-      "foreigner_5d": 1012.0,
-      "headroom_120d_pct": 67.3077,
-      "individual_10d": 367.0,
-      "individual_5d": 180.0,
-      "institution_5d": -1264.0,
-      "investment_trust_5d": 2726.0,
+      "absorption_path": "PRODUCTION_SPONSOR",
+      "broad_sponsor_10d": -907.0,
+      "broad_sponsor_5d": 804.0,
+      "foreigner_5d": -1852.0,
+      "headroom_120d_pct": 62.4788,
+      "individual_10d": 679.0,
+      "individual_5d": -861.0,
+      "institution_5d": 2656.0,
+      "investment_trust_5d": 2756.0,
       "pension_5d": -840.0,
       "prior_peak_to_base_drawdown_pct": -57.7847,
-      "private_equity_5d": -4114.0,
-      "range_position_120d_pct": 38.4,
-      "sponsor_10d": -1686.0,
-      "sponsor_3d": -422.0,
-      "sponsor_5d": -1216.0,
-      "turnover_median_20d_million_krw": 5457.5
+      "private_equity_5d": 150.0,
+      "range_position_120d_pct": 41.12,
+      "sponsor_10d": -1689.0,
+      "sponsor_3d": -685.0,
+      "sponsor_5d": 214.0,
+      "turnover_median_20d_million_krw": 5046.0
     },
-    "calculation_hash": "01ca19461f8eaba3f25618b544a181faea0d2dd6ed58af86aa7aea2ce979ea01",
-    "close": 28600.0,
-    "cutoff_kst": "21:19",
+    "calculation_hash": "1971ff90382f8a4b218981c86eddb977fc8be2307c82874a60934b608aadc80d",
+    "close": 29450.0,
+    "cutoff_kst": "16:20",
     "data_mode": "SCREEN_DATE_LATEST",
-    "distance_to_trigger_pct": 6.2937,
+    "distance_to_trigger_pct": 3.2258,
     "divergence": {
       "bullish_divergence": false,
       "first_low_date": "20260709",
       "first_low_price": 26600.0,
-      "first_macd_histogram": -1131.7262805352834,
-      "first_rsi14": 38.680998659705196,
+      "first_macd_histogram": -1131.7262552225618,
+      "first_rsi14": 38.68099913084928,
       "macd_histogram_divergence": false,
       "required_for_stage": false,
       "rsi_divergence": false,
       "second_low_date": "20260729",
       "second_low_price": 20200.0,
-      "second_macd_histogram": -1216.2162982576551,
-      "second_rsi14": 34.857664469983874
+      "second_macd_histogram": -1216.2162889502224,
+      "second_rsi14": 34.857664634221635
     },
     "divergence_evidence": {
       "bullish_divergence": false,
       "first_low_date": "20260709",
       "first_low_price": 26600.0,
-      "first_macd_histogram": -1131.7262805352834,
-      "first_rsi14": 38.680998659705196,
+      "first_macd_histogram": -1131.7262552225618,
+      "first_rsi14": 38.68099913084928,
       "macd_histogram_divergence": false,
       "required_for_stage": false,
       "rsi_divergence": false,
       "second_low_date": "20260729",
       "second_low_price": 20200.0,
-      "second_macd_histogram": -1216.2162982576551,
-      "second_rsi14": 34.857664469983874
+      "second_macd_histogram": -1216.2162889502224,
+      "second_rsi14": 34.857664634221635
     },
     "entry_zone_high": 31050.0,
     "entry_zone_low": 30400.0,
-    "execution_strength": 61.28,
+    "execution_strength": 65.56,
     "failed_conditions": [
       "PULLBACK_RECOVERY_SESSION"
     ],
@@ -458,15 +452,15 @@
     "first_missing_gate": "PULLBACK_RECOVERY_SESSION",
     "flow": {
       "absorption_path": "BROAD_SPONSOR_SHADOW",
-      "broad_sponsor_5d": -252.0,
-      "foreigner_5d": 1012.0,
-      "individual_5d": 180.0,
-      "institution_5d": -1264.0,
-      "investment_trust_5d": 2726.0,
+      "broad_sponsor_5d": 804.0,
+      "foreigner_5d": -1852.0,
+      "individual_5d": -861.0,
+      "institution_5d": 2656.0,
+      "investment_trust_5d": 2756.0,
       "pension_5d": -840.0,
-      "private_equity_5d": -4114.0,
-      "sponsor_3d": -422.0,
-      "sponsor_5d": -1216.0
+      "private_equity_5d": 150.0,
+      "sponsor_3d": -685.0,
+      "sponsor_5d": 214.0
     },
     "gate_details": {
       "base_drawdown": {
@@ -477,17 +471,17 @@
       "base_headroom": {
         "passed": true,
         "threshold": ">=12.0",
-        "value": 67.3077
+        "value": 62.4788
       },
       "base_range_position": {
         "passed": true,
         "threshold": "<=75.0",
-        "value": 38.4
+        "value": 41.12
       },
       "execution_confirmed": {
         "passed": false,
         "threshold": ">=105.0",
-        "value": 61.28
+        "value": 65.56
       },
       "geometry_valid": {
         "passed": false,
@@ -502,12 +496,12 @@
       "liquidity": {
         "passed": true,
         "threshold": ">=3000.0",
-        "value": 5457.5
+        "value": 5046.0
       },
       "momentum_positive": {
         "passed": false,
         "threshold": ">0",
-        "value": -746.8617
+        "value": -502.9963
       },
       "pullback_structure": {
         "passed": true,
@@ -517,19 +511,19 @@
           "pullback_depth_pct": 7.4013,
           "pullback_low": 28150.0,
           "support_held": true,
-          "turnover_median_ratio": 0.3815,
-          "volume_median_ratio": 0.372
+          "turnover_median_ratio": 0.3818,
+          "volume_median_ratio": 0.3723
         }
       },
       "ready_candle_quality": {
-        "passed": false,
+        "passed": true,
         "threshold": "READY close-position>=0.65 and upper-wick<=0.35",
         "value": {
-          "basis": "PIVOT_TO_HIGH_SUBRANGE",
-          "ready_close_position": 0.0,
-          "ready_upper_wick": 1.0,
-          "standard_close_position": 0.1364,
-          "standard_upper_wick": 0.4697
+          "basis": "FULL_SESSION_RANGE",
+          "ready_close_position": 0.8025,
+          "ready_upper_wick": 0.1975,
+          "standard_close_position": 0.8025,
+          "standard_upper_wick": 0.1975
         }
       },
       "rebreak_attempt": {
@@ -539,15 +533,15 @@
           "attempt_confirmed": false,
           "confirmation_gates": {
             "EXECUTION_STRENGTH_95": false,
-            "SPONSOR_3D_OR_5D_POSITIVE": false
+            "SPONSOR_3D_OR_5D_POSITIVE": true
           },
           "structural_attempt": false,
           "structural_gates": {
             "CLOSE_ABOVE_EMA10_EMA20": false,
             "MACD_HISTOGRAM_IMPROVING": true,
             "PIVOT_WITHIN_5_PCT_OR_HIGH_97": true,
-            "PULLBACK_BEFORE_SCREEN_DATE": false,
-            "RECOVERY_50_PCT": false
+            "PULLBACK_BEFORE_SCREEN_DATE": true,
+            "RECOVERY_50_PCT": true
           }
         }
       },
@@ -556,24 +550,24 @@
         "threshold": "all ready gates",
         "value": {
           "CLOSE_98_5_PIVOT": false,
-          "CLOSE_POSITION_65": false,
+          "CLOSE_POSITION_65": true,
           "CURRENT_HIGH_99_PIVOT": true,
           "ENTRY_GEOMETRY": false,
           "EXECUTION_STRENGTH_105": false,
           "MACD_HISTOGRAM_POSITIVE": false,
           "NOT_OVERHEATED": true,
           "SPONSOR_3D_POSITIVE": false,
-          "SPONSOR_5D_POSITIVE": false,
+          "SPONSOR_5D_POSITIVE": true,
           "SUPPLY_RISK_NOT_ADVERSE": true,
           "TREND_STACK": false,
-          "UPPER_WICK_35": false
+          "UPPER_WICK_35": true
         }
       },
       "rebreak_test": {
         "passed": true,
         "threshold": "current_high>=0.99*prior_20d_high",
         "value": {
-          "current_high": 31450.0,
+          "current_high": 30250.0,
           "prior_20d_high": 41750.0
         }
       },
@@ -581,19 +575,28 @@
         "passed": false,
         "threshold": "(production_sponsor_5d>0 OR broad_sponsor_5d>0) AND individual_5d<0; ignition retains five-session memory",
         "value": {
-          "broad_sponsor_5d": -252.0,
-          "individual_5d": 180.0,
+          "broad_sponsor_5d": 804.0,
+          "individual_5d": -861.0,
           "ordered_absorption_date": "20260731",
           "ordered_absorption_path": "BROAD_SPONSOR_SHADOW",
-          "sponsor_5d": -1216.0
+          "sponsor_5d": 214.0
         }
       },
       "successor_pivot_promotion": {
         "passed": false,
         "threshold": "all documented promotion gates, including execution_strength>=150",
         "value": {
-          "evaluated_date": null,
-          "gates": {},
+          "evaluated_date": "20260804",
+          "gates": {
+            "CLOSE_98_5_OF_RECOVERY_HIGH": false,
+            "CLOSE_ABOVE_EMA10_EMA20": false,
+            "EMA10_ABOVE_EMA20": false,
+            "EXECUTION_STRENGTH_150": false,
+            "HIGH_ABOVE_INITIAL_PIVOT": false,
+            "MACD_HISTOGRAM_IMPROVING": true,
+            "PIVOT_WITHIN_5_PCT_OR_HIGH_97": true,
+            "RECOVERY_50_PCT": true
+          },
           "promoted": false,
           "promoted_price": null,
           "promotion_date": null,
@@ -613,10 +616,10 @@
         "passed": false,
         "threshold": "close>EMA10>EMA20 AND close>=0.98*EMA60",
         "value": {
-          "close": 28600.0,
-          "ema10": 29531.7137,
-          "ema20": 31602.1241,
-          "ema60": 32928.0391
+          "close": 29450.0,
+          "ema10": 29516.8567,
+          "ema20": 31397.1599,
+          "ema60": 32814.4412
         }
       }
     },
@@ -624,7 +627,7 @@
       "base_drawdown": true,
       "base_headroom": true,
       "base_range_position": true,
-      "current_candle_ok": false,
+      "current_candle_ok": true,
       "execution_confirmed": false,
       "first_ignition": true,
       "geometry_valid": false,
@@ -635,7 +638,7 @@
       "momentum_positive": false,
       "not_no_chase": true,
       "point_in_time_valid": true,
-      "pullback_held": false,
+      "pullback_held": true,
       "pullback_in_progress": true,
       "rebreak_attempt": false,
       "rebreak_ready": false,
@@ -646,10 +649,10 @@
       "unified_flow_source": true
     },
     "geometry": {
-      "atr14": 4797.4688,
+      "atr14": 4744.0781,
       "entry_zone_high": 31050,
       "entry_zone_low": 30400,
-      "hard_stop_price": 26950,
+      "hard_stop_price": 26200,
       "no_chase": {
         "max_gap_pct": 5.0,
         "max_pivot_extension_pct": 5.0,
@@ -657,22 +660,22 @@
         "max_trigger_atr": 1.0
       },
       "order_valid_sessions": 2,
-      "raw_stop_price": 26950.6328,
+      "raw_stop_price": 26200.0,
       "reason": "STOP_DISTANCE_OR_ATR_INVALID",
-      "stop_distance_atr": 0.7191,
-      "stop_distance_pct": 11.3487,
+      "stop_distance_atr": 0.8853,
+      "stop_distance_pct": 13.8158,
       "structural_floor": 28150.0,
       "trigger_price": 30400,
       "valid": false
     },
-    "hard_stop_price": 26950.0,
+    "hard_stop_price": 26200.0,
     "history_sessions": 220,
     "history_sufficient": true,
     "ichimoku": {
       "above_cloud": false,
       "below_cloud": true,
       "close_above_kijun": false,
-      "cloud_top": 38375.0,
+      "cloud_top": 38100.0,
       "inside_cloud": false,
       "kijun": 32350.0
     },
@@ -685,7 +688,7 @@
       "date": "20260731",
       "execution_strength": 95.45,
       "high": 30400.0,
-      "index": 218,
+      "index": 217,
       "low": 26100.0,
       "open": 26200.0,
       "passed": true,
@@ -696,7 +699,7 @@
     "ignition_date": "20260731",
     "initial_pullback_pivot_date": "20260731",
     "initial_pullback_pivot_price": 30400.0,
-    "input_hash": "01ca19461f8eaba3f25618b544a181faea0d2dd6ed58af86aa7aea2ce979ea01",
+    "input_hash": "1971ff90382f8a4b218981c86eddb977fc8be2307c82874a60934b608aadc80d",
     "market": "KOSDAQ",
     "matched": true,
     "material_transition": false,
@@ -707,7 +710,7 @@
     "next_condition": "Wait for a separate recovery session without a new pullback low.",
     "no_chase_reasons": [],
     "pivot_date": "20260731",
-    "pivot_gap_pct": 5.9211,
+    "pivot_gap_pct": 3.125,
     "pivot_price": 30400.0,
     "prior_cutoff_kst": null,
     "prior_state": null,
@@ -715,61 +718,61 @@
     "production_actionable": false,
     "pullback": {
       "activity_contraction_passed": true,
-      "activity_to_ignition_ratio": 0.3815,
+      "activity_to_ignition_ratio": 0.3818,
       "age_sessions": 1.0,
-      "body_retention_ratio": 1.0916,
+      "body_retention_ratio": 1.124,
       "close": 28600.0,
       "date": "20260803",
       "down_close_present": true,
       "effective_min_pullback_depth_pct": 4.0,
       "failure_reason": null,
-      "index": 219,
+      "index": 218,
       "initial_pivot_date": "20260731",
-      "initial_pivot_index": 218.0,
+      "initial_pivot_index": 217.0,
       "initial_pivot_price": 30400.0,
       "low": 28150.0,
       "max_pullback_depth_pct": 12.0,
       "passed": true,
       "pivot_date": "20260731",
-      "pivot_gap_pct": 5.9211,
-      "pivot_index": 218.0,
+      "pivot_gap_pct": 3.125,
+      "pivot_index": 217.0,
       "pivot_price": 30400.0,
       "post_freeze_low_broken": false,
       "pullback_depth_pct": 7.4013,
       "pullback_end_date": "20260803",
-      "pullback_end_index": 219.0,
+      "pullback_end_index": 218.0,
       "pullback_low": 28150.0,
       "pullback_low_date": "20260803",
-      "pullback_low_index": 219.0,
+      "pullback_low_index": 218.0,
       "pullback_start_date": "20260803",
-      "pullback_start_index": 219.0,
-      "pullback_turnover_median": 2628.0,
-      "pullback_volume_median": 89651.0,
+      "pullback_start_index": 218.0,
+      "pullback_turnover_median": 2630.0,
+      "pullback_volume_median": 89719.0,
       "qualification_date": "20260803",
-      "qualification_index": 219.0,
-      "recovery_hold_date": null,
-      "recovery_hold_index": null,
-      "recovery_pct": 20.0,
-      "recovery_ratio": 0.2,
-      "sessions_since_low": 0.0,
+      "qualification_index": 218.0,
+      "recovery_hold_date": "20260804",
+      "recovery_hold_index": 219.0,
+      "recovery_pct": 57.7778,
+      "recovery_ratio": 0.5778,
+      "sessions_since_low": 1.0,
       "structure_broken": false,
       "support_held": true,
       "support_level": 26200.0,
       "support_source": "IGNITION_OPEN",
-      "turnover_contraction_pct": 61.8467,
-      "turnover_median_ratio": 0.3815,
-      "turnover_to_ignition_ratio": 0.3815,
+      "turnover_contraction_pct": 61.8177,
+      "turnover_median_ratio": 0.3818,
+      "turnover_to_ignition_ratio": 0.3818,
       "upswing_turnover_median": 6888.0,
       "upswing_volume_median": 240991.0,
-      "volume_contraction_pct": 62.799,
-      "volume_median_ratio": 0.372,
-      "volume_to_ignition_ratio": 0.372
+      "volume_contraction_pct": 62.7708,
+      "volume_median_ratio": 0.3723,
+      "volume_to_ignition_ratio": 0.3723
     },
     "pullback_depth_pct": 7.4013,
     "pullback_low": 28150.0,
     "pullback_low_date": "20260803",
-    "pullback_turnover_contraction_pct": 61.8467,
-    "pullback_volume_contraction_pct": 62.799,
+    "pullback_turnover_contraction_pct": 61.8177,
+    "pullback_volume_contraction_pct": 62.7708,
     "ready_date": null,
     "rebreak": {
       "action_pivot_date": "20260731",
@@ -781,68 +784,71 @@
         "EXECUTION_STRENGTH_95": false,
         "MACD_HISTOGRAM_IMPROVING": true,
         "PIVOT_WITHIN_5_PCT_OR_HIGH_97": true,
-        "PULLBACK_BEFORE_SCREEN_DATE": false,
-        "RECOVERY_50_PCT": false,
-        "SPONSOR_3D_OR_5D_POSITIVE": false
+        "PULLBACK_BEFORE_SCREEN_DATE": true,
+        "RECOVERY_50_PCT": true,
+        "SPONSOR_3D_OR_5D_POSITIVE": true
       },
       "attempt_missing_gates": [
-        "PULLBACK_BEFORE_SCREEN_DATE",
-        "RECOVERY_50_PCT",
         "CLOSE_ABOVE_EMA10_EMA20",
-        "EXECUTION_STRENGTH_95",
-        "SPONSOR_3D_OR_5D_POSITIVE"
+        "EXECUTION_STRENGTH_95"
       ],
       "first_rebreak_attempt_date": null,
       "initial_pullback_pivot_price": 30400.0,
       "non_blocking_annotations": [
         "SUPPLY_RISK_UNAVAILABLE"
       ],
-      "pivot_gap_pct": 5.9211,
+      "pivot_gap_pct": 3.125,
       "ready": false,
-      "ready_candle_basis": "PIVOT_TO_HIGH_SUBRANGE",
-      "ready_close_position": 0.0,
+      "ready_candle_basis": "FULL_SESSION_RANGE",
+      "ready_close_position": 0.8025,
       "ready_diagnostics": {
-        "close_position_65": false,
-        "upper_wick_35": false
+        "close_position_65": true,
+        "upper_wick_35": true
       },
       "ready_gates": {
         "CLOSE_98_5_PIVOT": false,
-        "CLOSE_POSITION_65": false,
+        "CLOSE_POSITION_65": true,
         "CURRENT_HIGH_99_PIVOT": true,
         "ENTRY_GEOMETRY": false,
         "EXECUTION_STRENGTH_105": false,
         "MACD_HISTOGRAM_POSITIVE": false,
         "NOT_OVERHEATED": true,
         "SPONSOR_3D_POSITIVE": false,
-        "SPONSOR_5D_POSITIVE": false,
+        "SPONSOR_5D_POSITIVE": true,
         "SUPPLY_RISK_NOT_ADVERSE": true,
         "TREND_STACK": false,
-        "UPPER_WICK_35": false
+        "UPPER_WICK_35": true
       },
       "ready_missing_gates": [
         "CLOSE_98_5_PIVOT",
-        "CLOSE_POSITION_65",
-        "UPPER_WICK_35",
         "EXECUTION_STRENGTH_105",
         "SPONSOR_3D_POSITIVE",
-        "SPONSOR_5D_POSITIVE",
         "TREND_STACK",
         "MACD_HISTOGRAM_POSITIVE",
         "ENTRY_GEOMETRY"
       ],
-      "ready_upper_wick": 1.0,
+      "ready_upper_wick": 0.1975,
       "recent_ready_date": null,
-      "recovery_pct": 20.0,
-      "recovery_ratio": 0.2,
+      "recovery_pct": 57.7778,
+      "recovery_ratio": 0.5778,
       "retest": false,
-      "sponsor_3d": -422.0,
-      "sponsor_5d": -1216.0,
-      "standard_close_position": 0.1364,
-      "standard_upper_wick": 0.4697,
+      "sponsor_3d": -685.0,
+      "sponsor_5d": 214.0,
+      "standard_close_position": 0.8025,
+      "standard_upper_wick": 0.1975,
       "structural_attempt": false,
       "successor_pivot_promotion": {
-        "evaluated_date": null,
-        "gates": {},
+        "evaluated_date": "20260804",
+        "gates": {
+          "CLOSE_98_5_OF_RECOVERY_HIGH": false,
+          "CLOSE_ABOVE_EMA10_EMA20": false,
+          "EMA10_ABOVE_EMA20": false,
+          "EXECUTION_STRENGTH_150": false,
+          "HIGH_ABOVE_INITIAL_PIVOT": false,
+          "MACD_HISTOGRAM_IMPROVING": true,
+          "PIVOT_WITHIN_5_PCT_OR_HIGH_97": true,
+          "RECOVERY_50_PCT": true
+        },
         "promoted": false,
         "promoted_price": null,
         "promotion_date": null,
@@ -861,14 +867,14 @@
       "supply_risk_status": "UNAVAILABLE_DELEGATED"
     },
     "reconstruction": {
-      "available_at_kst": "2026-08-03T21:07:45",
+      "available_at_kst": "2026-08-04T16:08:14",
       "flow_reconstruction": false,
       "point_in_time_valid": true,
       "price_reconstruction": false,
       "reconstructed": false
     },
-    "recovery_pct": 20.0,
-    "recovery_ratio": 0.2,
+    "recovery_pct": 57.7778,
+    "recovery_ratio": 0.5778,
     "research_actionable": false,
     "research_business_roles": [],
     "research_mapping_health": {
@@ -884,37 +890,37 @@
     "research_theme_paths": [],
     "reset_date": "20260803",
     "score": 100.0,
-    "source_hash": "4d5092b3bb4eba17a8fe148460b6f2f822a69a40830fee3c54ff75d55ee03dc9",
+    "source_hash": "af3b15a986d9e973443177bc466514e05d68aa3dd6d791e26d3186866c5505a3",
     "source_metadata": {
-      "available_at_kst": "2026-08-03T21:07:45",
+      "available_at_kst": "2026-08-04T16:08:14",
       "data_mode": "SCREEN_DATE_LATEST",
-      "finalized_at": "2026-08-03T21:07:45",
-      "flow_collected_at": "2026-08-03T21:00:43",
+      "finalized_at": "2026-08-04T16:08:14",
+      "flow_collected_at": "2026-08-04T16:00:45",
       "flow_reconstruction": false,
       "flow_source": "TR_A_2006_UNIFIED_TURNOVER",
       "point_in_time_valid": true,
-      "price_collected_at": "2026-08-03T21:07:45",
+      "price_collected_at": "2026-08-04T16:08:14",
       "price_reconstruction": false,
       "price_source": "TR_1843_EXECUTION_STRENGTH_DAILY_KRX",
       "price_venue": "KRX",
       "reconstruction_flag": false
     },
     "stage": "PULLBACK_IN_PROGRESS",
-    "stage_age_sessions": 1,
+    "stage_age_sessions": 2,
     "stage_rank": 3,
     "stage_scores": {
-      "BASE_ABSORPTION": 80.0,
-      "FIRST_IGNITION": 78.0,
+      "BASE_ABSORPTION": 100.0,
+      "FIRST_IGNITION": 85.0,
       "HEALTHY_PULLBACK": 100.0,
-      "PULLBACK_HELD": 80.0,
+      "PULLBACK_HELD": 100.0,
       "PULLBACK_IN_PROGRESS": 100.0,
-      "REBREAK_ATTEMPT": 46.57,
-      "REBREAK_READY": 31.47,
-      "REBREAK_RETEST": 25.18
+      "REBREAK_ATTEMPT": 81.43,
+      "REBREAK_READY": 59.43,
+      "REBREAK_RETEST": 47.54
     },
     "stage_started_on": "20260803",
     "state": "PULLBACK_IN_PROGRESS",
-    "state_age_sessions": 1,
+    "state_age_sessions": 2,
     "state_ko": "눌림 진행 중",
     "state_started_on": "20260803",
     "successor_retest_pivot_date": "20260731",
@@ -922,51 +928,51 @@
     "symbol": "160980",
     "taxonomy_version": "not_applicable",
     "technical": {
-      "atr14": 4797.4688,
-      "close": 28600.0,
-      "close_position": 0.1364,
-      "cloud_top": 38375.0,
-      "ema10": 29531.7137,
-      "ema120": 30107.1793,
-      "ema20": 31602.1241,
-      "ema60": 32928.0391,
-      "execution_strength": 61.28,
+      "atr14": 4744.0781,
+      "close": 29450.0,
+      "close_position": 0.8025,
+      "cloud_top": 38100.0,
+      "ema10": 29516.8567,
+      "ema120": 30095.8116,
+      "ema20": 31397.1599,
+      "ema60": 32814.4412,
+      "execution_strength": 65.56,
       "fixed_pivot": 30400.0,
       "fixed_pivot_date": "20260731",
       "kijun": 32350.0,
-      "macd": -2255.2776,
-      "macd_histogram": -746.8617,
-      "macd_histogram_change_1d": 218.1252,
-      "macd_signal": -1508.4159,
-      "pivot_gap_pct": 5.9211,
+      "macd": -2137.1613,
+      "macd_histogram": -502.9963,
+      "macd_histogram_change_1d": 243.8653,
+      "macd_signal": -1634.165,
+      "pivot_gap_pct": 3.125,
       "prior_20d_high": 41750.0,
       "pullback_low": 28150.0,
       "pullback_low_date": "20260803",
-      "recovery_ratio": 0.2,
-      "return_10d_pct": -17.934,
-      "return_1d_pct": -5.4545,
-      "return_20d_pct": -25.8106,
-      "return_5d_pct": -11.7284,
-      "rsi14": 45.0634,
-      "sponsor_3d": -422.0,
-      "sponsor_5d": -1216.0,
-      "tenkan": 30325.0,
-      "turnover_robust_zscore_20d": -1.779,
-      "upper_wick": 0.4697
+      "recovery_ratio": 0.5778,
+      "return_10d_pct": -22.2955,
+      "return_1d_pct": 2.972,
+      "return_20d_pct": -18.8705,
+      "return_5d_pct": 17.3307,
+      "rsi14": 46.2471,
+      "sponsor_3d": -685.0,
+      "sponsor_5d": 214.0,
+      "tenkan": 28650.0,
+      "turnover_robust_zscore_20d": -0.2948,
+      "upper_wick": 0.1975
     },
     "technical_state": {
       "close_above_ema10_ema20": false,
-      "ema10": 29531.7137,
-      "ema20": 31602.1241,
-      "macd_histogram": -746.8617,
-      "macd_histogram_change_1d": 218.1252
+      "ema10": 29516.8567,
+      "ema20": 31397.1599,
+      "macd_histogram": -502.9963,
+      "macd_histogram_change_1d": 243.8653
     },
     "total_score": 100.0,
-    "trade_date": "20260803",
+    "trade_date": "20260804",
     "trade_plan": {
       "entry_zone_high": 31050.0,
       "entry_zone_low": 30400.0,
-      "hard_stop_price": 26950.0,
+      "hard_stop_price": 26200.0,
       "order_valid_sessions": 2,
       "trigger_price": 30400.0
     },
@@ -982,15 +988,16 @@
   },
   "evidence": {
     "decision_reason_codes": [
+      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
+      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
-      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
       "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
-      "RISK_CAP",
       "STATE_CAP",
+      "TECHNICAL_CONFIRMATION",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
       "THEME_UNMAPPED",
@@ -999,9 +1006,7 @@
     ],
     "decision_risk_codes": [
       "EXPLICIT_SOFT_RISK",
-      "FAILED_BREAKOUT",
-      "SHORT_BORROW_DATA_MISSING",
-      "SHORT_BORROW_SUPPLY_PRESSURE"
+      "SHORT_BORROW_DATA_MISSING"
     ],
     "decision_shadow_annotations": [
       {
@@ -1042,54 +1047,54 @@
   "flow": {
     "flow": {
       "1d": {
-        "foreigner": -448.0,
-        "individual": 674.0,
-        "investment_trust": -69.0,
+        "foreigner": -573.0,
+        "individual": 205.0,
+        "investment_trust": 623.0,
         "observation_count": 1,
         "pension": 0.0,
         "positive_count": 0,
-        "private_equity": -169.0,
-        "sponsor": -686.0
+        "private_equity": -40.0,
+        "sponsor": 10.0
       },
       "3d": {
-        "foreigner": -3197.0,
-        "individual": -114.0,
-        "investment_trust": 1368.0,
+        "foreigner": -2985.0,
+        "individual": 444.0,
+        "investment_trust": 1645.0,
         "observation_count": 3,
         "pension": 0.0,
         "positive_count": 1,
-        "private_equity": 1407.0,
-        "sponsor": -422.0
+        "private_equity": 655.0,
+        "sponsor": -685.0
       },
       "5d": {
-        "foreigner": 1012.0,
-        "individual": 180.0,
-        "investment_trust": 2726.0,
+        "foreigner": -1852.0,
+        "individual": -861.0,
+        "investment_trust": 2756.0,
         "observation_count": 5,
         "pension": -840.0,
         "positive_count": 1,
-        "private_equity": -4114.0,
-        "sponsor": -1216.0
+        "private_equity": 150.0,
+        "sponsor": 214.0
       },
       "period": {
-        "foreigner": -1267.0,
-        "individual": -2533.0,
-        "investment_trust": 9999.0,
+        "foreigner": -1727.0,
+        "individual": -2019.0,
+        "investment_trust": 10212.0,
         "observation_count": 20,
         "pension": -4776.0,
         "positive_count": 0,
-        "private_equity": -2639.0,
-        "sponsor": 1317.0
+        "private_equity": -2676.0,
+        "sponsor": 1033.0
       }
     },
-    "individual_5d": 180.0,
-    "sponsor_3d": -422.0,
-    "sponsor_5d": -1216.0,
-    "sponsor_positive_days_5d": 2
+    "individual_5d": -861.0,
+    "sponsor_3d": -685.0,
+    "sponsor_5d": 214.0,
+    "sponsor_positive_days_5d": 3
   },
   "fundamentals": {
-    "market_cap_as_of": "20260803",
-    "market_cap_eok": 3124.333498
+    "market_cap_as_of": "20260804",
+    "market_cap_eok": 3217.1895635
   },
   "identity": {
     "instrument_type": "common_stock",
@@ -1100,23 +1105,23 @@
   "legacy_source": {
     "actionable": false,
     "actionable_rank": null,
-    "adv20_krw": 6244300000.0,
+    "adv20_krw": 6248600000.0,
     "adverse_narrative_theme_ids": [],
     "alert_text": null,
     "analysis_scope": "FULL_ANALYSIS",
-    "average_turnover_20d_million_krw": 6244.3,
+    "average_turnover_20d_million_krw": 6248.6,
     "axes": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
       "market_regime": "M1_NEUTRAL",
-      "risk_tier": "R0_HARD_STOP",
+      "risk_tier": "R1_SOFT_CAP",
       "theme_tier": "T0_INVALID"
     },
     "axes_v2": {
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution_tier": "E0_FAILED",
       "market_regime": "M1_NEUTRAL",
-      "risk_tier": "R0_HARD_STOP",
+      "risk_tier": "R1_SOFT_CAP",
       "theme_tier": "T0_INVALID"
     },
     "axis_details": {
@@ -1133,15 +1138,16 @@
       "catalyst_tier": "C0_NONE_OR_STALE",
       "execution": {
         "execution_strength": 0.0,
-        "flow_continuity_score": 40.0,
+        "flow_continuity_score": 20.0,
         "rank": 0,
         "reasons": [
-          "EXECUTION_GATE_INCOMPLETE"
+          "EXECUTION_GATE_INCOMPLETE",
+          "TECHNICAL_CONFIRMATION"
         ],
-        "sponsor_5d": -1216.0,
+        "sponsor_5d": 214.0,
         "tape_confirmed": false,
-        "technical_confirmation": false,
-        "technical_score": 0.0,
+        "technical_confirmation": true,
+        "technical_score": 30.75,
         "tier": "E0_FAILED"
       },
       "execution_tier": "E0_FAILED",
@@ -1156,25 +1162,20 @@
       },
       "market_regime": "M1_NEUTRAL",
       "risk": {
-        "hard": true,
-        "hard_reasons": [
-          "FAILED_BREAKOUT",
-          "SHORT_BORROW_SUPPLY_PRESSURE"
-        ],
-        "rank": 0,
+        "hard": false,
+        "hard_reasons": [],
+        "rank": 1,
         "reasons": [
           "EXPLICIT_SOFT_RISK",
-          "FAILED_BREAKOUT",
-          "SHORT_BORROW_DATA_MISSING",
-          "SHORT_BORROW_SUPPLY_PRESSURE"
+          "SHORT_BORROW_DATA_MISSING"
         ],
         "soft_reasons": [
           "EXPLICIT_SOFT_RISK",
           "SHORT_BORROW_DATA_MISSING"
         ],
-        "tier": "R0_HARD_STOP"
+        "tier": "R1_SOFT_CAP"
       },
-      "risk_tier": "R0_HARD_STOP",
+      "risk_tier": "R1_SOFT_CAP",
       "theme": {
         "active_member_count": 0,
         "breadth_pct": 0.0,
@@ -1203,9 +1204,9 @@
       },
       "theme_tier": "T0_INVALID",
       "universe": {
-        "average_turnover_20d_million_krw": 6244.3,
+        "average_turnover_20d_million_krw": 6248.6,
         "mapped": false,
-        "market_cap_eok": 3124.333498,
+        "market_cap_eok": 3217.1895635,
         "public_eligible": false,
         "rank": 0,
         "reasons": [
@@ -1214,36 +1215,36 @@
         ],
         "tactical_eligible": false,
         "tier": "RESEARCH_ONLY",
-        "turnover_million_krw": 2628.0
+        "turnover_million_krw": 4449.0
       },
       "universe_tier": "RESEARCH_ONLY"
     },
     "classified_news_events": [],
-    "close_position": 0.13636363636363635,
-    "conviction_score": 11.166667,
+    "close_position": 0.8024691358024691,
+    "conviction_score": 19.920833,
     "current": {
-      "change_rate": -5.45,
-      "close": 28600.0,
-      "collected_at": "2026-08-03T21:00:43",
-      "foreigner": -448.0,
+      "change_rate": 2.97,
+      "close": 29450.0,
+      "collected_at": "2026-08-04T16:00:45",
+      "foreigner": -573.0,
       "has_krx": 1,
       "has_nxt": 0,
-      "high": 31450.0,
-      "individual": 674.0,
-      "investment_trust": -69.0,
-      "low": 28150.0,
+      "high": 30250.0,
+      "individual": 205.0,
+      "investment_trust": 623.0,
+      "low": 26200.0,
       "market": "KOSDAQ",
-      "open": 29900.0,
+      "open": 29100.0,
       "pension": 0.0,
-      "private_equity": -169.0,
-      "source_row_count": 2,
+      "private_equity": -40.0,
+      "source_row_count": 1,
       "symbol": "160980",
       "symbol_name": "싸이맥스",
-      "trade_date": "20260803",
-      "turnover_million_krw": 2628.0,
+      "trade_date": "20260804",
+      "turnover_million_krw": 4449.0,
       "unified_source": "fallback_merge"
     },
-    "cutoff_kst": "21:19",
+    "cutoff_kst": "16:20",
     "data_health": {
       "flow_venue": "KRX",
       "has_krx": true,
@@ -1258,68 +1259,68 @@
       "unified_source": "fallback_merge"
     },
     "data_mode": "SCREEN_DATE_LATEST",
-    "decision_score": 11.166667,
+    "decision_score": 19.920833,
     "decision_version": "master-trade-v1",
     "display_theme_paths": [],
-    "drawdown_20d_pct": -31.49700598802395,
+    "drawdown_20d_pct": -29.46107784431138,
     "early_trend_transition": {
       "actionable": false,
-      "availability_hash": "13f7cd7a01bea5a689f41d82fc729e60de53c2a09df6f8b846337d10f7594b6b",
+      "availability_hash": "7ab9ef0520bb976fab2bbdc2ad16f0942b2f17cd88542dac6c5aff17ba3560fb",
       "base": {
-        "absorption_path": null,
-        "broad_sponsor_10d": -665.0,
-        "broad_sponsor_5d": -252.0,
-        "foreigner_5d": 1012.0,
-        "headroom_120d_pct": 67.3077,
-        "individual_10d": 367.0,
-        "individual_5d": 180.0,
-        "institution_5d": -1264.0,
-        "investment_trust_5d": 2726.0,
+        "absorption_path": "PRODUCTION_SPONSOR",
+        "broad_sponsor_10d": -907.0,
+        "broad_sponsor_5d": 804.0,
+        "foreigner_5d": -1852.0,
+        "headroom_120d_pct": 62.4788,
+        "individual_10d": 679.0,
+        "individual_5d": -861.0,
+        "institution_5d": 2656.0,
+        "investment_trust_5d": 2756.0,
         "pension_5d": -840.0,
         "prior_peak_to_base_drawdown_pct": -57.7847,
-        "private_equity_5d": -4114.0,
-        "range_position_120d_pct": 38.4,
-        "sponsor_10d": -1686.0,
-        "sponsor_3d": -422.0,
-        "sponsor_5d": -1216.0,
-        "turnover_median_20d_million_krw": 5457.5
+        "private_equity_5d": 150.0,
+        "range_position_120d_pct": 41.12,
+        "sponsor_10d": -1689.0,
+        "sponsor_3d": -685.0,
+        "sponsor_5d": 214.0,
+        "turnover_median_20d_million_krw": 5046.0
       },
-      "calculation_hash": "01ca19461f8eaba3f25618b544a181faea0d2dd6ed58af86aa7aea2ce979ea01",
-      "close": 28600.0,
-      "cutoff_kst": "21:19",
+      "calculation_hash": "1971ff90382f8a4b218981c86eddb977fc8be2307c82874a60934b608aadc80d",
+      "close": 29450.0,
+      "cutoff_kst": "16:20",
       "data_mode": "SCREEN_DATE_LATEST",
-      "distance_to_trigger_pct": 6.2937,
+      "distance_to_trigger_pct": 3.2258,
       "divergence": {
         "bullish_divergence": false,
         "first_low_date": "20260709",
         "first_low_price": 26600.0,
-        "first_macd_histogram": -1131.7262805352834,
-        "first_rsi14": 38.680998659705196,
+        "first_macd_histogram": -1131.7262552225618,
+        "first_rsi14": 38.68099913084928,
         "macd_histogram_divergence": false,
         "required_for_stage": false,
         "rsi_divergence": false,
         "second_low_date": "20260729",
         "second_low_price": 20200.0,
-        "second_macd_histogram": -1216.2162982576551,
-        "second_rsi14": 34.857664469983874
+        "second_macd_histogram": -1216.2162889502224,
+        "second_rsi14": 34.857664634221635
       },
       "divergence_evidence": {
         "bullish_divergence": false,
         "first_low_date": "20260709",
         "first_low_price": 26600.0,
-        "first_macd_histogram": -1131.7262805352834,
-        "first_rsi14": 38.680998659705196,
+        "first_macd_histogram": -1131.7262552225618,
+        "first_rsi14": 38.68099913084928,
         "macd_histogram_divergence": false,
         "required_for_stage": false,
         "rsi_divergence": false,
         "second_low_date": "20260729",
         "second_low_price": 20200.0,
-        "second_macd_histogram": -1216.2162982576551,
-        "second_rsi14": 34.857664469983874
+        "second_macd_histogram": -1216.2162889502224,
+        "second_rsi14": 34.857664634221635
       },
       "entry_zone_high": 31050.0,
       "entry_zone_low": 30400.0,
-      "execution_strength": 61.28,
+      "execution_strength": 65.56,
       "failed_conditions": [
         "PULLBACK_RECOVERY_SESSION"
       ],
@@ -1328,15 +1329,15 @@
       "first_missing_gate": "PULLBACK_RECOVERY_SESSION",
       "flow": {
         "absorption_path": "BROAD_SPONSOR_SHADOW",
-        "broad_sponsor_5d": -252.0,
-        "foreigner_5d": 1012.0,
-        "individual_5d": 180.0,
-        "institution_5d": -1264.0,
-        "investment_trust_5d": 2726.0,
+        "broad_sponsor_5d": 804.0,
+        "foreigner_5d": -1852.0,
+        "individual_5d": -861.0,
+        "institution_5d": 2656.0,
+        "investment_trust_5d": 2756.0,
         "pension_5d": -840.0,
-        "private_equity_5d": -4114.0,
-        "sponsor_3d": -422.0,
-        "sponsor_5d": -1216.0
+        "private_equity_5d": 150.0,
+        "sponsor_3d": -685.0,
+        "sponsor_5d": 214.0
       },
       "gate_details": {
         "base_drawdown": {
@@ -1347,17 +1348,17 @@
         "base_headroom": {
           "passed": true,
           "threshold": ">=12.0",
-          "value": 67.3077
+          "value": 62.4788
         },
         "base_range_position": {
           "passed": true,
           "threshold": "<=75.0",
-          "value": 38.4
+          "value": 41.12
         },
         "execution_confirmed": {
           "passed": false,
           "threshold": ">=105.0",
-          "value": 61.28
+          "value": 65.56
         },
         "geometry_valid": {
           "passed": false,
@@ -1372,12 +1373,12 @@
         "liquidity": {
           "passed": true,
           "threshold": ">=3000.0",
-          "value": 5457.5
+          "value": 5046.0
         },
         "momentum_positive": {
           "passed": false,
           "threshold": ">0",
-          "value": -746.8617
+          "value": -502.9963
         },
         "pullback_structure": {
           "passed": true,
@@ -1387,19 +1388,19 @@
             "pullback_depth_pct": 7.4013,
             "pullback_low": 28150.0,
             "support_held": true,
-            "turnover_median_ratio": 0.3815,
-            "volume_median_ratio": 0.372
+            "turnover_median_ratio": 0.3818,
+            "volume_median_ratio": 0.3723
           }
         },
         "ready_candle_quality": {
-          "passed": false,
+          "passed": true,
           "threshold": "READY close-position>=0.65 and upper-wick<=0.35",
           "value": {
-            "basis": "PIVOT_TO_HIGH_SUBRANGE",
-            "ready_close_position": 0.0,
-            "ready_upper_wick": 1.0,
-            "standard_close_position": 0.1364,
-            "standard_upper_wick": 0.4697
+            "basis": "FULL_SESSION_RANGE",
+            "ready_close_position": 0.8025,
+            "ready_upper_wick": 0.1975,
+            "standard_close_position": 0.8025,
+            "standard_upper_wick": 0.1975
           }
         },
         "rebreak_attempt": {
@@ -1409,15 +1410,15 @@
             "attempt_confirmed": false,
             "confirmation_gates": {
               "EXECUTION_STRENGTH_95": false,
-              "SPONSOR_3D_OR_5D_POSITIVE": false
+              "SPONSOR_3D_OR_5D_POSITIVE": true
             },
             "structural_attempt": false,
             "structural_gates": {
               "CLOSE_ABOVE_EMA10_EMA20": false,
               "MACD_HISTOGRAM_IMPROVING": true,
               "PIVOT_WITHIN_5_PCT_OR_HIGH_97": true,
-              "PULLBACK_BEFORE_SCREEN_DATE": false,
-              "RECOVERY_50_PCT": false
+              "PULLBACK_BEFORE_SCREEN_DATE": true,
+              "RECOVERY_50_PCT": true
             }
           }
         },
@@ -1426,24 +1427,24 @@
           "threshold": "all ready gates",
           "value": {
             "CLOSE_98_5_PIVOT": false,
-            "CLOSE_POSITION_65": false,
+            "CLOSE_POSITION_65": true,
             "CURRENT_HIGH_99_PIVOT": true,
             "ENTRY_GEOMETRY": false,
             "EXECUTION_STRENGTH_105": false,
             "MACD_HISTOGRAM_POSITIVE": false,
             "NOT_OVERHEATED": true,
             "SPONSOR_3D_POSITIVE": false,
-            "SPONSOR_5D_POSITIVE": false,
+            "SPONSOR_5D_POSITIVE": true,
             "SUPPLY_RISK_NOT_ADVERSE": true,
             "TREND_STACK": false,
-            "UPPER_WICK_35": false
+            "UPPER_WICK_35": true
           }
         },
         "rebreak_test": {
           "passed": true,
           "threshold": "current_high>=0.99*prior_20d_high",
           "value": {
-            "current_high": 31450.0,
+            "current_high": 30250.0,
             "prior_20d_high": 41750.0
           }
         },
@@ -1451,19 +1452,28 @@
           "passed": false,
           "threshold": "(production_sponsor_5d>0 OR broad_sponsor_5d>0) AND individual_5d<0; ignition retains five-session memory",
           "value": {
-            "broad_sponsor_5d": -252.0,
-            "individual_5d": 180.0,
+            "broad_sponsor_5d": 804.0,
+            "individual_5d": -861.0,
             "ordered_absorption_date": "20260731",
             "ordered_absorption_path": "BROAD_SPONSOR_SHADOW",
-            "sponsor_5d": -1216.0
+            "sponsor_5d": 214.0
           }
         },
         "successor_pivot_promotion": {
           "passed": false,
           "threshold": "all documented promotion gates, including execution_strength>=150",
           "value": {
-            "evaluated_date": null,
-            "gates": {},
+            "evaluated_date": "20260804",
+            "gates": {
+              "CLOSE_98_5_OF_RECOVERY_HIGH": false,
+              "CLOSE_ABOVE_EMA10_EMA20": false,
+              "EMA10_ABOVE_EMA20": false,
+              "EXECUTION_STRENGTH_150": false,
+              "HIGH_ABOVE_INITIAL_PIVOT": false,
+              "MACD_HISTOGRAM_IMPROVING": true,
+              "PIVOT_WITHIN_5_PCT_OR_HIGH_97": true,
+              "RECOVERY_50_PCT": true
+            },
             "promoted": false,
             "promoted_price": null,
             "promotion_date": null,
@@ -1483,10 +1493,10 @@
           "passed": false,
           "threshold": "close>EMA10>EMA20 AND close>=0.98*EMA60",
           "value": {
-            "close": 28600.0,
-            "ema10": 29531.7137,
-            "ema20": 31602.1241,
-            "ema60": 32928.0391
+            "close": 29450.0,
+            "ema10": 29516.8567,
+            "ema20": 31397.1599,
+            "ema60": 32814.4412
           }
         }
       },
@@ -1494,7 +1504,7 @@
         "base_drawdown": true,
         "base_headroom": true,
         "base_range_position": true,
-        "current_candle_ok": false,
+        "current_candle_ok": true,
         "execution_confirmed": false,
         "first_ignition": true,
         "geometry_valid": false,
@@ -1505,7 +1515,7 @@
         "momentum_positive": false,
         "not_no_chase": true,
         "point_in_time_valid": true,
-        "pullback_held": false,
+        "pullback_held": true,
         "pullback_in_progress": true,
         "rebreak_attempt": false,
         "rebreak_ready": false,
@@ -1516,10 +1526,10 @@
         "unified_flow_source": true
       },
       "geometry": {
-        "atr14": 4797.4688,
+        "atr14": 4744.0781,
         "entry_zone_high": 31050,
         "entry_zone_low": 30400,
-        "hard_stop_price": 26950,
+        "hard_stop_price": 26200,
         "no_chase": {
           "max_gap_pct": 5.0,
           "max_pivot_extension_pct": 5.0,
@@ -1527,22 +1537,22 @@
           "max_trigger_atr": 1.0
         },
         "order_valid_sessions": 2,
-        "raw_stop_price": 26950.6328,
+        "raw_stop_price": 26200.0,
         "reason": "STOP_DISTANCE_OR_ATR_INVALID",
-        "stop_distance_atr": 0.7191,
-        "stop_distance_pct": 11.3487,
+        "stop_distance_atr": 0.8853,
+        "stop_distance_pct": 13.8158,
         "structural_floor": 28150.0,
         "trigger_price": 30400,
         "valid": false
       },
-      "hard_stop_price": 26950.0,
+      "hard_stop_price": 26200.0,
       "history_sessions": 220,
       "history_sufficient": true,
       "ichimoku": {
         "above_cloud": false,
         "below_cloud": true,
         "close_above_kijun": false,
-        "cloud_top": 38375.0,
+        "cloud_top": 38100.0,
         "inside_cloud": false,
         "kijun": 32350.0
       },
@@ -1555,7 +1565,7 @@
         "date": "20260731",
         "execution_strength": 95.45,
         "high": 30400.0,
-        "index": 218,
+        "index": 217,
         "low": 26100.0,
         "open": 26200.0,
         "passed": true,
@@ -1566,7 +1576,7 @@
       "ignition_date": "20260731",
       "initial_pullback_pivot_date": "20260731",
       "initial_pullback_pivot_price": 30400.0,
-      "input_hash": "01ca19461f8eaba3f25618b544a181faea0d2dd6ed58af86aa7aea2ce979ea01",
+      "input_hash": "1971ff90382f8a4b218981c86eddb977fc8be2307c82874a60934b608aadc80d",
       "market": "KOSDAQ",
       "matched": true,
       "material_transition": false,
@@ -1577,7 +1587,7 @@
       "next_condition": "Wait for a separate recovery session without a new pullback low.",
       "no_chase_reasons": [],
       "pivot_date": "20260731",
-      "pivot_gap_pct": 5.9211,
+      "pivot_gap_pct": 3.125,
       "pivot_price": 30400.0,
       "prior_cutoff_kst": null,
       "prior_state": null,
@@ -1585,61 +1595,61 @@
       "production_actionable": false,
       "pullback": {
         "activity_contraction_passed": true,
-        "activity_to_ignition_ratio": 0.3815,
+        "activity_to_ignition_ratio": 0.3818,
         "age_sessions": 1.0,
-        "body_retention_ratio": 1.0916,
+        "body_retention_ratio": 1.124,
         "close": 28600.0,
         "date": "20260803",
         "down_close_present": true,
         "effective_min_pullback_depth_pct": 4.0,
         "failure_reason": null,
-        "index": 219,
+        "index": 218,
         "initial_pivot_date": "20260731",
-        "initial_pivot_index": 218.0,
+        "initial_pivot_index": 217.0,
         "initial_pivot_price": 30400.0,
         "low": 28150.0,
         "max_pullback_depth_pct": 12.0,
         "passed": true,
         "pivot_date": "20260731",
-        "pivot_gap_pct": 5.9211,
-        "pivot_index": 218.0,
+        "pivot_gap_pct": 3.125,
+        "pivot_index": 217.0,
         "pivot_price": 30400.0,
         "post_freeze_low_broken": false,
         "pullback_depth_pct": 7.4013,
         "pullback_end_date": "20260803",
-        "pullback_end_index": 219.0,
+        "pullback_end_index": 218.0,
         "pullback_low": 28150.0,
         "pullback_low_date": "20260803",
-        "pullback_low_index": 219.0,
+        "pullback_low_index": 218.0,
         "pullback_start_date": "20260803",
-        "pullback_start_index": 219.0,
-        "pullback_turnover_median": 2628.0,
-        "pullback_volume_median": 89651.0,
+        "pullback_start_index": 218.0,
+        "pullback_turnover_median": 2630.0,
+        "pullback_volume_median": 89719.0,
         "qualification_date": "20260803",
-        "qualification_index": 219.0,
-        "recovery_hold_date": null,
-        "recovery_hold_index": null,
-        "recovery_pct": 20.0,
-        "recovery_ratio": 0.2,
-        "sessions_since_low": 0.0,
+        "qualification_index": 218.0,
+        "recovery_hold_date": "20260804",
+        "recovery_hold_index": 219.0,
+        "recovery_pct": 57.7778,
+        "recovery_ratio": 0.5778,
+        "sessions_since_low": 1.0,
         "structure_broken": false,
         "support_held": true,
         "support_level": 26200.0,
         "support_source": "IGNITION_OPEN",
-        "turnover_contraction_pct": 61.8467,
-        "turnover_median_ratio": 0.3815,
-        "turnover_to_ignition_ratio": 0.3815,
+        "turnover_contraction_pct": 61.8177,
+        "turnover_median_ratio": 0.3818,
+        "turnover_to_ignition_ratio": 0.3818,
         "upswing_turnover_median": 6888.0,
         "upswing_volume_median": 240991.0,
-        "volume_contraction_pct": 62.799,
-        "volume_median_ratio": 0.372,
-        "volume_to_ignition_ratio": 0.372
+        "volume_contraction_pct": 62.7708,
+        "volume_median_ratio": 0.3723,
+        "volume_to_ignition_ratio": 0.3723
       },
       "pullback_depth_pct": 7.4013,
       "pullback_low": 28150.0,
       "pullback_low_date": "20260803",
-      "pullback_turnover_contraction_pct": 61.8467,
-      "pullback_volume_contraction_pct": 62.799,
+      "pullback_turnover_contraction_pct": 61.8177,
+      "pullback_volume_contraction_pct": 62.7708,
       "ready_date": null,
       "rebreak": {
         "action_pivot_date": "20260731",
@@ -1651,68 +1661,71 @@
           "EXECUTION_STRENGTH_95": false,
           "MACD_HISTOGRAM_IMPROVING": true,
           "PIVOT_WITHIN_5_PCT_OR_HIGH_97": true,
-          "PULLBACK_BEFORE_SCREEN_DATE": false,
-          "RECOVERY_50_PCT": false,
-          "SPONSOR_3D_OR_5D_POSITIVE": false
+          "PULLBACK_BEFORE_SCREEN_DATE": true,
+          "RECOVERY_50_PCT": true,
+          "SPONSOR_3D_OR_5D_POSITIVE": true
         },
         "attempt_missing_gates": [
-          "PULLBACK_BEFORE_SCREEN_DATE",
-          "RECOVERY_50_PCT",
           "CLOSE_ABOVE_EMA10_EMA20",
-          "EXECUTION_STRENGTH_95",
-          "SPONSOR_3D_OR_5D_POSITIVE"
+          "EXECUTION_STRENGTH_95"
         ],
         "first_rebreak_attempt_date": null,
         "initial_pullback_pivot_price": 30400.0,
         "non_blocking_annotations": [
           "SUPPLY_RISK_UNAVAILABLE"
         ],
-        "pivot_gap_pct": 5.9211,
+        "pivot_gap_pct": 3.125,
         "ready": false,
-        "ready_candle_basis": "PIVOT_TO_HIGH_SUBRANGE",
-        "ready_close_position": 0.0,
+        "ready_candle_basis": "FULL_SESSION_RANGE",
+        "ready_close_position": 0.8025,
         "ready_diagnostics": {
-          "close_position_65": false,
-          "upper_wick_35": false
+          "close_position_65": true,
+          "upper_wick_35": true
         },
         "ready_gates": {
           "CLOSE_98_5_PIVOT": false,
-          "CLOSE_POSITION_65": false,
+          "CLOSE_POSITION_65": true,
           "CURRENT_HIGH_99_PIVOT": true,
           "ENTRY_GEOMETRY": false,
           "EXECUTION_STRENGTH_105": false,
           "MACD_HISTOGRAM_POSITIVE": false,
           "NOT_OVERHEATED": true,
           "SPONSOR_3D_POSITIVE": false,
-          "SPONSOR_5D_POSITIVE": false,
+          "SPONSOR_5D_POSITIVE": true,
           "SUPPLY_RISK_NOT_ADVERSE": true,
           "TREND_STACK": false,
-          "UPPER_WICK_35": false
+          "UPPER_WICK_35": true
         },
         "ready_missing_gates": [
           "CLOSE_98_5_PIVOT",
-          "CLOSE_POSITION_65",
-          "UPPER_WICK_35",
           "EXECUTION_STRENGTH_105",
           "SPONSOR_3D_POSITIVE",
-          "SPONSOR_5D_POSITIVE",
           "TREND_STACK",
           "MACD_HISTOGRAM_POSITIVE",
           "ENTRY_GEOMETRY"
         ],
-        "ready_upper_wick": 1.0,
+        "ready_upper_wick": 0.1975,
         "recent_ready_date": null,
-        "recovery_pct": 20.0,
-        "recovery_ratio": 0.2,
+        "recovery_pct": 57.7778,
+        "recovery_ratio": 0.5778,
         "retest": false,
-        "sponsor_3d": -422.0,
-        "sponsor_5d": -1216.0,
-        "standard_close_position": 0.1364,
-        "standard_upper_wick": 0.4697,
+        "sponsor_3d": -685.0,
+        "sponsor_5d": 214.0,
+        "standard_close_position": 0.8025,
+        "standard_upper_wick": 0.1975,
         "structural_attempt": false,
         "successor_pivot_promotion": {
-          "evaluated_date": null,
-          "gates": {},
+          "evaluated_date": "20260804",
+          "gates": {
+            "CLOSE_98_5_OF_RECOVERY_HIGH": false,
+            "CLOSE_ABOVE_EMA10_EMA20": false,
+            "EMA10_ABOVE_EMA20": false,
+            "EXECUTION_STRENGTH_150": false,
+            "HIGH_ABOVE_INITIAL_PIVOT": false,
+            "MACD_HISTOGRAM_IMPROVING": true,
+            "PIVOT_WITHIN_5_PCT_OR_HIGH_97": true,
+            "RECOVERY_50_PCT": true
+          },
           "promoted": false,
           "promoted_price": null,
           "promotion_date": null,
@@ -1731,14 +1744,14 @@
         "supply_risk_status": "UNAVAILABLE_DELEGATED"
       },
       "reconstruction": {
-        "available_at_kst": "2026-08-03T21:07:45",
+        "available_at_kst": "2026-08-04T16:08:14",
         "flow_reconstruction": false,
         "point_in_time_valid": true,
         "price_reconstruction": false,
         "reconstructed": false
       },
-      "recovery_pct": 20.0,
-      "recovery_ratio": 0.2,
+      "recovery_pct": 57.7778,
+      "recovery_ratio": 0.5778,
       "research_actionable": false,
       "research_business_roles": [],
       "research_mapping_health": {
@@ -1754,37 +1767,37 @@
       "research_theme_paths": [],
       "reset_date": "20260803",
       "score": 100.0,
-      "source_hash": "4d5092b3bb4eba17a8fe148460b6f2f822a69a40830fee3c54ff75d55ee03dc9",
+      "source_hash": "af3b15a986d9e973443177bc466514e05d68aa3dd6d791e26d3186866c5505a3",
       "source_metadata": {
-        "available_at_kst": "2026-08-03T21:07:45",
+        "available_at_kst": "2026-08-04T16:08:14",
         "data_mode": "SCREEN_DATE_LATEST",
-        "finalized_at": "2026-08-03T21:07:45",
-        "flow_collected_at": "2026-08-03T21:00:43",
+        "finalized_at": "2026-08-04T16:08:14",
+        "flow_collected_at": "2026-08-04T16:00:45",
         "flow_reconstruction": false,
         "flow_source": "TR_A_2006_UNIFIED_TURNOVER",
         "point_in_time_valid": true,
-        "price_collected_at": "2026-08-03T21:07:45",
+        "price_collected_at": "2026-08-04T16:08:14",
         "price_reconstruction": false,
         "price_source": "TR_1843_EXECUTION_STRENGTH_DAILY_KRX",
         "price_venue": "KRX",
         "reconstruction_flag": false
       },
       "stage": "PULLBACK_IN_PROGRESS",
-      "stage_age_sessions": 1,
+      "stage_age_sessions": 2,
       "stage_rank": 3,
       "stage_scores": {
-        "BASE_ABSORPTION": 80.0,
-        "FIRST_IGNITION": 78.0,
+        "BASE_ABSORPTION": 100.0,
+        "FIRST_IGNITION": 85.0,
         "HEALTHY_PULLBACK": 100.0,
-        "PULLBACK_HELD": 80.0,
+        "PULLBACK_HELD": 100.0,
         "PULLBACK_IN_PROGRESS": 100.0,
-        "REBREAK_ATTEMPT": 46.57,
-        "REBREAK_READY": 31.47,
-        "REBREAK_RETEST": 25.18
+        "REBREAK_ATTEMPT": 81.43,
+        "REBREAK_READY": 59.43,
+        "REBREAK_RETEST": 47.54
       },
       "stage_started_on": "20260803",
       "state": "PULLBACK_IN_PROGRESS",
-      "state_age_sessions": 1,
+      "state_age_sessions": 2,
       "state_ko": "눌림 진행 중",
       "state_started_on": "20260803",
       "successor_retest_pivot_date": "20260731",
@@ -1792,51 +1805,51 @@
       "symbol": "160980",
       "taxonomy_version": "not_applicable",
       "technical": {
-        "atr14": 4797.4688,
-        "close": 28600.0,
-        "close_position": 0.1364,
-        "cloud_top": 38375.0,
-        "ema10": 29531.7137,
-        "ema120": 30107.1793,
-        "ema20": 31602.1241,
-        "ema60": 32928.0391,
-        "execution_strength": 61.28,
+        "atr14": 4744.0781,
+        "close": 29450.0,
+        "close_position": 0.8025,
+        "cloud_top": 38100.0,
+        "ema10": 29516.8567,
+        "ema120": 30095.8116,
+        "ema20": 31397.1599,
+        "ema60": 32814.4412,
+        "execution_strength": 65.56,
         "fixed_pivot": 30400.0,
         "fixed_pivot_date": "20260731",
         "kijun": 32350.0,
-        "macd": -2255.2776,
-        "macd_histogram": -746.8617,
-        "macd_histogram_change_1d": 218.1252,
-        "macd_signal": -1508.4159,
-        "pivot_gap_pct": 5.9211,
+        "macd": -2137.1613,
+        "macd_histogram": -502.9963,
+        "macd_histogram_change_1d": 243.8653,
+        "macd_signal": -1634.165,
+        "pivot_gap_pct": 3.125,
         "prior_20d_high": 41750.0,
         "pullback_low": 28150.0,
         "pullback_low_date": "20260803",
-        "recovery_ratio": 0.2,
-        "return_10d_pct": -17.934,
-        "return_1d_pct": -5.4545,
-        "return_20d_pct": -25.8106,
-        "return_5d_pct": -11.7284,
-        "rsi14": 45.0634,
-        "sponsor_3d": -422.0,
-        "sponsor_5d": -1216.0,
-        "tenkan": 30325.0,
-        "turnover_robust_zscore_20d": -1.779,
-        "upper_wick": 0.4697
+        "recovery_ratio": 0.5778,
+        "return_10d_pct": -22.2955,
+        "return_1d_pct": 2.972,
+        "return_20d_pct": -18.8705,
+        "return_5d_pct": 17.3307,
+        "rsi14": 46.2471,
+        "sponsor_3d": -685.0,
+        "sponsor_5d": 214.0,
+        "tenkan": 28650.0,
+        "turnover_robust_zscore_20d": -0.2948,
+        "upper_wick": 0.1975
       },
       "technical_state": {
         "close_above_ema10_ema20": false,
-        "ema10": 29531.7137,
-        "ema20": 31602.1241,
-        "macd_histogram": -746.8617,
-        "macd_histogram_change_1d": 218.1252
+        "ema10": 29516.8567,
+        "ema20": 31397.1599,
+        "macd_histogram": -502.9963,
+        "macd_histogram_change_1d": 243.8653
       },
       "total_score": 100.0,
-      "trade_date": "20260803",
+      "trade_date": "20260804",
       "trade_plan": {
         "entry_zone_high": 31050.0,
         "entry_zone_low": 30400.0,
-        "hard_stop_price": 26950.0,
+        "hard_stop_price": 26200.0,
         "order_valid_sessions": 2,
         "trigger_price": 30400.0
       },
@@ -1850,7 +1863,6 @@
       },
       "trigger_price": 30400.0
     },
-    "execution_instruction": "DO_NOT_ENTER",
     "exposure_paths": [],
     "feature_registry_status": {
       "advanced_chart_pattern_score": "SHADOW",
@@ -1878,44 +1890,44 @@
     },
     "flow": {
       "1d": {
-        "foreigner": -448.0,
-        "individual": 674.0,
-        "investment_trust": -69.0,
+        "foreigner": -573.0,
+        "individual": 205.0,
+        "investment_trust": 623.0,
         "observation_count": 1,
         "pension": 0.0,
         "positive_count": 0,
-        "private_equity": -169.0,
-        "sponsor": -686.0
+        "private_equity": -40.0,
+        "sponsor": 10.0
       },
       "3d": {
-        "foreigner": -3197.0,
-        "individual": -114.0,
-        "investment_trust": 1368.0,
+        "foreigner": -2985.0,
+        "individual": 444.0,
+        "investment_trust": 1645.0,
         "observation_count": 3,
         "pension": 0.0,
         "positive_count": 1,
-        "private_equity": 1407.0,
-        "sponsor": -422.0
+        "private_equity": 655.0,
+        "sponsor": -685.0
       },
       "5d": {
-        "foreigner": 1012.0,
-        "individual": 180.0,
-        "investment_trust": 2726.0,
+        "foreigner": -1852.0,
+        "individual": -861.0,
+        "investment_trust": 2756.0,
         "observation_count": 5,
         "pension": -840.0,
         "positive_count": 1,
-        "private_equity": -4114.0,
-        "sponsor": -1216.0
+        "private_equity": 150.0,
+        "sponsor": 214.0
       },
       "period": {
-        "foreigner": -1267.0,
-        "individual": -2533.0,
-        "investment_trust": 9999.0,
+        "foreigner": -1727.0,
+        "individual": -2019.0,
+        "investment_trust": 10212.0,
         "observation_count": 20,
         "pension": -4776.0,
         "positive_count": 0,
-        "private_equity": -2639.0,
-        "sponsor": 1317.0
+        "private_equity": -2676.0,
+        "sponsor": 1033.0
       }
     },
     "flow_source": "TR_A_2006_UNIFIED_TURNOVER",
@@ -1985,18 +1997,18 @@
         ]
       }
     },
-    "individual_5d": 180.0,
+    "individual_5d": -861.0,
     "krx_confirmed": true,
     "legacy_signal": {
       "catalyst_layer": "구조 신호만",
       "components": {
         "execution_tape": 0.0,
-        "flow_timing": 0.0,
-        "institutional_activity_research_only": 0.0,
+        "flow_timing": 20.0,
+        "institutional_activity_research_only": 15.0,
         "price_location": 35.0,
-        "relative_strength": 14.69,
-        "short_borrow_supply": 20.0,
-        "theme_confirmation": 53.51
+        "relative_strength": 64.26,
+        "short_borrow_supply": 60.0,
+        "theme_confirmation": 89.64
       },
       "execution_eligible": false,
       "flags": {
@@ -2007,23 +2019,21 @@
         "late": false,
         "price_flow_divergence": false,
         "private_equity_sponsorship": false,
-        "rolling_reset": true,
-        "short_borrow_supply_pressure": true,
+        "rolling_reset": false,
+        "short_borrow_supply_pressure": false,
         "short_cover_support": false,
         "tape_confirmed": false,
         "theme_confirmed": true
       },
       "reasons": [
-        "20일 고점 대비 눌림 구간",
         "테마 동반 상승"
       ],
       "risks": [
-        "공매도·대차 공급 압력",
-        "테마 매핑 미확인",
-        "당일 급락 진행 중"
+        "대차잔고 증가 — 공매도 확대 동반 여부 관찰",
+        "테마 매핑 미확인"
       ],
-      "stage": "공급 압력·회피",
-      "structural_score": 19.24
+      "stage": "관찰",
+      "structural_score": 37.62
     },
     "legacy_theme": {
       "assignment_confidence": "medium",
@@ -2052,38 +2062,26 @@
     },
     "market": "KOSDAQ",
     "market_cap_age_days": 0,
-    "market_cap_as_of": "20260803",
-    "market_cap_collected_at": "2026-08-03T21:00:26",
-    "market_cap_eok": 3124.333498,
+    "market_cap_as_of": "20260804",
+    "market_cap_collected_at": "2026-08-04T16:00:18",
+    "market_cap_eok": 3217.1895635,
     "market_cap_stale": false,
     "memberships": [],
     "name": "싸이맥스",
     "narrative_projections": [],
     "narrative_theme_ids": [],
     "narrative_theme_paths": [],
-    "order_state": "FAILED",
+    "order_state": "NOT_PLACED",
     "order_tracking": {
       "elapsed_sessions": 0,
       "fill_price": null,
       "plan_id": null,
       "started_on": null,
-      "state": "FAILED",
+      "state": "NOT_PLACED",
       "tracking_basis": "MARKET_REPLAY_NOT_BROKER_EXECUTION"
     },
     "price_confirmation_venue": "KRX",
     "price_history": [
-      {
-        "change_rate": 0.0,
-        "close": 38100.0,
-        "has_krx": true,
-        "has_nxt": false,
-        "high": 41400.0,
-        "low": 36950.0,
-        "open": 38000.0,
-        "trade_date": "20260622",
-        "turnover_million_krw": 5171.0,
-        "unified_source": "fallback_merge"
-      },
       {
         "change_rate": -11.55,
         "close": 33700.0,
@@ -2429,7 +2427,19 @@
         "low": 28150.0,
         "open": 29900.0,
         "trade_date": "20260803",
-        "turnover_million_krw": 2628.0,
+        "turnover_million_krw": 2630.0,
+        "unified_source": "fallback_merge"
+      },
+      {
+        "change_rate": 2.97,
+        "close": 29450.0,
+        "has_krx": true,
+        "has_nxt": false,
+        "high": 30250.0,
+        "low": 26200.0,
+        "open": 29100.0,
+        "trade_date": "20260804",
+        "turnover_million_krw": 4449.0,
         "unified_source": "fallback_merge"
       }
     ],
@@ -2442,21 +2452,22 @@
     "primary_theme_node_path": null,
     "primary_theme_path": null,
     "primary_theme_selection": {},
-    "prior_close": 30250.0,
-    "priority_score": 11.166667,
-    "production_decision_hash": "05cbdb59d53dece3dcab95b5eb963f0bc6d798e3af26c77a87617cf106d81ca3",
-    "rank": 1225,
-    "rank_3_10d": 1225,
+    "prior_close": 28600.0,
+    "priority_score": 19.920833,
+    "production_decision_hash": "c47b3420af0f02d9839ada238eecda98f9e14cd50035952106bb987406027548",
+    "rank": 1235,
+    "rank_3_10d": 1235,
     "reason_codes": [
+      "ACTION_GATES_INCOMPLETE",
       "CATALYST_NONE_STALE_OR_UNVERIFIED",
+      "CONCENTRATED_DIRECT_REQUIRES_C2_E3_R3",
       "EXECUTION_CAP",
       "EXECUTION_GATE_INCOMPLETE",
-      "HARD_RISK_PRECEDENCE",
       "MARKET_CAP",
       "MARKET_NEUTRAL_OR_UNAVAILABLE",
       "RESEARCH_ONLY_UNIVERSE",
-      "RISK_CAP",
       "STATE_CAP",
+      "TECHNICAL_CONFIRMATION",
       "THEME_CAP",
       "THEME_CONCENTRATED_DIRECT",
       "THEME_UNMAPPED",
@@ -2477,21 +2488,19 @@
     "research_only": true,
     "research_primary_theme_path": null,
     "research_theme_paths": [],
-    "return_10d_pct": -17.921788,
-    "return_1d_pct": -5.45,
-    "return_3d_pct": 28.837146,
-    "return_5d_pct": -11.717934,
-    "return_prior_5d_pct": -7.027309,
+    "return_10d_pct": -22.284197,
+    "return_1d_pct": 2.97,
+    "return_3d_pct": 25.854861,
+    "return_5d_pct": 17.340962,
+    "return_prior_5d_pct": -33.769247,
     "risk_codes": [
       "EXPLICIT_SOFT_RISK",
-      "FAILED_BREAKOUT",
-      "SHORT_BORROW_DATA_MISSING",
-      "SHORT_BORROW_SUPPLY_PRESSURE"
+      "SHORT_BORROW_DATA_MISSING"
     ],
-    "robust_turnover_zscore_20d": -1.299534833067729,
-    "screen_date": "20260803",
-    "setup_state": "DISTRIBUTION_AVOID",
-    "setup_state_ko": "분산/회피",
+    "robust_turnover_zscore_20d": -0.32085289302788844,
+    "screen_date": "20260804",
+    "setup_state": "OBSERVE",
+    "setup_state_ko": "관찰",
     "shadow_annotations": [
       {
         "feature": "unscoped_or_nonprimary_catalyst",
@@ -2528,37 +2537,37 @@
     ],
     "shadow_theme_paths": [],
     "soft_risk": false,
-    "source_available_at": "2026-08-03T21:00:43",
+    "source_available_at": "2026-08-04T16:00:45",
     "source_stale": false,
-    "sponsor_3d": -422.0,
-    "sponsor_5d": -1216.0,
+    "sponsor_3d": -685.0,
+    "sponsor_5d": 214.0,
     "sponsor_positive_days_10d": 4,
-    "sponsor_positive_days_5d": 2,
-    "state": "DISTRIBUTION_AVOID",
-    "state_age_sessions": 1,
-    "state_ko": "분산/회피",
-    "state_started_on": "20260803",
+    "sponsor_positive_days_5d": 3,
+    "state": "OBSERVE",
+    "state_age_sessions": 2,
+    "state_ko": "관찰",
+    "state_started_on": "20260727",
     "symbol": "160980",
     "technical": {
-      "atr14": 4797.122104722491,
+      "atr14": 4743.843969939466,
       "breakout_confirmed": false,
-      "cloud_bottom": 37178.08907609095,
-      "cloud_top": 38376.66648603905,
-      "collected_at": "2026-08-03T12:17:54.059171+00:00",
+      "cloud_bottom": 37178.82129056798,
+      "cloud_top": 38102.1899625363,
+      "collected_at": "2026-08-04T07:19:15.169981+00:00",
       "config_version": "technical-5.2.0-ichimoku-9-26-52",
-      "ema20": 31599.22624972039,
-      "failed_breakout": true,
-      "invalidation_price": 19953.38212584582,
-      "kijun": 32346.333406749916,
+      "ema20": 31395.10110495998,
+      "failed_breakout": false,
+      "invalidation_price": 19953.775103420016,
+      "kijun": 32346.970460837096,
       "nearest_support": null,
       "reclaim_confirmed": false,
-      "rsi14": 45.06615429905301,
-      "source_as_of": "20260803",
-      "support_confirmed": false,
+      "rsi14": 46.24916214186136,
+      "source_as_of": "20260804",
+      "support_confirmed": true,
       "support_price": null,
-      "technical_score": 0.0,
-      "trigger_price": 47853.04424242789,
-      "volume_ratio_20d": 0.43587368118079856
+      "technical_score": 30.75,
+      "trigger_price": 47853.98669785352,
+      "volume_ratio_20d": 0.7677260842302034
     },
     "technical_age_days": 0,
     "technical_stale": false,
@@ -2577,9 +2586,9 @@
     "trade_plan": {
       "actionable": false,
       "adv_participation_cap_pct": 5.0,
-      "average_turnover_20d_million_krw": 6244.3,
+      "average_turnover_20d_million_krw": 6248.6,
       "capacity_rule": "MIN(risk budget, NAV weight cap, 2% ADV20 for TACTICAL/Tier1; 5% ADV20 otherwise)",
-      "capacity_turnover_million_krw": 6244.3,
+      "capacity_turnover_million_krw": 6248.6,
       "entry_confirmation": [],
       "entry_legs": [],
       "entry_method": null,
@@ -2607,59 +2616,47 @@
       "trigger_price": null,
       "trigger_type": null
     },
-    "trade_status": "FAILED",
-    "trade_status_display": "FAILED",
+    "trade_status": "WATCH",
+    "trade_status_display": "WATCH",
     "transition": {
-      "candidate_state": "DISTRIBUTION_AVOID",
+      "candidate_state": "OBSERVE",
       "overheat_reset_required": false,
       "previous_state": "OBSERVE",
       "rearmed": false
     },
-    "turnover_million_krw": 2628.0,
-    "turnover_zscore_20d": -1.055264301415568,
+    "turnover_million_krw": 4449.0,
+    "turnover_zscore_20d": -0.5254992091923484,
     "unified_source": "fallback_merge",
     "universe_tier": "RESEARCH_ONLY",
-    "upper_wick": 0.4696969696969697
+    "upper_wick": 0.19753086419753085
   },
   "market_data": {
-    "close_position": 0.13636363636363635,
+    "close_position": 0.8024691358024691,
     "current": {
-      "change_rate": -5.45,
-      "close": 28600.0,
-      "collected_at": "2026-08-03T21:00:43",
-      "foreigner": -448.0,
+      "change_rate": 2.97,
+      "close": 29450.0,
+      "collected_at": "2026-08-04T16:00:45",
+      "foreigner": -573.0,
       "has_krx": 1,
       "has_nxt": 0,
-      "high": 31450.0,
-      "individual": 674.0,
-      "investment_trust": -69.0,
-      "low": 28150.0,
+      "high": 30250.0,
+      "individual": 205.0,
+      "investment_trust": 623.0,
+      "low": 26200.0,
       "market": "KOSDAQ",
-      "open": 29900.0,
+      "open": 29100.0,
       "pension": 0.0,
-      "private_equity": -169.0,
-      "source_row_count": 2,
+      "private_equity": -40.0,
+      "source_row_count": 1,
       "symbol": "160980",
       "symbol_name": "싸이맥스",
-      "trade_date": "20260803",
-      "turnover_million_krw": 2628.0,
+      "trade_date": "20260804",
+      "turnover_million_krw": 4449.0,
       "unified_source": "fallback_merge"
     },
-    "drawdown_20d_pct": -31.49700598802395,
+    "drawdown_20d_pct": -29.46107784431138,
     "history_sessions": 30,
     "price_history": [
-      {
-        "change_rate": 0.0,
-        "close": 38100.0,
-        "has_krx": true,
-        "has_nxt": false,
-        "high": 41400.0,
-        "low": 36950.0,
-        "open": 38000.0,
-        "trade_date": "20260622",
-        "turnover_million_krw": 5171.0,
-        "unified_source": "fallback_merge"
-      },
       {
         "change_rate": -11.55,
         "close": 33700.0,
@@ -3005,49 +3002,61 @@
         "low": 28150.0,
         "open": 29900.0,
         "trade_date": "20260803",
-        "turnover_million_krw": 2628.0,
+        "turnover_million_krw": 2630.0,
+        "unified_source": "fallback_merge"
+      },
+      {
+        "change_rate": 2.97,
+        "close": 29450.0,
+        "has_krx": true,
+        "has_nxt": false,
+        "high": 30250.0,
+        "low": 26200.0,
+        "open": 29100.0,
+        "trade_date": "20260804",
+        "turnover_million_krw": 4449.0,
         "unified_source": "fallback_merge"
       }
     ],
-    "return_10d_pct": -17.921788,
-    "return_1d_pct": -5.45,
-    "return_3d_pct": 28.837146,
-    "return_5d_pct": -11.717934,
+    "return_10d_pct": -22.284197,
+    "return_1d_pct": 2.97,
+    "return_3d_pct": 25.854861,
+    "return_5d_pct": 17.340962,
     "technical": {
-      "atr14": 4797.122104722491,
+      "atr14": 4743.843969939466,
       "breakout_confirmed": false,
-      "cloud_bottom": 37178.08907609095,
-      "cloud_top": 38376.66648603905,
-      "collected_at": "2026-08-03T12:17:54.059171+00:00",
+      "cloud_bottom": 37178.82129056798,
+      "cloud_top": 38102.1899625363,
+      "collected_at": "2026-08-04T07:19:15.169981+00:00",
       "config_version": "technical-5.2.0-ichimoku-9-26-52",
-      "ema20": 31599.22624972039,
-      "failed_breakout": true,
-      "invalidation_price": 19953.38212584582,
-      "kijun": 32346.333406749916,
+      "ema20": 31395.10110495998,
+      "failed_breakout": false,
+      "invalidation_price": 19953.775103420016,
+      "kijun": 32346.970460837096,
       "nearest_support": null,
       "reclaim_confirmed": false,
-      "rsi14": 45.06615429905301,
-      "source_as_of": "20260803",
-      "support_confirmed": false,
+      "rsi14": 46.24916214186136,
+      "source_as_of": "20260804",
+      "support_confirmed": true,
       "support_price": null,
-      "technical_score": 0.0,
-      "trigger_price": 47853.04424242789,
-      "volume_ratio_20d": 0.43587368118079856
+      "technical_score": 30.75,
+      "trigger_price": 47853.98669785352,
+      "volume_ratio_20d": 0.7677260842302034
     },
-    "upper_wick": 0.4696969696969697
+    "upper_wick": 0.19753086419753085
   },
   "publication": {
-    "cutoff_kst": "21:19",
+    "cutoff_kst": "16:20",
     "decision_version": "master-trade-v1",
-    "generated_at": "2026-08-03T21:19:00+09:00",
+    "generated_at": "2026-08-04T16:20:00+09:00",
     "mode": "production",
     "production": true,
-    "screen_date": "20260803",
+    "screen_date": "20260804",
     "shadow": false,
     "taxonomy_version": "v2.0.0"
   },
   "schema_version": "2.0.0",
-  "screen_date": "20260803",
+  "screen_date": "20260804",
   "symbol": "160980",
   "themes": {
     "adverse_narrative_theme_ids": [],
@@ -3079,9 +3088,9 @@
   "trade_plan": {
     "actionable": false,
     "adv_participation_cap_pct": 5.0,
-    "average_turnover_20d_million_krw": 6244.3,
+    "average_turnover_20d_million_krw": 6248.6,
     "capacity_rule": "MIN(risk budget, NAV weight cap, 2% ADV20 for TACTICAL/Tier1; 5% ADV20 otherwise)",
-    "capacity_turnover_million_krw": 6244.3,
+    "capacity_turnover_million_krw": 6248.6,
     "entry_confirmation": [],
     "entry_legs": [],
     "entry_method": null,
